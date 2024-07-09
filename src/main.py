@@ -1,17 +1,17 @@
 import os
 
 import uvicorn
-from fastapi import FastAPI, Request, status, Depends
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Request, status
 from fastapi.encoders import jsonable_encoder
-from fastapi.staticfiles import StaticFiles
 from fastapi.exceptions import ValidationException, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 
 from src.auth.base_config import fastapi_users, auth_backend
 from src.auth.schemas import UserRead, UserCreate
-from src.sensor.router import router as router_sensor
 from src.pages.router import router as router_pages, templates
+from src.sensor.router import router as router_sensor
 
 app = FastAPI(
     title="ISPU App"
