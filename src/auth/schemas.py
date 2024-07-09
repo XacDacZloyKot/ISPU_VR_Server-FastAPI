@@ -8,15 +8,16 @@ PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
 
 
 class UserRead(schemas.BaseUser[int]):
-    id: int
+    email: str
     username: str
     first_name: str
     last_name: str
-    email: str
-    role_id: int
-    is_active: bool = True
-    is_superuser: bool = False
-    is_verified: bool = False
+    patronymic: str
+    is_staff: Optional[bool] = False
+    is_active: Optional[bool] = True
+    is_superuser: Optional[bool] = False
+    is_verified: Optional[bool] = False
+    division: str
 
     if PYDANTIC_V2:
         model_config = ConfigDict(from_attributes=True)
@@ -26,16 +27,17 @@ class UserRead(schemas.BaseUser[int]):
 
 
 class UserCreate(schemas.BaseUserCreate):
-    last_name: str
-    first_name: str
-    username: str
-    role_id: int
-    is_staff: bool
     email: str
+    username: str
+    first_name: str
+    last_name: str
+    patronymic: str
+    is_staff: Optional[bool] = False
     password: str
     is_active: Optional[bool] = True
     is_superuser: Optional[bool] = False
     is_verified: Optional[bool] = False
+    division: str
 
 
 class UserUpdate(schemas.BaseUserUpdate):
