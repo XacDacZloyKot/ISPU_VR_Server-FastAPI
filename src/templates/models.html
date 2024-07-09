@@ -23,9 +23,9 @@
                 {% for model in models %}
                 <tr>
                     <td>{{ model.id }}</td>
-                    <td>{{ model.sensor_type }}</td>
+                    <td>{{ model.sensor_type.name if model.sensor_type else '' }}</td>
                     <td>{{ model.specification }}</td>
-                    <td>{{ model.parameters }}</td>
+                    <td>{{ model.parameters.fields }}</td>
                     <td>
                         <form action="/pages/models/{{ model.id }}/" method="post" style="display:inline;">
                             <button type="submit" class="red-btn">Delete</button>

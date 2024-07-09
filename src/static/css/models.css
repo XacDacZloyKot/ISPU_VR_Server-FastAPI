@@ -1,93 +1,69 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    box-sizing: border-box;
-}
+/* models.css */
 
+/* Общие стили для контейнера и заголовков */
 .container {
-    background-color: #fff;
+    max-width: 800px;
+    margin: 0 auto;
     padding: 20px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    max-width: 1000px;
-    width: 100%;
-    box-sizing: border-box;
-    overflow: auto;
 }
 
 h1, h2 {
-    color: #333;
     text-align: center;
-    margin-top: 0;
+    color: #333;
 }
 
+/* Стили для таблицы с моделями */
 table {
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 20px;
 }
 
-table, th, td {
+table th, table td {
     border: 1px solid #ddd;
-}
-
-th, td {
     padding: 8px;
     text-align: left;
-    box-sizing: border-box;
 }
 
-th {
+table th {
     background-color: #f2f2f2;
 }
 
-tr:nth-child(even) {
-    background-color: #f9f9f9;
-}
-
+/* Стили для формы создания модели */
 form {
-    display: flex;
-    flex-direction: column;
+    margin-bottom: 20px;
 }
 
-label {
+form label {
+    display: block;
     margin-bottom: 5px;
-    font-weight: bold;
 }
 
-input[type="text"],
-textarea {
-    padding: 10px;
+form input[type=text], form textarea {
+    width: 100%;
+    padding: 8px;
     margin-bottom: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: calc(100% - 22px);
     box-sizing: border-box;
 }
 
-button {
-    padding: 10px;
-    background-color: #5cb85c;
+form button[type=submit] {
+    padding: 10px 20px;
+    background-color: #4CAF50;
     color: white;
     border: none;
-    border-radius: 4px;
     cursor: pointer;
 }
 
-button:hover {
-    background-color: #4cae4c;
+form button[type=submit]:hover {
+    background-color: #45a049;
 }
 
 .red-btn {
-    background: red;
+    background-color: #f44336;
 }
 
 .red-btn:hover {
-    background-color: darkred;
+    background-color: #da190b;
 }
+
+/* Остальные стили, если нужно */
