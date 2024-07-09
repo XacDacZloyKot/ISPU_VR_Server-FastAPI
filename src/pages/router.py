@@ -7,7 +7,8 @@ from fastapi import Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select
+from sqlalchemy import select, delete
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.base_config import auth_backend, get_jwt_strategy, current_user
@@ -15,7 +16,7 @@ from src.auth.manager import get_user_manager
 from src.auth.models import User
 from src.auth.utils import get_user_db
 from src.database import get_async_session
-from src.sensor.models import model
+from src.sensor.models import Model
 
 
 router = APIRouter(
@@ -28,7 +29,6 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates\\")
 
 
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
-# templates = Jinja2Templates(directory="src/templates/")
 
 
 get_async_session_context = contextlib.asynccontextmanager(get_async_session)
@@ -73,11 +73,13 @@ async def post_login(request: Request, email: str = Form(...), password: str = F
 async def get_models(request: Request, user: User = Depends(current_user),
                      session: AsyncSession = Depends(get_async_session)):
     try:
-        query = select(model)
+        query = select(Model)
         result = await session.execute(query)
-        models = result.mappings().all()
+        models = result.scalars().all()
         return templates.TemplateResponse("models.html", {"request": request, "models": models,
                                                           'status': HTTPStatus.OK, 'detail': None})
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
     except Exception as e:
         print(e)
         return templates.TemplateResponse("login.html", {"request": request, "error": "Please login first"})
@@ -90,12 +92,9 @@ async def create_model(
     parameters: str = Form(...),
     session: AsyncSession = Depends(get_async_session),
 ):
-    new_model = model.insert().values(
-        sensor_type=sensor_type,
-        specification=specification,
-        parameters=parameters
-    )
-    await session.execute(new_model)
+    # TODO: ПЕРЕДЕЛАТЬ СОЗДАНИЕ
+    # new_model = Model(sensor_type=sensor_type, specification=specification, parameters=parameters)
+    # session.add(new_model)
     await session.commit()
     return RedirectResponse(url="/pages/models", status_code=303)
 
@@ -105,7 +104,7 @@ async def delete_model(
     id: int,
     session: AsyncSession = Depends(get_async_session),
 ):
-    query = model.delete().where(model.c.id == id)
+    query = delete(Model).where(Model.id == id)
     result = await session.execute(query)
     await session.commit()
     if result.rowcount == 0:
