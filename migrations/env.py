@@ -12,9 +12,8 @@ sys.path.append(os.path.join(sys.path[0], 'src'))
 
 from src.database import Base
 from src.config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
-from src.sensor.models import metadata as sensor_metadata
-from src.auth.models import metadata as auth_metadata
-
+from src.auth.models import User, Admission, Scenario  # Ваши модели
+from src.sensor.models import Model, SensorType, Parameters, Accident, Location
 
 
 # this is the Alembic Config object, which provides
@@ -37,7 +36,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = [sensor_metadata, Base.metadata, auth_metadata]
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:
