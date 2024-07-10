@@ -13,10 +13,6 @@ class UserRead(schemas.BaseUser[int]):
     first_name: str
     last_name: str
     patronymic: str
-    is_staff: Optional[bool] = False
-    is_active: Optional[bool] = True
-    is_superuser: Optional[bool] = False
-    is_verified: Optional[bool] = False
     division: str
 
     if PYDANTIC_V2:
