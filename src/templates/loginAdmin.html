@@ -12,7 +12,7 @@
         {% if error %}
             <p style="color: red;">{{ error }}</p>
         {% endif %}
-        <form action="{{ url_for('post_login') }}" method="POST">
+        <form action="{{ url_for('post_login_admin') }}" method="POST">
             <div class="form-group">
                 <label for="email">Email:</label>
                 <input type="email" id="email" name="email" required>
