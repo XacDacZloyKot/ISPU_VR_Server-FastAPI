@@ -9,7 +9,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pages.utils import authenticate
+from pages.utils import authenticate, authenticate_for_username
 from src.auth.base_config import get_jwt_strategy, current_user
 from src.auth.models import User
 from src.database import get_async_session
@@ -23,20 +23,36 @@ router = APIRouter(
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates\\")
 
-
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
-@router.get("/login", response_class=HTMLResponse)
-async def get_login(request: Request):
-    return templates.TemplateResponse("/login.html", {"request": request})
+@router.get("/loginAdmin", response_class=HTMLResponse)
+async def get_login_admin(request: Request):
+    return templates.TemplateResponse("/loginAdmin.html", {"request": request})
 
 
-@router.post("/login", response_class=HTMLResponse)
-async def post_login(request: Request, email: str = Form(...), password: str = Form(...)):
+@router.post("/loginAdmin", response_class=HTMLResponse)
+async def post_login_admin(request: Request, email: str = Form(...), password: str = Form(...)):
     user = await authenticate(email=email, password=password)
     if not user:
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Failed to login"})
+        return templates.TemplateResponse("loginAdmin.html", {"request": request, "error": "Failed to login"})
+
+    token = await get_jwt_strategy().write_token(user)
+    response = RedirectResponse(url="/pages/models/", status_code=302)
+    response.set_cookie(key="user-cookie", value=token, httponly=True)
+    return response
+
+
+@router.get("/loginUser", response_class=HTMLResponse)
+async def get_login_user(request: Request):
+    return templates.TemplateResponse("/loginUser.html", {"request": request})
+
+
+@router.post("/loginUser", response_class=HTMLResponse)
+async def post_login_user(request: Request, username: str = Form(...), password: str = Form(...)):
+    user = await authenticate_for_username(username=username, password=password)
+    if not user:
+        return templates.TemplateResponse("loginUser.html", {"request": request, "error": "Failed to login"})
 
     token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse(url="/pages/models/", status_code=302)
@@ -57,7 +73,7 @@ async def get_models(request: Request, user: User = Depends(current_user),
         print(f"SQLAlchemy error occurred: {e}")
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("login.html", {"request": request, "error": "Please login first"})
+        return templates.TemplateResponse("loginAdmin.html", {"request": request, "error": "Please login first"})
 
 
 @router.post("/models/", response_class=HTMLResponse, dependencies=[Depends(get_async_session)])
@@ -79,7 +95,7 @@ async def delete_model(
     id: int,
     session: AsyncSession = Depends(get_async_session),
 ):
-    query = delete(Model).where(Model.id == id)
+    query = delete(Model).where(id == Model.id)
     result = await session.execute(query)
     await session.commit()
     if result.rowcount == 0:

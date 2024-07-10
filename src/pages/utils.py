@@ -22,8 +22,22 @@ async def authenticate(email: str, password: str):
                         credentials=OAuth2PasswordRequestForm(username=email, password=password)
                     )
                     response: Response = await auth_backend.login(strategy=get_jwt_strategy(), user=user)
-                    print(f"User auth {user}")
-                    print(f"Response {response}")
+                    print(f"User auth {user.username} | Response {response.status_code}")
+                    return user
+    except Exception as e:
+        print(e)
+
+
+async def authenticate_for_username(username: str, password: str):
+    try:
+        async with get_async_session_con() as session:
+            async with get_user_db_context(session) as user_db:
+                async with get_user_manager_context(user_db) as user_manager:
+                    user = await user_manager.authenticate_for_username(
+                        credentials=OAuth2PasswordRequestForm(username=username, password=password), session=session
+                    )
+                    response: Response = await auth_backend.login(strategy=get_jwt_strategy(), user=user)
+                    print(f"User auth {user.username} | Response {response.status_code}")
                     return user
     except Exception as e:
         print(e)
