@@ -51,7 +51,7 @@ async def validation_exception_handler(request: Request, exc: ValidationExceptio
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
     if exc.status_code == 401:  # Unauthorized
-        return templates.TemplateResponse("loginAdmin.html", {"request": request, "error": "Please log in to continue"})
+        return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Please log in to continue"})
     return JSONResponse(
         status_code=exc.status_code,
         content={"detail": exc.detail},

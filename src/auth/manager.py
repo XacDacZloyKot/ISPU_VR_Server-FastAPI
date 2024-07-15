@@ -6,7 +6,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database import get_async_session
 from src.auth.models import User
 from src.auth.utils import get_user_db
 from src.config import SECRET_KEY

@@ -1,0 +1,127 @@
+@import 'colors.css';
+
+/* Buttons */
+.button{
+    -webkit-writing-mode: horizontal-tb !important;
+    -webkit-appearance: button;
+    cursor: pointer;
+    appearance: none;
+    text-rendering: auto;
+    box-shadow: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    height: 42px;
+    padding: 7px 15px;
+    width: fit-content;
+    background-color: var(--color-primary-300);
+    border-radius: 8px;
+    font-weight: 700;
+    color: var(--color-white);
+}
+
+.button[disabled]{
+    color: var(--color-gray-200);
+    background-color: var(--color-gray-100);
+    cursor:auto;
+}
+
+.blue{
+    background-color: var(--color-primary-300); 
+}
+
+.blue:hover {
+    background-color: var(--color-primary-200);
+}
+
+.blue:active {
+    background-color: var(--color-primary-500);
+}
+
+.blue:focus-visible {
+    background-color: var(--color-primary-100);
+}
+
+/* Orange button */
+.orange{
+    background-color: var(--color-secondary-300); 
+}
+
+.orange:hover {
+    background-color: var(--color-secondary-200);
+}
+
+.orange:active {
+    background-color: var(--color-secondary-500);
+}
+
+.orange:focus-visible {
+    background-color: var(--color-secondary-100);
+}
+
+.slim{
+    height: 24px;
+}
+
+/* Input fields */
+input {
+    width: 100%;
+    text-rendering: auto;
+    box-shadow: none;
+    padding: 7.5px 16px;
+    background-clip: padding-box;
+    border-radius: 8px;
+    border: solid 1px var(--color-secondary-400);
+    font-weight:400;
+    font-size: 20px;
+    line-height: 1.5;
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+input[disabled]{
+    border-color: var(--color-gray-300);
+}
+
+input:focus {
+    border-color: var(--color-secondary-500);
+    outline: 0;
+}
+
+.input-error {
+    border-color: var(--color-error) !important;
+}
+
+.input-slim {
+    padding: 3px 16px;
+    font-size: 14px;
+}
+
+/* Sidebar */
+.nav-btn{
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    padding: 5px 15px;
+    gap: 15px;
+    border-radius: 8px;
+    color: var(--color-black);
+    font-size: 13px;
+    font-family: inherit;
+    font-weight: 400;
+}
+
+.nav-btn img {
+    width: 30px;
+    height: 30px;
+}
+
+.nav-btn:hover {
+    background-color: var(--color-primary-100);
+}
+
+.nav-btn-selected {
+    background-color: var(--color-primary-200);
+    color: var(--color-white);
+}
+
+

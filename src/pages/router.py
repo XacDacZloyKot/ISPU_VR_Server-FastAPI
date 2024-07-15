@@ -28,14 +28,14 @@ templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 @router.get("/loginAdmin", response_class=HTMLResponse)
 async def get_login_admin(request: Request):
-    return templates.TemplateResponse("/loginAdmin.html", {"request": request})
+    return templates.TemplateResponse("/auth/loginAdmin.html", {"request": request})
 
 
 @router.post("/loginAdmin", response_class=HTMLResponse)
 async def post_login_admin(request: Request, email: str = Form(...), password: str = Form(...)):
     user = await authenticate(email=email, password=password)
     if not user:
-        return templates.TemplateResponse("loginAdmin.html", {"request": request, "error": "Failed to login"})
+        return templates.TemplateResponse("/auth/loginAdmin.html", {"request": request, "error": "Failed to login"})
 
     token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse(url="/pages/models/", status_code=302)
@@ -45,14 +45,14 @@ async def post_login_admin(request: Request, email: str = Form(...), password: s
 
 @router.get("/loginUser", response_class=HTMLResponse)
 async def get_login_user(request: Request):
-    return templates.TemplateResponse("/loginUser.html", {"request": request})
+    return templates.TemplateResponse("/auth/loginUser.html", {"request": request})
 
 
 @router.post("/loginUser", response_class=HTMLResponse)
 async def post_login_user(request: Request, username: str = Form(...), password: str = Form(...)):
     user = await authenticate_for_username(username=username, password=password)
     if not user:
-        return templates.TemplateResponse("loginUser.html", {"request": request, "error": "Failed to login"})
+        return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Failed to login"})
 
     token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse(url="/pages/models/", status_code=302)
@@ -73,7 +73,7 @@ async def get_models(request: Request, user: User = Depends(current_user),
         print(f"SQLAlchemy error occurred: {e}")
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("loginAdmin.html", {"request": request, "error": "Please login first"})
+        return templates.TemplateResponse("/auth/loginAdmin.html", {"request": request, "error": "Please login first"})
 
 
 @router.post("/models/", response_class=HTMLResponse, dependencies=[Depends(get_async_session)])

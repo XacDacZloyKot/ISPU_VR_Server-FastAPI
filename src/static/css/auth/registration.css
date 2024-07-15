@@ -1,0 +1,78 @@
+.body{
+    display: flex;
+    justify-content: center;
+    align-content: center;
+    flex-wrap: wrap;
+}
+
+.registration-container{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+.registration-container-title{
+    color: var(--color-primary-500);
+    font-weight: bolder;
+    margin: 0 auto;
+    margin-bottom: 21px;
+    font-weight: 900;
+}
+
+.registration-container-subtitle{
+    font-weight: bold;
+    margin: 0 auto;
+    margin-bottom: 10px;
+}
+
+.registration-container-lable{
+    margin: 0 auto;
+    margin-bottom: 36px;
+}
+
+.input{
+    width: 200px;
+}
+
+.registration-container-form{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    font-weight: bolder;
+}
+
+.error{
+    color: var(--color-error);
+    font-weight: bold;
+}
+
+.submit{
+    margin-top: 30px;
+}
+.change-user-profile-container{
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    align-items: center;
+    justify-items: center;
+}
+
+.registration-container-is-new-user{
+    font-weight: bolder;
+}
+
+.registration-container-is-admin{
+    font-weight: bolder;
+}
+
+.form-group{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 434px;
+}
