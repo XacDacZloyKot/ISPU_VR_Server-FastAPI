@@ -1,0 +1,46 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/style.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/sidebar.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/navbar.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
+{% endblock %}
+
+{% block content %}
+    <h1 class="title-orange">Локации</h1>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Название</th>
+                            <th>Статус локации</th>
+                            <th>Опции</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for location in locations %}
+                        <tr>
+                            <td>{{ location.id }}</td>
+                            <td>{{ location.name }}</td>
+                            <td>{{ location.status.value }}</td>
+                            <td>
+                                <div class="location-option-column">
+                                    <a href="#" class="location-link">
+                                        <img src="/static/img/Redact.svg" alt="Редактирование" class="location-icon">
+                                    </a>
+                                    <a href="#" class="location-link">
+                                        <img src="/static/img/Vector.svg" alt="Редактирование" class="location-icon">
+                                    </a>
+                                    <a href="#" class="location-link">
+                                        <img src="/static/img/Subtract.svg" alt="Редактирование" class="location-icon">
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+{% endblock %}

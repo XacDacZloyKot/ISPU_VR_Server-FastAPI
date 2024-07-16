@@ -1,13 +1,17 @@
+.body{
+    display: grid;
+    height: calc(100% - 30px);
+    grid-template-rows: 80px 1fr;
+    grid-template-columns: 330px 1fr;
+}
+
 .navbar {
     height: 50px;
-    width: calc(100% - 360px);
+    width: calc(100% - 30px);
     display: flex;
     padding: 15px;
-    position: absolute;
-    right: 0;
     background-color: var(--color-light);
     border-bottom: solid 0.5px var(--color-primary-200);
-    z-index: 0;
     flex-direction: row;
     align-items: center;
     justify-content: space-between;

@@ -18,9 +18,27 @@ body,
     margin: 15px;
 }
 
-
-
 .logo {
     width: 67px;
     height: 67px;
+}
+
+.title-orange{
+  color: var(--color-secondary-500);
+  background-color: var(--color-secondary-100);
+  width: calc(100% - 30px);
+  height: fit-content;
+  padding: 10px 0px 10px 10px;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.content{
+  padding: 15px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 10px;
 }

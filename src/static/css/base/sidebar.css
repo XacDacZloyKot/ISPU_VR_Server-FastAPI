@@ -5,7 +5,7 @@
     height: 100%;
     padding: 15px;
     border-right: solid 0.5px var(--color-primary-200);
-    z-index: 1;
+    grid-row: span 2;
 }
 
 .sidebar-container {
@@ -30,14 +30,23 @@
 
 }
 
+.helpbar{
+    display: flex;
+    flex-direction: row;
+    padding: 15px 15px;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 15px;
+}
+
 .nav-category__title{
     font-weight: 600;
-    font-size: 14px;
-    margin: 0;
+    font-size: 18px;
+    margin: 15px;
 }
 
 .nav-category{
-    margin: 0;
+    margin-bottom: 5px;
 }
 
 .helpbar{
