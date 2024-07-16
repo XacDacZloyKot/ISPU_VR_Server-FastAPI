@@ -38,9 +38,10 @@ class User(SQLAlchemyBaseUserTable[int], Base):
 
 
 class AdmissionStatus(Enum):
-    INACTIVE = "inactive"
-    ACTIVE = "active"
-    COMPLETED = "completed"
+    INACTIVE = "Не активно"
+    ACTIVE = "Активно"
+    COMPLETED = "Завершено"
+    EXAMINATION = "Проверяется"
 
 
 class Admission(Base):

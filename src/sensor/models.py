@@ -1,5 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Table, JSON
-from sqlalchemy.orm import relationship
+from enum import Enum
+
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, Table, JSON, Enum as SQLAEnum
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from src.database import Base
 
@@ -81,6 +83,12 @@ class Accident(Base):
                              lazy="subquery")
 
 
+class LocationStatus(Enum):
+    DEVELOPING = "В разработке"
+    INACTIVE = "Не доступна"
+    COMPLETED = "Готова"
+
+
 class Location(Base):
     __tablename__ = "location"
 
@@ -89,6 +97,8 @@ class Location(Base):
     #  Связь many to many(промежуточная таблица)
     models = relationship("Model", secondary=location_model_association, back_populates="locations",
                           lazy="subquery")
+    status: Mapped[LocationStatus] = mapped_column(SQLAEnum(LocationStatus), default=LocationStatus.DEVELOPING,
+                                                    nullable=False, doc="Статус заявки")
     #  Обратная совместимость
     scenarios = relationship("Scenario", back_populates="location", lazy="selectin")
 
