@@ -13,6 +13,22 @@ get_user_db_context = contextlib.asynccontextmanager(get_user_db)
 get_user_manager_context = contextlib.asynccontextmanager(get_user_manager)
 
 
+user_menu = [
+    {
+        "name": "СТАТИСТИКА",
+        "urls": [
+            ("Домашняя страница", "#"),
+        ]
+    },
+    {
+        "name": "ТРЕНАЖЕР",
+        "urls": [
+            ("Локации", "get_location"),
+        ]
+    },
+]
+
+
 async def authenticate(email: str, password: str):
     try:
         async with get_async_session_con() as session:

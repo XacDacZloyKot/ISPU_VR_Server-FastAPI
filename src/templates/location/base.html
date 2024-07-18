@@ -13,31 +13,17 @@
             <div class="sidebar-container">
                 <img src="{{ url_for('static', path='/img/logo.png') }}" alt="" class="logo sidebar-logo">
                 <nav class="navigation">
-                    <div class="nav-category">
-                        <p class="nav-category__title">СТАТИСТИКА</p>
-                        <a class="nav-btn nav-btn-selected" href="#" alt="#">
-                            <img src="{{ url_for('static', path='/img/task.svg') }}" alt="#">
-                            Личный кабинет
-                        </a>
-                    </div>
-                    <div class="nav-category">
-                        <p class="nav-category__title">ТРЕНАЖЕР</p>
-                        <a class="nav-btn" href="#" alt="#">
-                            <img src="{{ url_for('static', path='/img/task.svg') }}" alt="#">
-                            Домашняя страница
-                        </a>
-                        <a class="nav-btn" href="#" alt="#">
-                            <img src="{{ url_for('static', path='/img/task.svg') }}" alt="#">
-                            Домашняя страница
-                        </a>
-                    </div>
-                    <div class="nav-category">
-                        <p class="nav-category__title">Администратор</p>
-                        <a class="nav-btn" href="#" alt="#">
-                            <img src="{{ url_for('static', path='/img/task.svg') }}" alt="#">
-                            Домашняя страница
-                        </a>
-                    </div>
+                    {% for item in menu %}
+                    	<div class="nav-category">
+                            <p class="nav-category__title">{{ item.name }}</p>
+                            {% for url in item.urls %}
+                                    <a class="nav-btn nav-btn-selected" href="{% if url.1 != '#' %}{{ url_for(url.1) }}{% else %}#{% endif %}" alt="#">
+                                    <img src="{{ url_for('static', path='/img/task.svg') }}" alt="#">
+                                    {{ url.0 }}
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
                 </nav>
                 <div class="helpbar">
                     <svg width="30" height="35" viewBox="0 0 30 35" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -53,7 +39,7 @@
             <p class="navbar__title">Домашняя страница</p>
             <div class="nav-menu">
                 <div class="menu-info">
-                    <p class="menu-info__title">{{ user.first_name }} {{ user.last_name }} {{ user.patronymic }}</p>
+                    <p class="menu-info__title">{{ user.last_name }} {{ user.first_name }} {{ user.patronymic }}</p>
                     <p class="menu-info__id">ID: {{ user.id }}</p>
                 </div>
                 <div class="menu-logo">

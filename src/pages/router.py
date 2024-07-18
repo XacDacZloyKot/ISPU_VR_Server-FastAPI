@@ -9,7 +9,7 @@ from sqlalchemy import select, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.pages.utils import authenticate, authenticate_for_username
+from src.pages.utils import authenticate, authenticate_for_username, user_menu
 from src.auth.base_config import get_jwt_strategy, current_user
 from src.auth.models import User
 from src.database import get_async_session
@@ -71,10 +71,10 @@ async def get_location(request: Request, user: User = Depends(current_user),
             "/location/location.html",
             {
                 "request": request,
-                "locations": location,
-                'status': HTTPStatus.OK,
                 'user': user,
-                'title': "ISPU - Location"
+                "locations": location,
+                'title': "ISPU - Location",
+                'menu': user_menu,
             }
         )
     except SQLAlchemyError as e:
