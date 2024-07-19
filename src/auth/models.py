@@ -2,7 +2,9 @@ from datetime import datetime
 from enum import Enum
 
 from fastapi_users.db import SQLAlchemyBaseUserTable
-from sqlalchemy import Integer, String, Boolean, ForeignKey, Column, TIMESTAMP, Enum as SQLAEnum, Table
+from sqlalchemy import Integer, String, Boolean, ForeignKey, Column, TIMESTAMP, Enum as SQLAEnum, Table, select, func, \
+    Float
+from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import Base
@@ -58,6 +60,14 @@ class Admission(Base):
                                         lazy="selectin")
     scenario: Mapped["Scenario"] = relationship("Scenario", back_populates="admissions",
                                                 foreign_keys="Admission.scenario_id", lazy="selectin")
+
+    @classmethod
+    async def get_average_rating_for_user(cls, user_id: int, session: AsyncSession) -> float:
+        result = await session.execute(
+            select(func.avg(cls.rating).cast(Float)).where(user_id == cls.user_id)
+        )
+        average_rating = result.scalar()
+        return average_rating or 0.0
 
 
 class Scenario(Base):
