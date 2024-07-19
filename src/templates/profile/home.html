@@ -1,0 +1,122 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/profile/home.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+    <p class="navbar__title">Домашняя страница</p>
+{% endblock %}
+
+{% block content %}
+    <h1 class="title-orange">Активные задачи</h1>
+    <div class="table">
+        <table>
+            <tbody>
+            {% for admission in admissions %}
+                <tr>
+                    <td>{{ admission.scenario.location.name }}</td>
+                    <td>{{ admission.scenario.model.sensor_type.name }}</td>
+                    <td>
+                        {% macro get_status_class(status) %}
+                            {% if status == "Не активно" %}
+                                status-red
+                            {% elif status == "Активно" %}
+                                status-orange
+                            {% elif status == "Завершено" %}
+                                status-green
+                            {% elif status == "Проверяется" %}
+                                status-blue
+                            {% else %}
+                                "#"
+                            {% endif %}
+                        {% endmacro %}
+                        <p class="status {{ get_status_class(admission.status.value) }}">{{ admission.status.value }}</p>
+                    </td>
+                    <td>
+                        <div class="home-option-column">
+                            <a href="#" class="home-link">
+                                <img src="/static/img/Redact.svg" alt="Редактирование" class="home-icon">
+                            </a>
+                            <a href="#" class="home-link">
+                                <img src="/static/img/Vector.svg" alt="Информация" class="home-icon">
+                            </a>
+                            <a href="#" class="home-link">
+                                <img src="/static/img/Subtract.svg" alt="Конфигурация" class="home-icon">
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="statistics">
+        <div class="statistics__last-work">
+            <h2 class="title-orange subtask">Последняя задача</h2>
+            {% if False %}
+                <div class="statistics-data">
+                    <div class="statistics-data__name-task">
+                        <p class="statistics-data-name__title"> Поверка прибора </p>
+                        <p class="statistics-data-name__description">
+                            ТС-1088, куча текста<br>
+                            описательного для задачи
+                        </p>
+                    </div>
+                    <div class="statistics-data__param">
+                        <p class="statistics-data-param__name">19.02.2024</p>
+                        <p class="statistics-data-param__value">Время выполнения: 20 мин.</p>
+                    </div>
+                    <p class="statistics-data-task-param">Локация: Какая-то</p>
+                    <p class="statistics-data-task-param">Допущено ошибок: 0</p>
+                    <p class="statistics-data-task-param">Выявлено неисправностей: 7 из 7</p>
+                    <p class="statistics-data-task-param">Исправлено неисправностей: 7 из 7</p>
+                    <p class="statistics-data-task-rating">Общая оценка: 5.00</p>
+                </div>
+            {% else %}
+                <div class="statistics-data">
+                    <div class="statistics-data__name-task">
+                        <p class="statistics-data-name__title"> У вас ещё не было пройдено ни одной локации!</p>
+                    </div>
+                    <p class="menu-info__title statistics-data-task-param">
+                           Начните проходить тесты в поле "Активные задачи"
+                    </p>
+                </div>
+            {% endif %}
+        </div>
+        <div class="profile">
+            <h2 class="title-orange subtask">Профиль</h2>
+            <div class="statistics-data">
+                <div class="statistics-data__name">
+                    <div class="menu-logo">
+                        <p class="menu-logo__initials">{{ user.first_name[0] + user.last_name[0] }}</p>
+                    </div>
+                    <p class="menu-info__title"> {{ user.last_name }} {{ user.first_name }} {{ user.patronymic }} </p>
+                </div>
+                <div class="statistics-data__param">
+                    <p class="statistics-data-param__name">Статус: </p>
+                    <p class="statistics-data-param__value">Обучаемый</p>
+                </div>
+                <div class="statistics-data__param">
+                    <p class="statistics-data-param__name">Последняя активность:</p>
+                    <p class="statistics-data-param__value">06.06.2024 12:37</p>
+                </div>
+                <div class="statistics-data__param">
+                    <p class="statistics-data-param__name">Подразделение:</p>
+                    <p class="statistics-data-param__value">{{ user.division }}</p>
+                </div>
+                <div class="statistics-data__param">
+                    <p class="statistics-data-param__name">Проведено за работой:</p>
+                    <p class="statistics-data-param__value">72.3 ч</p>
+                </div>
+                <div class="statistics-data__param">
+                    <p class="statistics-data-param__name">Средний балл:</p>
+                        <p class="statistics-data-param__value">{{ sum_rating }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

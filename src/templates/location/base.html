@@ -36,7 +36,8 @@
             </div>
         </section>
         <section class="navbar">
-            <p class="navbar__title">Домашняя страница</p>
+            {% block navTitle %}
+            {% endblock %}
             <div class="nav-menu">
                 <div class="menu-info">
                     <p class="menu-info__title">{{ user.last_name }} {{ user.first_name }} {{ user.patronymic }}</p>

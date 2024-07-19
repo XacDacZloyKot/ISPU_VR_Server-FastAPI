@@ -1,0 +1,128 @@
+.table {
+    height: 33%;
+    overflow-y: auto;
+    max-height: 575px;
+    border: 1px solid var(--color-primary-400);
+    border-radius: 10px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 2px 12px;
+    border-bottom: 1px solid var(--color-primary-400);
+    text-align: left;
+}
+
+thead th {
+    position: sticky;
+    top: 0;
+    background-color: var(--color-primary-100);
+}
+
+.home-icon{
+    width: 30px;
+}
+
+.home-link{
+    width: fit-content;
+    height: fit-content;
+}
+
+.home-option-column{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+.subtask{
+    margin: 0px;
+    width: unset;
+}
+
+.statistics{
+    display: grid;
+    grid-template-columns: 4fr 3fr;
+    grid-template-rows: 1fr;
+    justify-content: start;
+    gap: 30px;
+    height: 50%;
+}
+
+.statistics__last-work {
+    display: flex;
+    flex-direction: column;
+}
+
+.profile{
+    display: flex;
+    flex-direction: column;
+}
+
+.statistics-data{
+    border-radius: 8px;
+    border: 1px solid var(--color-primary-400);
+    margin-top: 10px;
+    height: 100%;
+}
+
+.statistics-data__name{
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+    border-bottom: 1px solid var(--color-primary-400);
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.statistics-data__param{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 1px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.statistics-data-param__name{
+    margin: 0;
+}
+
+.statistics-data-param__value{
+    margin: 0;
+}
+
+.statistics-data__name-task{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+    border-bottom: 1px solid var(--color-primary-400);
+    padding: 15px;
+    margin-bottom: 10px;
+}
+
+.statistics-data-name__title{
+    margin: 0px;
+    font-weight: 700;
+    font-size: 24px;
+}
+
+.statistics-data-name__description{
+    margin: 0px;
+}
+
+.statistics-data-task-param{
+    padding: 1px;
+    padding-left: 15px;
+    margin: 0;
+}
+
+.statistics-data-task-rating{
+    font-weight: 400;
+    font-size: 24px;
+    padding-left: 15px;
+}

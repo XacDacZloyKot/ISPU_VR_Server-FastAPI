@@ -124,4 +124,41 @@ input:focus {
     color: var(--color-white);
 }
 
+.status{
+    padding: 4px 25px 4px 25px;
+    width: fit-content;
+    max-width: 80px;
+    height: fit-content;
+    margin: 0 auto;
+}
 
+.status-red {
+
+    border: 1px solid #FF1E1E;
+    border-radius: 8px;
+    background-color: #FFBBBB;
+    color: #FF1E1E;
+}
+
+.status-green {
+
+    border: 1px solid #19B000;
+    border-radius: 8px;
+    background-color: #D4F7CE;
+    color: #19B000;
+}
+
+.status-orange {
+
+    border: 1px solid #FF7900;
+    border-radius: 8px;
+    background-color: #FFDAB8;
+    color: #FF7900;
+}
+
+.status-blue {
+    border: 1px solid #318ADC;
+    border-radius: 8px;
+    background-color: #BBDEFF;
+    color: #318ADC;
+}

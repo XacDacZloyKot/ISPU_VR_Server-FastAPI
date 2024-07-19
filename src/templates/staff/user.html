@@ -8,27 +8,30 @@
 {% endblock %}
 
 {% block navTitle %}
-	<p class="navbar__title">Домашняя страница</p>
+	<p class="navbar__title">Пользователи</p>
 {% endblock %}
 
+
 {% block content %}
-    <h1 class="title-orange">Локации</h1>
+            <h1 class="title-orange">Пользователи</h1>
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
                             <th>ID</th>
-                            <th>Название</th>
-                            <th>Статус локации</th>
+                            <th>ФИО</th>
+                            <th>Дата регистрации</th>
+                            <th>Подразделение</th>
                             <th>Опции</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for location in locations %}
+                    {% for curr_user in users %}
                         <tr>
-                            <td>{{ location.id }}</td>
-                            <td>{{ location.name }}</td>
-                            <td>{{ location.status.value }}</td>
+                            <td>{{ curr_user.id }}</td>
+                            <td>{{ curr_user.last_name }} {{ curr_user.first_name }} {{ curr_user.patronymic }}</td>
+                            <td>{{ curr_user.registered_at }}</td>
+                            <td>{{ curr_user.division }}</td>
                             <td>
                                 <div class="location-option-column">
                                     <a href="#" class="location-link">
