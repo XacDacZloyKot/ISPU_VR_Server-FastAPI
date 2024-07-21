@@ -9,10 +9,10 @@ from sqlalchemy import select, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.base_config import get_jwt_strategy, current_user
+from src.auth.base_config import get_jwt_strategy, current_user, staff_user, administrator_user
 from src.auth.models import User, Admission
 from src.database import get_async_session
-from src.pages.utils import authenticate, authenticate_for_username, user_menu
+from src.pages.utils import authenticate, authenticate_for_username, user_menu, create
 from src.sensor.models import Model, Location
 
 router = APIRouter(
@@ -57,6 +57,33 @@ async def post_login_user(request: Request, username: str = Form(...), password:
     token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse(url="/pages/location/", status_code=302)
     response.set_cookie(key="user-cookie", value=token, httponly=True)
+    return response
+
+
+@router.get("/registration", response_class=HTMLResponse)
+async def get_registration(request: Request):
+    return templates.TemplateResponse("/auth/registration.html", {"request": request})
+
+
+@router.post("/registration", response_class=HTMLResponse)
+async def post_registration(request: Request,
+                            username: str = Form(...),
+                            password: str = Form(...),
+                            first_name: str = Form(...),
+                            last_name: str = Form(...),
+                            patronymic: str = Form(...),
+                            division: str = Form(...)):
+    user = await create(
+        username=username,
+        password=password,
+        first_name=first_name,
+        last_name=last_name,
+        patronymic=patronymic,
+        division=division
+    )
+    if not user:
+        return templates.TemplateResponse("/auth/registration.html", {"request": request, "error": "Error registering user"})
+    response = RedirectResponse(url="/pages/loginUser/", status_code=302)
     return response
 
 
@@ -111,7 +138,7 @@ async def get_home_page(request: Request, user: User = Depends(current_user),
 
 
 @router.get("/users", response_class=HTMLResponse)
-async def get_users_page(request: Request, user: User = Depends(current_user),
+async def get_users_page(request: Request, user: User = Depends(staff_user),
                         session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(User).where(False == User.is_superuser, False == User.is_staff)

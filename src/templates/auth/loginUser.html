@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" href="{{ url_for('static', path='css/base/normalize.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', path='css/base/style.css') }}">
-        <link rel="stylesheet" href="{{ url_for('static', path='css/base/uiKit.css') }}">
         <link rel="stylesheet" href="{{ url_for('static', path='css/auth/loginUser.css') }}">
     <title>ISPU Login</title>
 </head>
@@ -33,8 +32,8 @@
             <div class="change-user-profile-container">
                 <p class="login-container-is-new-user">Новый пользователь?</p>
                 <p class="login-container-is-admin">Администратор?</p>
-                <a href="#" class="button orange slim">Регистрация</a>
-                <a href="#" class="button orange slim">Авторизация</a>
+                <a href="{{ url_for("get_registration") }}" class="button orange slim">Регистрация</a>
+                <a href="{{ url_for("get_login_admin") }}" class="button orange slim">Авторизация</a>
             </div>
         </div>
     </section>

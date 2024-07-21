@@ -14,7 +14,8 @@
                 <img src="{{ url_for('static', path='/img/logo.png') }}" alt="" class="logo sidebar-logo">
                 <nav class="navigation">
                     {% for item in menu %}
-                    	<div class="nav-category">
+                        {% if (item.access == "staff" and (user.is_staff == True or user.is_superuser == True)) or item.access == "user" or (item.access == "admin" and user.is_superuser == True) %}
+                    	    <div class="nav-category">
                             <p class="nav-category__title">{{ item.name }}</p>
                             {% for url in item.urls %}
                                     <a class="nav-btn nav-btn-selected" href="{% if url.1 != '#' %}{{ url_for(url.1) }}{% else %}#{% endif %}" alt="#">
@@ -23,6 +24,7 @@
                                 </a>
                             {% endfor %}
                         </div>
+                        {% endif %}
                     {% endfor %}
                 </nav>
                 <div class="helpbar">

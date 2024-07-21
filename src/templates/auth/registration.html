@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/normalize.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/auth/registration.css') }}">
+    <title>ISPU Registration</title>
+</head>
+<body class="body">
+<section class="registration">
+    <div class="registration-container">
+        <h1 class="registration-container-title">Добро пожаловать!</h1>
+        <p class="registration-container-subtitle">Для работы с тренажером необходимо авторизоваться</p>
+        <p class="registration-container-lable">Введите данные вашей учетной записи</p>
+        <p class="error">Неверно введены данные!</p>
+        <form action="{{ url_for('post_registration') }}" method="POST" class="registration-container-form">
+            <div class="form-group">
+                <label for="username">Имя пользователя:</label>
+                <input type="text" id="username" name="username" required class="input input-slim" placeholder="Текст">
+            </div>
+            <div class="form-group">
+                <label for="last_name">Фамилия:</label>
+                <input type="text" id="last_name" name="last_name" required class="input input-slim"
+                       placeholder="Текст">
+            </div>
+            <div class="form-group">
+                <label for="first_name">Имя:</label>
+                <input type="text" id="first_name" name="first_name" required class="input input-slim"
+                       placeholder="Текст">
+            </div>
+            <div class="form-group">
+                <label for="patronymic">Отчество:</label>
+                <input type="text" id="patronymic" name="patronymic" required class="input input-slim"
+                       placeholder="Текст">
+            </div>
+            <div class="form-group">
+                <label for="password">Пароль:</label>
+                <input type="password" id="password" name="password" required class="input input-slim"
+                       placeholder="Текст">
+            </div>
+            <div class="form-group">
+                <label for="division">Подразделение:</label>
+                <input type="text" id="division" name="division" required class="input input-slim" placeholder="Текст">
+            </div>
+            <div class="submit-container">
+                <button type="submit" class="button orange submit">Регистрация</button>
+                <a href="{{ url_for("get_login_user") }}" class="button orange slim">Назад</a>
+            </div>
+        </form>
+    </div>
+</section>
+</body>
+</html>

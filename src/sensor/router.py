@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from http import HTTPStatus
 
 from src.sensor.schemas import ModelResponse
-from src.auth.base_config import current_user
+from src.auth.base_config import current_user, staff_user, administrator_user
 from src.auth.models import User
 from src.database import get_async_session
 from src.sensor.models import Model
@@ -47,8 +47,8 @@ async def add_models(new_model: ModelResponse, session: AsyncSession = Depends(g
         raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail={'data': None, 'details': str(e)})
 
 
-@router.get("/protected-route/")
-def protected_route(user: User = Depends(current_user)):
+@router.get("/protected-router-admin/")
+def protected_route(user: User = Depends(staff_user)):
     print(user)
     return f"Hello, {user.username}"
 

@@ -2,7 +2,7 @@ from typing import Optional
 
 from fastapi._compat import PYDANTIC_VERSION
 from fastapi_users import schemas
-from pydantic import ConfigDict
+from pydantic import ConfigDict, BaseModel
 
 PYDANTIC_V2 = PYDANTIC_VERSION.startswith("2.")
 
@@ -23,7 +23,7 @@ class UserRead(schemas.BaseUser[int]):
 
 
 class UserCreate(schemas.BaseUserCreate):
-    email: str
+    email: Optional[str] = ""
     username: str
     first_name: str
     last_name: str

@@ -23,7 +23,7 @@ scenario_accident_association = Table(
 class User(SQLAlchemyBaseUserTable[int], Base):
     __tablename__ = "user"
 
-    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False, doc="Почта")
+    email: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=True, doc="Почта")
     username: Mapped[str] = mapped_column(String(255), nullable=False, unique=True, doc="Пользовательское имя")
     registered_at: Mapped[datetime] = mapped_column(TIMESTAMP, default=datetime.utcnow)
     first_name: Mapped[str] = mapped_column(String(255), doc="Имя")

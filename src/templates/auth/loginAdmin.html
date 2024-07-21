@@ -27,7 +27,10 @@
                     <label for="password">Пароль</label>
                     <input type="password" id="password" name="password" required class="input" placeholder="Текст">
                 </div>
-                <button type="submit" class="button orange submit">Авторизоваться</button>
+                <div class="submit-container">
+                    <button type="submit" class="button orange submit">Авторизоваться</button>
+                    <a href="{{ url_for("get_login_user") }}" class="button orange slim">Назад</a>
+                </div>
             </form> 
         </div>
     </section>
