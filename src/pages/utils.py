@@ -21,11 +21,12 @@ user_menu = [
         "access": "user",
         "urls": [
             ("Домашняя страница", "get_home_page"),
+            ("Активные задачи", "#"),
         ]
     },
     {
         "name": "ТРЕНАЖЕР",
-        "access": "user",
+        "access": "staff",
         "urls": [
             ("Локации", "get_location_page"),
         ]
@@ -35,6 +36,13 @@ user_menu = [
         "access": "staff",
         "urls": [
             ("Пользователи", "get_users_page"),
+        ]
+    },
+    {
+        "name": "СУПЕР АДМИН",
+        "access": "admin",
+        "urls": [
+            ("Создание сценария", "#"),
         ]
     },
 ]

@@ -102,3 +102,12 @@ class Location(Base):
     #  Обратная совместимость
     scenarios = relationship("Scenario", back_populates="location", lazy="selectin")
 
+
+class SensorValue(Base):
+    __tablename__ = "sensor_value"
+
+    sensor_type = Column(String(255), doc="Тип датчика")
+    field = Column(String(128), doc="Поле датчика")
+    value = Column(String(64), doc="Значение")
+    measurement = Column(String(64), doc="Величина измерения")
+
