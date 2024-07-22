@@ -1,0 +1,67 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/profile/home.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+    <p class="navbar__title">Активные задачи</p>
+{% endblock %}
+
+{% block content %}
+    <h1 class="title-orange">Активные задачи</h1>
+    <div class="table tasks-full">
+        <table>
+            <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Тип датчика</th>
+                    <th>Статус локации</th>
+                    <th>Результат</th>
+                    <th class="home-option-column">Опции</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for admission in admissions %}
+                <tr>
+                    <td>{{ admission.scenario.location.name }}</td>
+                    <td>{{ admission.scenario.model.sensor_type.name }}</td>
+                    <td>
+                        {% macro get_status_class(status) %}
+                            {% if status == "Не активно" %}
+                                status-red
+                            {% elif status == "Активно" %}
+                                status-orange
+                            {% elif status == "Завершено" %}
+                                status-green
+                            {% elif status == "Проверяется" %}
+                                status-blue
+                            {% else %}
+                                "#"
+                            {% endif %}
+                        {% endmacro %}
+                        <p class="status {{ get_status_class(admission.status.value) }}">{{ admission.status.value }}</p>
+                    <td>{% if admission.status.value == "Завершено" %}{{ admission.rating }}{% else %}Работа не оценена{% endif %}</td>
+                    </td>
+                    <td class="option-button">
+                        <div class="home-option-column">
+                            <a href="#" class="home-link">
+                                <img src="/static/img/Redact.svg" alt="Редактирование" class="home-icon">
+                            </a>
+                            <a href="#" class="home-link">
+                                <img src="/static/img/Vector.svg" alt="Информация" class="home-icon">
+                            </a>
+                            <a href="#" class="home-link">
+                                <img src="/static/img/Subtract.svg" alt="Конфигурация" class="home-icon">
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

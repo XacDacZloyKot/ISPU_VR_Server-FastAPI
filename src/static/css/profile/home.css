@@ -35,6 +35,7 @@ thead th {
 .home-option-column{
     display: flex;
     flex-direction: row;
+    justify-content: end;
     gap: 10px;
 }
 .subtask{
@@ -125,4 +126,9 @@ thead th {
     font-weight: 400;
     font-size: 24px;
     padding-left: 15px;
+}
+
+.tasks-full{
+    height: calc(100% - 30px);
+    max-height: fit-content;
 }

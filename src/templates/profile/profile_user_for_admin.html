@@ -1,0 +1,81 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/sidebar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/navbar.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/profile/home.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+    <p class="navbar__title">Пользователь {{ user_for_id.username }}</p>
+{% endblock %}
+
+{% block content %}
+    <div class="profile">
+        <h2 class="title-orange subtask">Данные</h2>
+        <div class="statistics-data">
+            <div class="statistics-data__name">
+                <div class="menu-logo">
+                    <p class="menu-logo__initials">{{ user_for_id.first_name[0] + user_for_id.last_name[0] }}</p>
+                </div>
+                <p class="menu-info__title"> {{ user_for_id.last_name }} {{ user_for_id.first_name }} {{ user_for_id.patronymic }} </p>
+            </div>
+            <div class="statistics-data__param">
+                <p class="statistics-data-param__name">ID: </p>
+                <p class="statistics-data-param__value">{{ user_for_id.id }}</p>
+            </div>
+            <div class="statistics-data__param">
+                <p class="statistics-data-param__name">Статус: </p>
+                <p class="statistics-data-param__value">Обучаемый</p>
+            </div>
+            <div class="statistics-data__param">
+                <p class="statistics-data-param__name">Последняя активность:</p>
+                <p class="statistics-data-param__value">06.06.2024 12:37</p>
+            </div>
+            <div class="statistics-data__param">
+                <p class="statistics-data-param__name">Подразделение:</p>
+                <p class="statistics-data-param__value">{{ user_for_id.division }}</p>
+            </div>
+            <div class="statistics-data__param">
+                <p class="statistics-data-param__name">Проведено за работой:</p>
+                <p class="statistics-data-param__value">72.3 ч</p>
+            </div>
+            <div class="statistics-data__param">
+                <p class="statistics-data-param__name">Средний балл:</p>
+                    <p class="statistics-data-param__value">{{ sum_rating }}</p>
+            </div>
+        <br>
+        </div>
+    </div>
+    <h1 class="title-orange">Активные задачи</h1>
+    <div class="table">
+        <table>
+            <tbody>
+            {% for admission in admissions %}
+                <tr>
+                    <td>{{ admission.scenario.location.name }}</td>
+                    <td>{{ admission.scenario.model.sensor_type.name }}</td>
+                    <td>{% if admission.status.value == "Завершено" %}Оценка: {{ admission.rating }}{% else %}Работа не оценена{% endif %}</td>
+                    <td class="home-option-column">
+                        {% macro get_status_class(status) %}
+                            {% if status == "Не активно" %}
+                                status-red
+                            {% elif status == "Активно" %}
+                                status-orange
+                            {% elif status == "Завершено" %}
+                                status-green
+                            {% elif status == "Проверяется" %}
+                                status-blue
+                            {% else %}
+                                "#"
+                            {% endif %}
+                        {% endmacro %}
+                        <p class="status {{ get_status_class(admission.status.value) }}">{{ admission.status.value }}</p>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

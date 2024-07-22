@@ -10,10 +10,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.base_config import get_jwt_strategy, current_user, staff_user, administrator_user
-from src.auth.models import User, Admission
+from src.auth.models import User, Admission, AdmissionStatus
 from src.database import get_async_session
 from src.pages.utils import authenticate, authenticate_for_username, user_menu, create
 from src.sensor.models import Model, Location
+from src.pages.crud import admission_for_id, user_for_id
 
 router = APIRouter(
     prefix='/pages',
@@ -82,7 +83,8 @@ async def post_registration(request: Request,
         division=division
     )
     if not user:
-        return templates.TemplateResponse("/auth/registration.html", {"request": request, "error": "Error registering user"})
+        return templates.TemplateResponse("/auth/registration.html", {"request": request,
+                                                                      "error": "Неверно введены данные!"})
     response = RedirectResponse(url="/pages/loginUser/", status_code=302)
     return response
 
@@ -115,7 +117,8 @@ async def get_location_page(request: Request, user: User = Depends(current_user)
 async def get_home_page(request: Request, user: User = Depends(current_user),
                         session: AsyncSession = Depends(get_async_session)):
     try:
-        query = select(Admission).where(user.id == Admission.user_id)
+        query = select(Admission).where(user.id == Admission.user_id,
+                                        AdmissionStatus.COMPLETED != Admission.status)
         result = await session.execute(query)
         admission = result.scalars().all()
         sum_rating = await Admission.get_average_rating_for_user(user_id=user.id, session=session)
@@ -128,7 +131,7 @@ async def get_home_page(request: Request, user: User = Depends(current_user),
                 'title': "ISPU - Home page!",
                 'menu': user_menu,
                 'sum_rating': sum_rating,
-        }
+            }
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
@@ -151,6 +154,80 @@ async def get_users_page(request: Request, user: User = Depends(staff_user),
                 'user': user,
                 "users": users,
                 'title': "ISPU - Users",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
+
+
+@router.get("/users", response_class=HTMLResponse)
+async def get_users_page(request: Request, user: User = Depends(staff_user),
+                         session: AsyncSession = Depends(get_async_session)):
+    try:
+        query = select(User).where(False == User.is_superuser, False == User.is_staff)
+        result = await session.execute(query)
+        users = result.scalars().all()
+        return templates.TemplateResponse(
+            "/staff/user.html",
+            {
+                "request": request,
+                'user': user,
+                "users": users,
+                'title': "ISPU - Users",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
+
+
+@router.get("/tasks", response_class=HTMLResponse)
+async def get_tasks_page(request: Request, user: User = Depends(current_user),
+                        session: AsyncSession = Depends(get_async_session)):
+    try:
+        query = select(Admission).where(user.id == Admission.user_id).order_by("status")
+        result = await session.execute(query)
+        admission = result.scalars().all()
+        return templates.TemplateResponse(
+            "/location/tasks.html",
+            {
+                "request": request,
+                'user': user,
+                "admissions": admission,
+                'title': "ISPU - Tasks!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
+
+
+@router.get("/user/{user_id}", response_class=HTMLResponse)
+async def get_profile_for_id(request: Request, user_id: int, current_user: User = Depends(staff_user),
+                             session: AsyncSession = Depends(get_async_session)):
+    try:
+        user = await user_for_id(user_id, session)
+        admission = await admission_for_id(user_id, session)
+        sum_rating = await Admission.get_average_rating_for_user(user_id=user_id, session=session)
+        return templates.TemplateResponse(
+            "/profile/profile_user_for_admin.html",
+            {
+                "request": request,
+                'user': current_user,
+                "user_for_id": user,
+                "sum_rating": sum_rating,
+                "admissions": admission,
+                'title': "ISPU - User Profile!",
                 'menu': user_menu,
             }
         )

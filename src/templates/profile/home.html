@@ -20,7 +20,7 @@
                 <tr>
                     <td>{{ admission.scenario.location.name }}</td>
                     <td>{{ admission.scenario.model.sensor_type.name }}</td>
-                    <td>
+                    <td class="home-option-column">
                         {% macro get_status_class(status) %}
                             {% if status == "Не активно" %}
                                 status-red
@@ -35,19 +35,6 @@
                             {% endif %}
                         {% endmacro %}
                         <p class="status {{ get_status_class(admission.status.value) }}">{{ admission.status.value }}</p>
-                    </td>
-                    <td>
-                        <div class="home-option-column">
-                            <a href="#" class="home-link">
-                                <img src="/static/img/Redact.svg" alt="Редактирование" class="home-icon">
-                            </a>
-                            <a href="#" class="home-link">
-                                <img src="/static/img/Vector.svg" alt="Информация" class="home-icon">
-                            </a>
-                            <a href="#" class="home-link">
-                                <img src="/static/img/Subtract.svg" alt="Конфигурация" class="home-icon">
-                            </a>
-                        </div>
                     </td>
                 </tr>
             {% endfor %}

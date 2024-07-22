@@ -14,7 +14,9 @@
         <h1 class="registration-container-title">Добро пожаловать!</h1>
         <p class="registration-container-subtitle">Для работы с тренажером необходимо авторизоваться</p>
         <p class="registration-container-lable">Введите данные вашей учетной записи</p>
-        <p class="error">Неверно введены данные!</p>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
         <form action="{{ url_for('post_registration') }}" method="POST" class="registration-container-form">
             <div class="form-group">
                 <label for="username">Имя пользователя:</label>
