@@ -1,0 +1,87 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+	<p class="navbar__title">Сценарий #{{ scenarios.id }}</p>
+{% endblock %}
+
+{% block content %}
+    <h1 class="title-orange">Локация "{{ scenarios.location.name }}"</h1>
+    <div class="locatinon-container">
+        <div class="locatinon-data">
+            <div class="locatinon-data__name">
+                <p class="locatinon-data__title"> {{ scenarios.location.name }} </p>
+            </div>
+            <div class="locatinon-data__param">
+                <div class="locatinon-data__param-insert">
+                    <p class="locatinon-data-param__name">Статус:  </p>
+                    <p class="locatinon-data-param__value">{{ scenarios.location.status.value }}</p>
+                </div>
+                <div class="locatinon-data__param-insert">
+                    <p class="locatinon-data-param__name">Ошибка в модели (Id:{{ scenarios.model.id }}):</p>
+                    <p class="locatinon-data-param__value">{{ scenarios.model.name }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <h2 class="title-blue">
+        Приборы
+    </h2>
+    <div class="table-wrapper table-container-30">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Параметры</th>
+                    <th>Наличие ошибки</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for model in scenarios.location.models %}
+                <tr>
+                    <td>{{ model.id }}</td>
+                    <td>{{ model.sensor_type.name }}</td>
+                    <td>
+                        {% for field, value in model.specification.items() %}
+                            {{ field }}: {{ value }}<br>
+                        {% endfor %}
+                    </td>
+                    <td>{% if scenarios.model.id == model.id %}Да{% else %}Нет{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <h2 class="title-red">
+        Авария
+    </h2>
+    <div class="table-wrapper table-container-30">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Параметры</th>
+                    <th>Механическая ошибки</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for accident in scenarios.accidents %}
+                <tr>
+                    <td>{{ accident.id }}</td>
+                    <td>{{ accident.name }}</td>
+                    <td>{% for field, value in accident.change_value.items() %}
+                            {{ field }}: {{ value }}<br>
+                        {% endfor %}</td>
+                    <td>{% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

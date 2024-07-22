@@ -10,11 +10,11 @@ from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth.base_config import get_jwt_strategy, current_user, staff_user, administrator_user
-from src.auth.models import User, Admission, AdmissionStatus
+from src.auth.models import User, Admission, AdmissionStatus, Scenario
 from src.database import get_async_session
 from src.pages.utils import authenticate, authenticate_for_username, user_menu, create
 from src.sensor.models import Model, Location
-from src.pages.crud import admission_for_id, user_for_id
+from src.pages.crud import get_admission_for_id, get_user_for_id, get_scenario_for_id
 
 router = APIRouter(
     prefix='/pages',
@@ -89,19 +89,20 @@ async def post_registration(request: Request,
     return response
 
 
+# TODO: Поменять на scenario
 @router.get("/location", response_class=HTMLResponse)
 async def get_location_page(request: Request, user: User = Depends(current_user),
                             session: AsyncSession = Depends(get_async_session)):
     try:
-        query = select(Location).order_by(Location.id)
+        query = select(Scenario).order_by(Scenario.id)
         result = await session.execute(query)
-        location = result.scalars().all()
+        scenarios = result.scalars().all()
         return templates.TemplateResponse(
             "/location/location.html",
             {
                 "request": request,
                 'user': user,
-                "locations": location,
+                "scenarios": scenarios,
                 'title': "ISPU - Location",
                 'menu': user_menu,
             }
@@ -117,10 +118,7 @@ async def get_location_page(request: Request, user: User = Depends(current_user)
 async def get_home_page(request: Request, user: User = Depends(current_user),
                         session: AsyncSession = Depends(get_async_session)):
     try:
-        query = select(Admission).where(user.id == Admission.user_id,
-                                        AdmissionStatus.COMPLETED != Admission.status)
-        result = await session.execute(query)
-        admission = result.scalars().all()
+        admission = await get_admission_for_id(user_id=user.id, session=session)
         sum_rating = await Admission.get_average_rating_for_user(user_id=user.id, session=session)
         return templates.TemplateResponse(
             "/profile/home.html",
@@ -143,30 +141,6 @@ async def get_home_page(request: Request, user: User = Depends(current_user),
 @router.get("/users", response_class=HTMLResponse)
 async def get_users_page(request: Request, user: User = Depends(staff_user),
                         session: AsyncSession = Depends(get_async_session)):
-    try:
-        query = select(User).where(False == User.is_superuser, False == User.is_staff)
-        result = await session.execute(query)
-        users = result.scalars().all()
-        return templates.TemplateResponse(
-            "/staff/user.html",
-            {
-                "request": request,
-                'user': user,
-                "users": users,
-                'title': "ISPU - Users",
-                'menu': user_menu,
-            }
-        )
-    except SQLAlchemyError as e:
-        print(f"SQLAlchemy error occurred: {e}")
-    except Exception as e:
-        print(e)
-        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
-
-
-@router.get("/users", response_class=HTMLResponse)
-async def get_users_page(request: Request, user: User = Depends(staff_user),
-                         session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(User).where(False == User.is_superuser, False == User.is_staff)
         result = await session.execute(query)
@@ -212,12 +186,12 @@ async def get_tasks_page(request: Request, user: User = Depends(current_user),
         return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
 
 
-@router.get("/user/{user_id}", response_class=HTMLResponse)
-async def get_profile_for_id(request: Request, user_id: int, current_user: User = Depends(staff_user),
+@router.get("/users/{user_id}", response_class=HTMLResponse)
+async def get_profile_for_id_page(request: Request, user_id: int, current_user: User = Depends(staff_user),
                              session: AsyncSession = Depends(get_async_session)):
     try:
-        user = await user_for_id(user_id, session)
-        admission = await admission_for_id(user_id, session)
+        user = await get_user_for_id(user_id, session)
+        admission = await get_admission_for_id(user_id, session)
         sum_rating = await Admission.get_average_rating_for_user(user_id=user_id, session=session)
         return templates.TemplateResponse(
             "/profile/profile_user_for_admin.html",
@@ -228,6 +202,28 @@ async def get_profile_for_id(request: Request, user_id: int, current_user: User 
                 "sum_rating": sum_rating,
                 "admissions": admission,
                 'title': "ISPU - User Profile!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
+
+
+@router.get("/scenarios/{scenario_id}", response_class=HTMLResponse)
+async def get_scenario_for_id_page(request: Request, scenario_id: int, current_user: User = Depends(staff_user),
+                             session: AsyncSession = Depends(get_async_session)):
+    try:
+        scenarios = await get_scenario_for_id(scenario_id=scenario_id, session=session)
+        return templates.TemplateResponse(
+            "/location/scenario_info.html",
+            {
+                'request': request,
+                'user': current_user,
+                'scenarios': scenarios,
+                'title': "ISPU - Scenario!",
                 'menu': user_menu,
             }
         )

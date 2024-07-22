@@ -1,10 +1,10 @@
 from sqlalchemy import select, Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth import Admission, AdmissionStatus, User
+from src.auth import Admission, AdmissionStatus, User, Scenario
 
 
-async def admission_for_id(user_id: int, session: AsyncSession, include_completed: bool = True) -> Sequence[Admission]:
+async def get_admission_for_id(user_id: int, session: AsyncSession, include_completed: bool = True) -> Sequence[Admission]:
     if include_completed:
         query = select(Admission).where(user_id == Admission.user_id)
     else:
@@ -15,8 +15,16 @@ async def admission_for_id(user_id: int, session: AsyncSession, include_complete
     return admission
 
 
-async def user_for_id(user_id: int, session: AsyncSession) -> User:
-    query = select(User).where(User.id == user_id)
+async def get_user_for_id(user_id: int, session: AsyncSession) -> User:
+    query = select(User).where(user_id == User.id)
     result = await session.execute(query)
     user: User = result.scalars().first()
     return user
+
+
+async def get_scenario_for_id(scenario_id: int, session: AsyncSession) -> Scenario:
+    query = select(Scenario).where(scenario_id == Scenario.id)
+    result = await session.execute(query)
+    scenario: Scenario = result.scalars().first()
+    return scenario
+

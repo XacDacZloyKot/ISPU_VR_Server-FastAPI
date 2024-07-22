@@ -4,7 +4,9 @@ __all__ = ['model_accident_association',
            'SensorType',
            'Parameters',
            'Accident',
-           'Location']
+           'Location',
+           'SensorValue'
+           ]
 
 from .models import (
     model_accident_association,
@@ -14,4 +16,5 @@ from .models import (
     Parameters,
     Accident,
     Location,
+    SensorValue,
 )

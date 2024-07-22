@@ -1,26 +1,9 @@
-.table {
+.table{
     height: 33%;
     overflow-y: auto;
     max-height: 575px;
     border: 1px solid var(--color-primary-400);
     border-radius: 10px;
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th, td {
-    padding: 2px 12px;
-    border-bottom: 1px solid var(--color-primary-400);
-    text-align: left;
-}
-
-thead th {
-    position: sticky;
-    top: 0;
-    background-color: var(--color-primary-100);
 }
 
 .home-icon{
@@ -126,4 +109,9 @@ thead th {
     font-weight: 400;
     font-size: 24px;
     padding-left: 15px;
+}
+
+.tasks-full{
+    height: calc(100% - 30px);
+    max-height: fit-content;
 }

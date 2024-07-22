@@ -33,6 +33,26 @@ body,
   border-radius: 8px;
 }
 
+.title-blue{
+  color: var(--color-light-100);
+  background-color: var(--color-primary-300);
+  width: calc(100% - 15px);
+  height: fit-content;
+  padding: 10px 0px 10px 10px;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.title-red{
+  color: var(--color-light-100);
+  background-color: var(--color-scarlet);
+  width: calc(100% - 15px);
+  height: fit-content;
+  padding: 10px 0px 10px 10px;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
 .content{
   padding: 15px;
   height: 100%;

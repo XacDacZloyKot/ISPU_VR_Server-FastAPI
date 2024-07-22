@@ -1,10 +1,8 @@
 {% extends '/location/base.html' %}
 
 {% block css %}
-	<link rel="stylesheet" href="{{ url_for('static', path='css/base/style.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', path='css/base/sidebar.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', path='css/base/navbar.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
 {% endblock %}
 
 {% block navTitle %}
@@ -37,7 +35,7 @@
                                     <a href="#" class="location-link">
                                         <img src="/static/img/Redact.svg" alt="Редактирование" class="location-icon">
                                     </a>
-                                    <a href="{{ url_for("get_profile_for_id", user_id=curr_user.id) }}" class="location-link">
+                                    <a href="{{ url_for("get_profile_for_id_page", user_id=curr_user.id) }}" class="location-link">
                                         <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
                                     </a>
                                     <a href="#" class="location-link">
