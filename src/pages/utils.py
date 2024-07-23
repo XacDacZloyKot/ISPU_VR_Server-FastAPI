@@ -28,7 +28,7 @@ user_menu = [
         "name": "ТРЕНАЖЕР",
         "access": "staff",
         "urls": [
-            ("Локации", "get_location_page"),
+            ("Сценарии", "get_scenario_page"),
         ]
     },
     {

@@ -29,15 +29,19 @@
                             <td>{{ scenario.location.status.value }}</td>
                             <td>
                                 <div class="location-option-column">
-                                    <a href="#" class="location-link">
-                                        <img src="/static/img/Redact.svg" alt="Редактирование" class="location-icon">
-                                    </a>
+                                    {% if scenario.location.status.value == "Готова" %}
+                                        <a href="#" class="location-link">
+                                            <img src="/static/img/Redact.svg" alt="Редактирование" class="location-icon">
+                                        </a>
+                                    {% endif %}
                                     <a href="{{ url_for("get_scenario_for_id_page", scenario_id=scenario.id) }}" class="location-link">
                                         <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
                                     </a>
-                                    <a href="#" class="location-link">
-                                        <img src="/static/img/Subtract.svg" alt="Редактирование" class="location-icon">
-                                    </a>
+                                    {% if scenario.location.status.value == "Готова" %}
+                                        <a href="#" class="location-link">
+                                            <img src="/static/img/Subtract.svg" alt="Редактирование" class="location-icon">
+                                        </a>
+                                    {% endif %}
                                 </div>
                             </td>
                         </tr>

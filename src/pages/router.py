@@ -39,7 +39,7 @@ async def post_login_admin(request: Request, email: str = Form(...), password: s
         return templates.TemplateResponse("/auth/loginAdmin.html", {"request": request, "error": "Failed to login"})
 
     token = await get_jwt_strategy().write_token(user)
-    response = RedirectResponse(url="/pages/location/", status_code=302)
+    response = RedirectResponse(url="/pages/home/", status_code=302)
     response.set_cookie(key="user-cookie", value=token, httponly=True)
     return response
 
@@ -56,7 +56,7 @@ async def post_login_user(request: Request, username: str = Form(...), password:
         return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Failed to login"})
 
     token = await get_jwt_strategy().write_token(user)
-    response = RedirectResponse(url="/pages/location/", status_code=302)
+    response = RedirectResponse(url="/pages/home/", status_code=302)
     response.set_cookie(key="user-cookie", value=token, httponly=True)
     return response
 
@@ -89,21 +89,20 @@ async def post_registration(request: Request,
     return response
 
 
-# TODO: Поменять на scenario
-@router.get("/location", response_class=HTMLResponse)
-async def get_location_page(request: Request, user: User = Depends(current_user),
+@router.get("/scenario", response_class=HTMLResponse)
+async def get_scenario_page(request: Request, user: User = Depends(current_user),
                             session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(Scenario).order_by(Scenario.id)
         result = await session.execute(query)
         scenarios = result.scalars().all()
         return templates.TemplateResponse(
-            "/location/location.html",
+            "/location/scenario.html",
             {
-                "request": request,
+                'request': request,
                 'user': user,
                 "scenarios": scenarios,
-                'title': "ISPU - Location",
+                'title': "ISPU - Scenario",
                 'menu': user_menu,
             }
         )
