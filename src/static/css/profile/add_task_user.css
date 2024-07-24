@@ -1,0 +1,8 @@
+.submit-container{
+    margin-top: 10px;
+}
+
+.table-task-container{
+    max-height: 510px;
+    height: fit-content;
+}

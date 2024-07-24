@@ -22,6 +22,13 @@ async def get_user_for_id(user_id: int, session: AsyncSession) -> User:
     return user
 
 
+async def get_users_without_scenario(scenario_id: int, session: AsyncSession) -> Sequence[User]:
+    subquery = select(Admission.user_id).where(scenario_id == Admission.scenario_id).subquery()
+    result = await session.execute(select(User).where(User.id.not_in(select(subquery))))
+    users_without_scenario = result.scalars().all()
+    return users_without_scenario
+
+
 async def get_scenario_for_id(scenario_id: int, session: AsyncSession) -> Scenario:
     query = select(Scenario).where(scenario_id == Scenario.id)
     result = await session.execute(query)

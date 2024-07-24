@@ -14,7 +14,7 @@ from src.auth.models import User, Admission, AdmissionStatus, Scenario
 from src.database import get_async_session
 from src.pages.utils import authenticate, authenticate_for_username, user_menu, create
 from src.sensor.models import Model, Location
-from src.pages.crud import get_admission_for_id, get_user_for_id, get_scenario_for_id
+from src.pages.crud import get_admission_for_id, get_user_for_id, get_scenario_for_id, get_users_without_scenario
 
 router = APIRouter(
     prefix='/pages',
@@ -108,9 +108,12 @@ async def get_scenario_page(request: Request, user: User = Depends(current_user)
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("/auth/loginAdmin.html", {"request": request, "error": "Please login first"})
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
 
 
 @router.get("/home", response_class=HTMLResponse)
@@ -132,9 +135,12 @@ async def get_home_page(request: Request, user: User = Depends(current_user),
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the home page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the home page."})
 
 
 @router.get("/users", response_class=HTMLResponse)
@@ -156,9 +162,12 @@ async def get_users_page(request: Request, user: User = Depends(staff_user),
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the user page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the user page."})
 
 
 @router.get("/tasks", response_class=HTMLResponse)
@@ -180,9 +189,12 @@ async def get_tasks_page(request: Request, user: User = Depends(current_user),
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the task page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the task page."})
 
 
 @router.get("/users/{user_id}", response_class=HTMLResponse)
@@ -206,13 +218,18 @@ async def get_profile_for_id_page(request: Request, user_id: int, current_user: 
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the profile page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the profile page."})
 
 
 @router.get("/scenarios/{scenario_id}", response_class=HTMLResponse)
-async def get_scenario_for_id_page(request: Request, scenario_id: int, current_user: User = Depends(staff_user),
+async def get_scenario_for_id_page(request: Request, scenario_id: int, user: User = Depends(staff_user),
                              session: AsyncSession = Depends(get_async_session)):
     try:
         scenarios = await get_scenario_for_id(scenario_id=scenario_id, session=session)
@@ -220,7 +237,7 @@ async def get_scenario_for_id_page(request: Request, scenario_id: int, current_u
             "/location/scenario_info.html",
             {
                 'request': request,
-                'user': current_user,
+                'user': user,
                 'scenarios': scenarios,
                 'title': "ISPU - Scenario!",
                 'menu': user_menu,
@@ -228,9 +245,67 @@ async def get_scenario_for_id_page(request: Request, scenario_id: int, current_u
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("/profile/home.html", {"request": request, "error": "Please login first"})
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+
+
+@router.get("/add-scenario/{scenario_id}", response_class=HTMLResponse)
+async def get_task_assignment(request: Request, scenario_id: int, current_user: User = Depends(staff_user),
+                              session: AsyncSession = Depends(get_async_session)):
+    try:
+        scenario = await get_scenario_for_id(scenario_id=scenario_id, session=session)
+        users = await get_users_without_scenario(scenario_id=scenario_id, session=session)
+        return templates.TemplateResponse(
+            "/staff/add_task_user.html",
+            {
+                'request': request,
+                'user': current_user,
+                'users': users,
+                'scenario': scenario,
+                'title': "ISPU - Assignment task!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})
+
+
+@router.post("/add-scenario/{scenario_id}", response_class=HTMLResponse)
+async def post_task_assignment(request: Request, scenario_id: int, user_ids: list[int] = Form(...),
+                               current_user: User = Depends(staff_user),
+                               session: AsyncSession = Depends(get_async_session)):
+    try:
+        for user_id in user_ids:
+            admission = Admission(status=AdmissionStatus.ACTIVE, user_id=user_id, rating="0", scenario_id=scenario_id)
+            session.add(admission)
+        await session.commit()
+        response = RedirectResponse(url=request.url_for("get_scenario_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
+        return response
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})
+
+
+
 
 
 @router.get("/models/", response_class=HTMLResponse)

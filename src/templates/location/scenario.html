@@ -38,8 +38,8 @@
                                         <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
                                     </a>
                                     {% if scenario.location.status.value == "Готова" %}
-                                        <a href="#" class="location-link">
-                                            <img src="/static/img/Subtract.svg" alt="Редактирование" class="location-icon">
+                                        <a href="{{ url_for("get_task_assignment", scenario_id=scenario.id) }}" class="location-link">
+                                            <img src="/static/img/Subtract.svg" alt="Назначение" class="location-icon">
                                         </a>
                                     {% endif %}
                                 </div>
