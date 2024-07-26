@@ -4,6 +4,12 @@ from fastapi import HTTPException
 from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordRequestForm
 
+from datetime import datetime
+
+from sqlalchemy import Sequence
+from typing_extensions import Optional, List
+
+from src.auth.models import Admission
 from src.auth.base_config import auth_backend, get_jwt_strategy
 from src.auth.manager import get_user_manager
 from src.auth.utils import get_user_db
@@ -93,3 +99,13 @@ async def create(username: str, password: str, first_name: str, last_name: str, 
                     return user
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+def get_last_admission_task(list_admission_tasks: Sequence[Admission]) -> Admission | None:
+    if not list_admission_tasks:
+        return None
+    filtered_admissions = [admission for admission in list_admission_tasks if admission.is_ready is not None]
+    if not filtered_admissions:
+        return None
+    last_admission = max(filtered_admissions, key=lambda admission: admission.is_ready)
+    return last_admission

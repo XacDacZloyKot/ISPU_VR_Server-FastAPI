@@ -41,24 +41,23 @@
     <div class="statistics">
         <div class="statistics__last-work">
             <h2 class="title-orange subtask">Последняя задача</h2>
-            {% if False %}
+            {% if last_admission %}
                 <div class="statistics-data">
                     <div class="statistics-data__name-task">
-                        <p class="statistics-data-name__title"> Поверка прибора </p>
+                        <p class="statistics-data-name__title"> {{ last_admission.scenario.location.name }} </p>
                         <p class="statistics-data-name__description">
-                            ТС-1088, куча текста<br>
-                            описательного для задачи
+                            {{ last_admission.scenario.model.sensor_type.name }}<br>
                         </p>
                     </div>
                     <div class="statistics-data__param">
-                        <p class="statistics-data-param__name">19.02.2024</p>
+                        <p class="statistics-data-param__name">{{ last_admission.is_ready }}</p>
                         <p class="statistics-data-param__value">Время выполнения: 20 мин.</p>
                     </div>
-                    <p class="statistics-data-task-param">Локация: Какая-то</p>
+                    <p class="statistics-data-task-param">Локация: {{ last_admission.scenario.location.name }}</p>
                     <p class="statistics-data-task-param">Допущено ошибок: 0</p>
                     <p class="statistics-data-task-param">Выявлено неисправностей: 7 из 7</p>
                     <p class="statistics-data-task-param">Исправлено неисправностей: 7 из 7</p>
-                    <p class="statistics-data-task-rating">Общая оценка: 5.00</p>
+                    <p class="statistics-data-task-rating">Общая оценка: {{ last_admission.rating }}</p>
                 </div>
             {% else %}
                 <div class="statistics-data">

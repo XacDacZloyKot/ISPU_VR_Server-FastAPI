@@ -5,7 +5,7 @@ from fastapi import APIRouter, HTTPException
 from fastapi import Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select, delete, insert
+from sqlalchemy import select, delete, insert, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -23,7 +23,7 @@ from src.pages.crud import (
     get_model_names,
     get_accidents_for_model,
 )
-from src.pages.utils import authenticate, authenticate_for_username, user_menu, create
+from src.pages.utils import authenticate, authenticate_for_username, user_menu, create, get_last_admission_task
 from src.sensor.models import Model, scenario_accident_association
 
 router = APIRouter(
@@ -141,12 +141,14 @@ async def get_home_page(request: Request, user: User = Depends(current_user),
     try:
         admission = await get_admission_for_id(user_id=user.id, session=session)
         sum_rating = await Admission.get_average_rating_for_user(user_id=user.id, session=session)
+        last_admission = get_last_admission_task(list_admission_tasks=admission)
         return templates.TemplateResponse(
             "/profile/home.html",
             {
                 "request": request,
                 'user': user,
-                "admissions": admission,
+                'admissions': admission,
+                'last_admission': last_admission,
                 'title': "ISPU - Home page!",
                 'menu': user_menu,
                 'sum_rating': sum_rating,
@@ -164,7 +166,7 @@ async def get_home_page(request: Request, user: User = Depends(current_user),
 
 @router.get("/users", response_class=HTMLResponse)
 async def get_users_page(request: Request, user: User = Depends(staff_user),
-                        session: AsyncSession = Depends(get_async_session)):
+                         session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(User).where(False == User.is_superuser, False == User.is_staff)
         result = await session.execute(query)
@@ -191,7 +193,7 @@ async def get_users_page(request: Request, user: User = Depends(staff_user),
 
 @router.get("/tasks", response_class=HTMLResponse)
 async def get_tasks_page(request: Request, user: User = Depends(current_user),
-                        session: AsyncSession = Depends(get_async_session)):
+                         session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(Admission).where(user.id == Admission.user_id).order_by("status")
         result = await session.execute(query)
@@ -218,7 +220,7 @@ async def get_tasks_page(request: Request, user: User = Depends(current_user),
 
 @router.get("/users/{user_id}", response_class=HTMLResponse)
 async def get_profile_for_id_page(request: Request, user_id: int, current_user: User = Depends(staff_user),
-                             session: AsyncSession = Depends(get_async_session)):
+                                  session: AsyncSession = Depends(get_async_session)):
     try:
         user = await get_user_for_id(user_id, session)
         admission = await get_admission_for_id(user_id, session)
@@ -249,7 +251,7 @@ async def get_profile_for_id_page(request: Request, user_id: int, current_user: 
 
 @router.get("/scenarios/{scenario_id}", response_class=HTMLResponse)
 async def get_scenario_for_id_page(request: Request, scenario_id: int, user: User = Depends(staff_user),
-                             session: AsyncSession = Depends(get_async_session)):
+                                   session: AsyncSession = Depends(get_async_session)):
     try:
         scenarios = await get_scenario_for_id(scenario_id=scenario_id, session=session)
         return templates.TemplateResponse(
@@ -272,7 +274,7 @@ async def get_scenario_for_id_page(request: Request, scenario_id: int, user: Use
                                                                                                 " with the scripts."})
 
 
-@router.get("/add-scenario/{scenario_id}", response_class=HTMLResponse)
+@router.get("/scenario/add/{scenario_id}", response_class=HTMLResponse)
 async def get_task_assignment(request: Request, scenario_id: int, current_user: User = Depends(staff_user),
                               session: AsyncSession = Depends(get_async_session)):
     try:
@@ -301,7 +303,7 @@ async def get_task_assignment(request: Request, scenario_id: int, current_user: 
                                                                             "with the assignment task page."})
 
 
-@router.post("/add-scenario/{scenario_id}", response_class=HTMLResponse)
+@router.post("/scenario/add/{scenario_id}", response_class=HTMLResponse)
 async def post_task_assignment(request: Request, scenario_id: int, user_ids: list[int] = Form(...),
                                current_user: User = Depends(staff_user),
                                session: AsyncSession = Depends(get_async_session)):
@@ -326,7 +328,7 @@ async def post_task_assignment(request: Request, scenario_id: int, user_ids: lis
                                                                             "with the assignment task page."})
 
 
-@router.get("/create-scenario", response_class=HTMLResponse)
+@router.get("/scenario/create", response_class=HTMLResponse)
 async def get_create_scenario_page(request: Request, user: User = Depends(staff_user),
                                    session: AsyncSession = Depends(get_async_session)):
     try:
@@ -355,7 +357,7 @@ async def get_create_scenario_page(request: Request, user: User = Depends(staff_
                                                                             "with the create scenario page."})
 
 
-@router.post("/create-scenario/accident/", response_class=HTMLResponse)
+@router.post("/scenario/create/accident/", response_class=HTMLResponse)
 async def get_choice_accident_for_scenario(request: Request, location_selected: int = Form(...),
                                            model_selected: int = Form(...), user: User = Depends(staff_user),
                                            session: AsyncSession = Depends(get_async_session)):
@@ -385,7 +387,7 @@ async def get_choice_accident_for_scenario(request: Request, location_selected: 
                                                                             "with the create scenario page."})
 
 
-@router.post("/create-scenariooo/{location_id}/{model_id}", response_class=HTMLResponse)
+@router.post("/scenario/create/{location_id}/{model_id}", response_class=HTMLResponse)
 async def post_create_scenario(request: Request, location_id: int, model_id: int,
                                accident_selected: list[int] = Form(...), user: User = Depends(staff_user),
                                session: AsyncSession = Depends(get_async_session)):
@@ -414,46 +416,61 @@ async def post_create_scenario(request: Request, location_id: int, model_id: int
                                                                             "with the assignment task page."})
 
 
-
-
-@router.get("/models/", response_class=HTMLResponse)
-async def get_models(request: Request, user: User = Depends(current_user),
-                     session: AsyncSession = Depends(get_async_session)):
+@router.get("/users/update/{user_id}", response_class=HTMLResponse)
+async def get_update_user_page(request: Request, user_id: int, user: User = Depends(staff_user),
+                               session: AsyncSession = Depends(get_async_session)):
     try:
-        query = select(Model)
-        result = await session.execute(query)
-        models = result.scalars().all()
-        return templates.TemplateResponse("models.html", {"request": request, "models": models,
-                                                          'status': HTTPStatus.OK, 'detail': None})
+        current_user = await get_user_for_id(user_id=user_id, session=session)
+        return templates.TemplateResponse(
+            "/staff/update_user.html",
+            {
+                'request': request,
+                'user': user,
+                'current_user': current_user,
+                'menu': user_menu,
+                'title': "ISPU - Update user",
+            }
+        )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the update user page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("/auth/loginAdmin.html", {"request": request, "error": "Please login first"})
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the update user page."})
 
 
-@router.post("/models/", response_class=HTMLResponse, dependencies=[Depends(get_async_session)])
-async def create_model(
-        sensor_type: str = Form(...),
-        specification: str = Form(...),
-        parameters: str = Form(...),
-        session: AsyncSession = Depends(get_async_session),
-):
-    # TODO: ПЕРЕДЕЛАТЬ СОЗДАНИЕ
-    # new_model = Model(sensor_type=sensor_type, specification=specification, parameters=parameters)
-    # session.add(new_model)
-    await session.commit()
-    return RedirectResponse(url="/pages/models", status_code=303)
+@router.post("/users/update/{user_id}/", response_class=HTMLResponse)
+async def put_user(request: Request, user_id: int,
+                   username=Form(...), first_name=Form(...), last_name=Form(...),
+                   patronymic=Form(...), division=Form(...),
+                   user: User = Depends(staff_user), session: AsyncSession = Depends(get_async_session)):
+    try:
+        current_user: User = await get_user_for_id(user_id=user_id, session=session)
+        stmt = update(User).where(current_user.id == User.id).values(first_name=first_name,
+                                                                     last_name=last_name,
+                                                                     patronymic=patronymic,
+                                                                     division=division,
+                                                                     username=username)
+        await session.execute(stmt)
+        await session.commit()
 
-
-@router.post("/models/{id}/", response_class=HTMLResponse, dependencies=[Depends(get_async_session)])
-async def delete_model(
-        id: int,
-        session: AsyncSession = Depends(get_async_session),
-):
-    query = delete(Model).where(id == Model.id)
-    result = await session.execute(query)
-    await session.commit()
-    if result.rowcount == 0:
-        raise HTTPException(status_code=404, detail="Model not found")
-    return RedirectResponse(url="/pages/models", status_code=303)
+        return RedirectResponse(url=request.url_for("get_users_page"),
+                                status_code=HTTPStatus.MOVED_PERMANENTLY)
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the update user page."
+        })
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the update user page."
+        })
