@@ -474,3 +474,5 @@ async def put_user(request: Request, user_id: int,
             "request": request,
             "error": "There is some problem with the update user page."
         })
+
+
