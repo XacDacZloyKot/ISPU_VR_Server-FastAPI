@@ -5,16 +5,26 @@ from fastapi import APIRouter, HTTPException
 from fastapi import Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select, delete
+from sqlalchemy import select, delete, insert
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.base_config import get_jwt_strategy, current_user, staff_user, administrator_user
+from src.auth.base_config import get_jwt_strategy, current_user, staff_user
 from src.auth.models import User, Admission, AdmissionStatus, Scenario
 from src.database import get_async_session
+from src.pages.crud import (
+    get_admission_for_id,
+    get_user_for_id,
+    get_scenario_for_id,
+    get_location_for_id,
+    get_model_for_id,
+    get_users_without_scenario,
+    get_location_names,
+    get_model_names,
+    get_accidents_for_model,
+)
 from src.pages.utils import authenticate, authenticate_for_username, user_menu, create
-from src.sensor.models import Model, Location
-from src.pages.crud import get_admission_for_id, get_user_for_id, get_scenario_for_id, get_users_without_scenario
+from src.sensor.models import Model, scenario_accident_association
 
 router = APIRouter(
     prefix='/pages',
@@ -56,7 +66,7 @@ async def post_login_user(request: Request, username: str = Form(...), password:
         return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Failed to login"})
 
     token = await get_jwt_strategy().write_token(user)
-    response = RedirectResponse(url="/pages/home/", status_code=302)
+    response = RedirectResponse(url=request.url_for("get_home_page"), status_code=302)
     response.set_cookie(key="user-cookie", value=token, httponly=True)
     return response
 
@@ -74,19 +84,28 @@ async def post_registration(request: Request,
                             last_name: str = Form(...),
                             patronymic: str = Form(...),
                             division: str = Form(...)):
-    user = await create(
-        username=username,
-        password=password,
-        first_name=first_name,
-        last_name=last_name,
-        patronymic=patronymic,
-        division=division
-    )
-    if not user:
-        return templates.TemplateResponse("/auth/registration.html", {"request": request,
-                                                                      "error": "Неверно введены данные!"})
-    response = RedirectResponse(url="/pages/loginUser/", status_code=302)
-    return response
+    try:
+        user = await create(
+            username=username,
+            password=password,
+            first_name=first_name,
+            last_name=last_name,
+            patronymic=patronymic,
+            division=division
+        )
+        if not user:
+            return templates.TemplateResponse("/auth/registration.html", {"request": request,
+                                                                          "error": "Неверно введены данные!"})
+        response = RedirectResponse(url=request.url_for("post_login_user"), status_code=302)
+        return response
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
 
 
 @router.get("/scenario", response_class=HTMLResponse)
@@ -295,15 +314,104 @@ async def post_task_assignment(request: Request, scenario_id: int, user_ids: lis
         return response
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
     except Exception as e:
         print(e)
+        await session.rollback()
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
 
+
+@router.get("/create-scenario", response_class=HTMLResponse)
+async def get_create_scenario_page(request: Request, user: User = Depends(staff_user),
+                                   session: AsyncSession = Depends(get_async_session)):
+    try:
+        location_name = await get_location_names(session=session)
+        model_name = await get_model_names(session=session)
+        return templates.TemplateResponse(
+            "/staff/choice_location_and_model_for_scenario.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'title': "ISPU - Create scenario!",
+                'location_options': location_name,
+                'model_options': model_name,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create scenario page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create scenario page."})
+
+
+@router.post("/create-scenario/accident/", response_class=HTMLResponse)
+async def get_choice_accident_for_scenario(request: Request, location_selected: int = Form(...),
+                                           model_selected: int = Form(...), user: User = Depends(staff_user),
+                                           session: AsyncSession = Depends(get_async_session)):
+    try:
+        accidents = await get_accidents_for_model(session=session, model_id=model_selected)
+        return templates.TemplateResponse(
+            "/staff/choice_accident_for_scenario.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'title': "ISPU - Create scenario!",
+                'location_selected': location_selected,
+                'model_selected': model_selected,
+                'accidents_options': accidents,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create scenario page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create scenario page."})
+
+
+@router.post("/create-scenariooo/{location_id}/{model_id}", response_class=HTMLResponse)
+async def post_create_scenario(request: Request, location_id: int, model_id: int,
+                               accident_selected: list[int] = Form(...), user: User = Depends(staff_user),
+                               session: AsyncSession = Depends(get_async_session)):
+    try:
+        new_scenario = Scenario(location_id=location_id, model_id=model_id)
+        session.add(new_scenario)
+        await session.flush()
+        scenario_accidents = [
+            {"scenario_id": new_scenario.id, "accident_id": accident_id}
+            for accident_id in accident_selected
+        ]
+        await session.execute(insert(scenario_accident_association).values(scenario_accidents))
+        await session.commit()
+        return RedirectResponse(url=request.url_for("get_scenario_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})
 
 
 

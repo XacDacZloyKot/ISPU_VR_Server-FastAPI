@@ -68,3 +68,7 @@ body,
   flex-direction: column;
   gap: 5px;
 }
+
+.unready{
+  background: coral;
+}

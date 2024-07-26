@@ -11,41 +11,38 @@
 
 
 {% block content %}
-            <h1 class="title-orange">Пользователи</h1>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>ФИО</th>
-                            <th>Дата регистрации</th>
-                            <th>Подразделение</th>
-                            <th>Опции</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for curr_user in users %}
-                        <tr>
-                            <td>{{ curr_user.id }}</td>
-                            <td>{{ curr_user.last_name }} {{ curr_user.first_name }} {{ curr_user.patronymic }}</td>
-                            <td>{{ curr_user.registered_at }}</td>
-                            <td>{{ curr_user.division }}</td>
-                            <td>
-                                <div class="location-option-column">
-                                    <a href="#" class="location-link">
-                                        <img src="/static/img/Redact.svg" alt="Редактирование" class="location-icon">
-                                    </a>
-                                    <a href="{{ url_for("get_profile_for_id_page", user_id=curr_user.id) }}" class="location-link">
-                                        <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
-                                    </a>
-                                    <a href="#" class="location-link">
-                                        <img src="/static/img/Subtract.svg" alt="Редактирование" class="location-icon">
-                                    </a>
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <h1 class="title-orange">Пользователи</h1>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>ФИО</th>
+                    <th>Дата регистрации</th>
+                    <th>Подразделение</th>
+                    <th>Опции</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for curr_user in users %}
+                <tr>
+                    <td>{{ curr_user.id }}</td>
+                    <td>{{ curr_user.last_name }} {{ curr_user.first_name }} {{ curr_user.patronymic }}</td>
+                    <td>{{ curr_user.registered_at }}</td>
+                    <td>{{ curr_user.division }}</td>
+                    <td>
+                        <div class="location-option-column">
+                            <a href="#" class="location-link unready">
+                                <img src="/static/img/Redact.svg" alt="Редактирование" class="location-icon">
+                            </a>
+                            <a href="{{ url_for("get_profile_for_id_page", user_id=curr_user.id) }}" class="location-link">
+                                <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

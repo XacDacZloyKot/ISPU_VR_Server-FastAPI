@@ -53,6 +53,9 @@ class Model(Base):
     #  Обратная совместимость
     scenarios = relationship("Scenario", back_populates="model", lazy="selectin")
 
+    def __str__(self):
+        return f"ID: {self.id} | Имя: {self.sensor_type.name} | Параметры: {self.parameters_id}"
+
 
 class SensorType(Base):
     __tablename__ = "sensortype"
@@ -101,6 +104,9 @@ class Location(Base):
                                                     nullable=False, doc="Статус заявки")
     #  Обратная совместимость
     scenarios = relationship("Scenario", back_populates="location", lazy="selectin")
+
+    def __str__(self):
+        return f"ID:{self.id} | {self.name}"
 
 
 class SensorValue(Base):

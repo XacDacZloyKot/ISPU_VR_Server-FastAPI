@@ -1,0 +1,11 @@
+.submit-container{
+    margin-top: 10px;
+}
+
+.form-group{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 800px;
+}

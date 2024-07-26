@@ -42,7 +42,7 @@ user_menu = [
         "name": "СУПЕР АДМИН",
         "access": "admin",
         "urls": [
-            ("Создание сценария", "#"),
+            ("Создание сценария", "get_create_scenario_page"),
         ]
     },
 ]
