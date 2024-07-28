@@ -75,6 +75,7 @@ class Admission(Base):
         instance.rating = value
         if value is not None and value != "0":
             instance.is_ready = datetime.utcnow()
+            instance.status = "COMPLETED"
         else:
             instance.is_ready = None
 

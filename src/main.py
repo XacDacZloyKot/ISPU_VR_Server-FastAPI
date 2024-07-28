@@ -1,4 +1,5 @@
 import os
+import sys
 
 import uvicorn
 from fastapi import FastAPI, Request, status
@@ -74,4 +75,11 @@ app.include_router(router_sensor)
 app.include_router(router_pages)
 
 if __name__ == "__main__":
-    uvicorn.run(app, port=8000)
+    try:
+        uvicorn.run(app, port=8000, host="0.0.0.0")
+    except Exception as e:
+        print("Error occurred:", e)
+        sys.exit(1)
+    finally:
+        print("Press Enter to exit...")
+        input()

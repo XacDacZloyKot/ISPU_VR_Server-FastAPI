@@ -6,7 +6,7 @@ from src.auth import Admission, AdmissionStatus, User, Scenario
 from src.sensor import Location, Model, Accident, model_accident_association
 
 
-async def get_admission_for_id(user_id: int, session: AsyncSession, include_completed: bool = True) -> Sequence[Admission]:
+async def get_admission_for_user_id(user_id: int, session: AsyncSession, include_completed: bool = True) -> Sequence[Admission]:
     if include_completed:
         query = select(Admission).where(user_id == Admission.user_id)
     else:
@@ -14,6 +14,13 @@ async def get_admission_for_id(user_id: int, session: AsyncSession, include_comp
                                         AdmissionStatus.COMPLETED != Admission.status)
     result = await session.execute(query)
     admission = result.scalars().all()
+    return admission
+
+
+async def get_admission_for_id(admission_id: int, session: AsyncSession) -> Admission:
+    query = select(Admission).where(admission_id == Admission.id)
+    result = await session.execute(query)
+    admission = result.scalar_one_or_none()
     return admission
 
 

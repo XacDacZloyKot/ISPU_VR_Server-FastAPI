@@ -1,11 +1,14 @@
 import os
 from http import HTTPStatus
+from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+
+from fastapi import APIRouter,  HTTPException
 from fastapi import Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select, delete, insert, update
+from pydantic import ValidationError
+from sqlalchemy import select, insert, update
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,18 +16,18 @@ from src.auth.base_config import get_jwt_strategy, current_user, staff_user
 from src.auth.models import User, Admission, AdmissionStatus, Scenario
 from src.database import get_async_session
 from src.pages.crud import (
-    get_admission_for_id,
+    get_admission_for_user_id,
     get_user_for_id,
     get_scenario_for_id,
-    get_location_for_id,
-    get_model_for_id,
     get_users_without_scenario,
     get_location_names,
     get_model_names,
     get_accidents_for_model,
+    get_admission_for_id,
 )
+from src.pages.forms import AdmissionUpdateForm
 from src.pages.utils import authenticate, authenticate_for_username, user_menu, create, get_last_admission_task
-from src.sensor.models import Model, scenario_accident_association
+from src.sensor.models import scenario_accident_association
 
 router = APIRouter(
     prefix='/pages',
@@ -139,7 +142,7 @@ async def get_scenario_page(request: Request, user: User = Depends(current_user)
 async def get_home_page(request: Request, user: User = Depends(current_user),
                         session: AsyncSession = Depends(get_async_session)):
     try:
-        admission = await get_admission_for_id(user_id=user.id, session=session)
+        admission = await get_admission_for_user_id(user_id=user.id, session=session)
         sum_rating = await Admission.get_average_rating_for_user(user_id=user.id, session=session)
         last_admission = get_last_admission_task(list_admission_tasks=admission)
         return templates.TemplateResponse(
@@ -223,7 +226,7 @@ async def get_profile_for_id_page(request: Request, user_id: int, current_user: 
                                   session: AsyncSession = Depends(get_async_session)):
     try:
         user = await get_user_for_id(user_id, session)
-        admission = await get_admission_for_id(user_id, session)
+        admission = await get_admission_for_user_id(user_id, session)
         sum_rating = await Admission.get_average_rating_for_user(user_id=user_id, session=session)
         return templates.TemplateResponse(
             "/profile/profile_user_for_admin.html",
@@ -449,12 +452,11 @@ async def put_user(request: Request, user_id: int,
                    patronymic=Form(...), division=Form(...),
                    user: User = Depends(staff_user), session: AsyncSession = Depends(get_async_session)):
     try:
-        current_user: User = await get_user_for_id(user_id=user_id, session=session)
-        stmt = update(User).where(current_user.id == User.id).values(first_name=first_name,
-                                                                     last_name=last_name,
-                                                                     patronymic=patronymic,
-                                                                     division=division,
-                                                                     username=username)
+        stmt = update(User).where(User.id == user_id).values(first_name=first_name,
+                                                             last_name=last_name,
+                                                             patronymic=patronymic,
+                                                             division=division,
+                                                             username=username)
         await session.execute(stmt)
         await session.commit()
 
@@ -474,5 +476,105 @@ async def put_user(request: Request, user_id: int,
             "request": request,
             "error": "There is some problem with the update user page."
         })
+
+
+@router.get("/admission/update/{admission_id}", response_class=HTMLResponse)
+async def get_update_admission_page(
+    request: Request,
+    admission_id: int,
+    error: Optional[str] = None,
+    user: User = Depends(staff_user),
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        admission = await get_admission_for_id(admission_id=admission_id, session=session)
+        return templates.TemplateResponse(
+            "/staff/update_admission_for_user.html",
+            {
+                'request': request,
+                'user': user,
+                'admission': admission,
+                'status_options': AdmissionStatus,
+                'menu': user_menu,
+                'title': "ISPU - Update admission",
+                'error': error
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the update admission page."
+        })
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the update admission page."
+        })
+
+
+@router.post("/admission/update/{admission_id}/", response_class=HTMLResponse)
+async def put_admission(
+    request: Request,
+    admission_id: int,
+    rating: str = Form(...),
+    status: AdmissionStatus = Form(...),
+    user: User = Depends(staff_user),
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        admission: Admission = await get_admission_for_id(admission_id=admission_id, session=session)
+        Admission.set_rating(admission, rating)
+        admission.status = status
+        session.add(admission)
+        await session.commit()
+
+        return RedirectResponse(url=request.url_for("get_users_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the update admission page."
+        })
+    except ValidationError as e:
+        error_message = str(e)
+        return templates.TemplateResponse("/staff/update_admission_for_user.html", {
+            "request": request,
+            "error": error_message,
+            'admission': admission,
+        })
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the update admission page."
+        })
+
+@router.delete("/admission/delete/{admission_id}", name="delete_admission")
+async def delete_admission(admission_id: int, session: AsyncSession = Depends(get_async_session)):
+    try:
+        result = await session.execute(select(Admission).filter_by(id=admission_id))
+        admission = result.scalars().first()
+
+        if admission is None:
+            raise HTTPException(status_code=404, detail="Admission not found")
+
+        await session.delete(admission)
+        await session.commit()
+
+        return {"detail": "Admission deleted successfully"}
+
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
+
 
 
