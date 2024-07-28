@@ -1,6 +1,6 @@
 import contextlib
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from fastapi.responses import Response
 from fastapi.security import OAuth2PasswordRequestForm
 
@@ -9,7 +9,7 @@ from datetime import datetime
 from sqlalchemy import Sequence
 from typing_extensions import Optional, List
 
-from src.auth.models import Admission
+from src.auth.models import Admission, User
 from src.auth.base_config import auth_backend, get_jwt_strategy
 from src.auth.manager import get_user_manager
 from src.auth.utils import get_user_db
@@ -82,6 +82,19 @@ async def authenticate_for_username(username: str, password: str):
                     return user
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+
+async def logout(request: Request, user: User, response: Response):
+    strategy = auth_backend.get_strategy()
+    token = request.cookies.get("user-cookie", None)
+    if not token:
+        raise HTTPException(status_code=401, detail="No token provided")
+    try:
+        await auth_backend.logout(strategy=strategy, user=user, token=token)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    response.delete_cookie(key="user-cookie", httponly=True, path="/")
+    return response
 
 
 async def create(username: str, password: str, first_name: str, last_name: str, patronymic: str, division: str):

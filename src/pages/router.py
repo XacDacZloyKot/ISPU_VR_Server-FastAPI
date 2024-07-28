@@ -4,7 +4,7 @@ from typing import Optional
 
 
 from fastapi import APIRouter,  HTTPException
-from fastapi import Request, Form, Depends
+from fastapi import Request, Form, Depends, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
@@ -25,8 +25,13 @@ from src.pages.crud import (
     get_accidents_for_model,
     get_admission_for_id,
 )
-from src.pages.forms import AdmissionUpdateForm
-from src.pages.utils import authenticate, authenticate_for_username, user_menu, create, get_last_admission_task
+from src.pages.utils import (authenticate,
+                             authenticate_for_username,
+                             user_menu,
+                             create,
+                             get_last_admission_task,
+                             logout as logout_func,
+                             )
 from src.sensor.models import scenario_accident_association
 
 router = APIRouter(
@@ -53,8 +58,15 @@ async def post_login_admin(request: Request, email: str = Form(...), password: s
 
     token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse(url="/pages/home/", status_code=302)
-    response.set_cookie(key="user-cookie", value=token, httponly=True)
+    response.set_cookie(key="user-cookie", value=token, httponly=True, path="/")
     return response
+
+
+@router.get("/logout", response_class=HTMLResponse)
+async def logout(request: Request, user=Depends(current_user)):
+    redirect_response = RedirectResponse(url=request.url_for("get_login_user"), status_code=302)
+    response_cookie = await logout_func(request=request, user=user, response=redirect_response)
+    return response_cookie
 
 
 @router.get("/loginUser", response_class=HTMLResponse)
@@ -70,7 +82,7 @@ async def post_login_user(request: Request, username: str = Form(...), password:
 
     token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse(url=request.url_for("get_home_page"), status_code=302)
-    response.set_cookie(key="user-cookie", value=token, httponly=True)
+    response.set_cookie(key="user-cookie", value=token, httponly=True, path="/")
     return response
 
 

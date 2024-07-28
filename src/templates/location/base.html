@@ -23,7 +23,7 @@
                             <div class="container-menu-link">
                                 {% for url in item.urls %}
                                     <a class="nav-btn nav-btn-selected" href="{% if url.1 != '#' %}{{ url_for(url.1) }}{% else %}#{% endif %}" alt="#">
-                                    <img src="{{ url_for('static', path='/img/task.svg') }}" alt="#">
+                                        <img src="{{ url_for('static', path='/img/task.svg') }}" alt="#">
                                     {{ url.0 }}
                                     </a>
                                 {% endfor %}
@@ -54,11 +54,9 @@
                     <p class="menu-logo__initials">{{ user.first_name[0] + user.last_name[0] }}</p>
                 </div>
                 <div class="menu-arrow">
-                    <button class="navbar-btn">
-                        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M20.6028 9.23655L13.5756 16.1526C13.4223 16.3043 13.2153 16.3894 12.9996 16.3894C12.7839 16.3894 12.577 16.3043 12.4236 16.1526L5.39647 9.23805C5.2422 9.08645 5.03455 9.0015 4.81825 9.0015C4.60195 9.0015 4.39431 9.08645 4.24003 9.23805C4.16406 9.31212 4.10369 9.40063 4.06246 9.49839C4.02124 9.59615 4 9.70118 4 9.80727C4 9.91337 4.02124 10.0184 4.06246 10.1161C4.10369 10.2139 4.16406 10.3024 4.24003 10.3765L11.2657 17.2911C11.7285 17.7454 12.3511 18 12.9996 18C13.6482 18 14.2708 17.7454 14.7335 17.2911L21.7592 10.3765C21.8354 10.3024 21.896 10.2138 21.9373 10.1159C21.9787 10.018 22 9.9128 22 9.80652C22 9.70024 21.9787 9.59505 21.9373 9.49715C21.896 9.39925 21.8354 9.31064 21.7592 9.23655C21.6049 9.08495 21.3973 9 21.181 9C20.9647 9 20.757 9.08495 20.6028 9.23655Z" fill="#6D82A1"/>
-                            </svg>
-                    </button>
+                    <a class="navbar-btn" href="{{ url_for("logout") }}">
+                        <img src="/static/img/exit.svg" alt="Выход" class="home-icon">
+                    </a>
                 </div>
             </div>
         </section>
