@@ -1,9 +1,9 @@
-from sqlalchemy import select
+from sqlalchemy import select, func
 from typing import List, Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.auth import Admission, AdmissionStatus, User, Scenario
-from src.sensor import Location, Model, Accident, model_accident_association
+from src.sensor import Location, Model, Accident, model_accident_association, SensorValue, SensorType
 
 
 async def get_admission_for_user_id(user_id: int, session: AsyncSession, include_completed: bool = True) -> Sequence[Admission]:
@@ -79,6 +79,40 @@ async def get_accidents_for_model(session: AsyncSession, model_id: int) -> Seque
     query = select(Accident).join(model_accident_association).join(Model).where(model_id == Model.id)
     result = await session.execute(query)
     accidents = result.scalars().all()
-    print(accidents)
     return accidents
+
+
+async def get_name_sensor_value(session: AsyncSession):
+    query = select(SensorValue.sensor_type, func.count(SensorValue.id).label('count')).group_by(SensorValue.sensor_type)
+    result = await session.execute(query)
+    sensor_values = result.all()
+    return sensor_values
+
+
+async def get_sensor_value_for_name(session: AsyncSession, sensor_name: str) -> Sequence[SensorValue]:
+    query = select(SensorValue).where(sensor_name == SensorValue.sensor_type)
+    result = await session.execute(query)
+    values = result.scalars().all()
+    return values
+
+
+async def get_sensor_values_for_id(session: AsyncSession, fields_id: list[int]) -> Sequence[SensorValue]:
+    result = await session.execute(select(SensorValue).where(SensorValue.id.in_(fields_id)))
+    sensor_values = result.scalars().all()
+    return sensor_values
+
+
+async def create_or_get_sensor_type(session: AsyncSession, sensor_type_name: str) -> int:
+    query = select(SensorType).where(SensorType.name == sensor_type_name)
+    result = await session.execute(query)
+    sensor_type = result.scalars().first()
+
+    if sensor_type:
+        return sensor_type.id
+
+    new_sensor_type = SensorType(name=sensor_type_name)
+    session.add(new_sensor_type)
+    await session.commit()
+
+    return new_sensor_type.id
 

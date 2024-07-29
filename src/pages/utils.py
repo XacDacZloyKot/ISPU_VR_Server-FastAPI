@@ -49,6 +49,7 @@ user_menu = [
         "access": "admin",
         "urls": [
             ("Создание сценария", "get_create_scenario_page"),
+            ("Создание модели прибора", "get_create_model_page"),
         ]
     },
 ]

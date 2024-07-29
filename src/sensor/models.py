@@ -39,12 +39,9 @@ class Model(Base):
 
     #  Создание связи ForeignKey
     sensor_type_id = Column(Integer, ForeignKey('sensortype.id'))
-    parameters_id = Column(Integer, ForeignKey('parameters.id'))
     # Связь объектов(ForeignKey)
     sensor_type = relationship("SensorType", back_populates="models", foreign_keys="Model.sensor_type_id",
                                lazy="selectin")
-    parameters = relationship("Parameters", back_populates="models", foreign_keys="Model.parameters_id",
-                              lazy="selectin")
     #  Связь many to many(промежуточная таблица)
     accident = relationship("Accident", secondary=model_accident_association, back_populates="models",
                             lazy="subquery")
@@ -54,7 +51,7 @@ class Model(Base):
     scenarios = relationship("Scenario", back_populates="model", lazy="selectin")
 
     def __str__(self):
-        return f"ID: {self.id} | Имя: {self.sensor_type.name} | Параметры: {self.parameters_id}"
+        return f"ID: {self.id} | Имя: {self.sensor_type.name}"
 
 
 class SensorType(Base):
@@ -63,14 +60,6 @@ class SensorType(Base):
     name = Column(String(255), doc="Тип датчика")
     #  Обратная совместимость
     models = relationship("Model", back_populates="sensor_type", lazy="selectin")
-
-
-class Parameters(Base):
-    __tablename__ = "parameters"
-
-    fields = Column(JSON, doc="Параметры")
-    #  Обратная совместимость
-    models = relationship("Model", back_populates="parameters", lazy="selectin")
 
 
 class Accident(Base):

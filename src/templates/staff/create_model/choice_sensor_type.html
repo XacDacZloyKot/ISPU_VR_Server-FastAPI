@@ -1,0 +1,30 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/select.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+	<p class="navbar__title">Создание датчика</p>
+{% endblock %}
+
+{% block content %}
+    <h1 class="title-orange">Выбор типа датчика</h1>
+    <form action="{{ url_for('get_choice_fields') }}" method="post">
+        <div class="form-group">
+            <label for="model_selected">Датчик:</label>
+            <div class="select-wrapper">
+                <select name="model_selected" id="model_selected">
+                    {% for option in model_options %}
+                        <option value="{{ option.0 }}">{{ option.0 }}</option>
+                    {% endfor %}
+                </select>
+                <div class="select-arrow-1"></div>
+            </div>
+        </div>
+        <div class="submit-container">
+            <button type="submit" class="button orange submit">Выбрать аварии</button>
+        </div>
+    </form>
+{% endblock %}

@@ -23,7 +23,8 @@ from src.pages.crud import (
     get_location_names,
     get_model_names,
     get_accidents_for_model,
-    get_admission_for_id,
+    get_admission_for_id, get_name_sensor_value, get_sensor_value_for_name, get_sensor_values_for_id,
+    create_or_get_sensor_type,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -32,7 +33,7 @@ from src.pages.utils import (authenticate,
                              get_last_admission_task,
                              logout as logout_func,
                              )
-from src.sensor.models import scenario_accident_association
+from src.sensor.models import scenario_accident_association, Model, Accident, model_accident_association
 
 router = APIRouter(
     prefix='/pages',
@@ -565,6 +566,7 @@ async def put_admission(
             "error": "There is some problem with the update admission page."
         })
 
+
 @router.delete("/admission/delete/{admission_id}", name="delete_admission")
 async def delete_admission(admission_id: int, session: AsyncSession = Depends(get_async_session)):
     try:
@@ -588,5 +590,177 @@ async def delete_admission(admission_id: int, session: AsyncSession = Depends(ge
         await session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
 
+
+@router.get("/model/create", response_class=HTMLResponse)
+async def get_create_model_page(request: Request, user: User = Depends(staff_user),
+                                session: AsyncSession = Depends(get_async_session)):
+    try:
+        print("Страница создания модели")
+        sensor_value_names = await get_name_sensor_value(session=session)
+        return templates.TemplateResponse(
+            "/staff/create_model/choice_sensor_type.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'title': "ISPU - Create model!",
+                'model_options':  sensor_value_names,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
+
+
+@router.post("/model/create/fields/", response_class=HTMLResponse)
+async def get_choice_fields(request: Request, model_selected: str = Form(...), user: User = Depends(staff_user),
+                            session: AsyncSession = Depends(get_async_session)):
+    try:
+        print("Страница выбора полей")
+        values = await get_sensor_value_for_name(session=session, sensor_name=model_selected)
+        return templates.TemplateResponse(
+            "/staff/create_model/choice_fields.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'title': "ISPU - Create scenario!",
+                'fields_options': values,
+                'model_selected': model_selected,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
+
+
+@router.post("/model/create/{models_name}", response_class=HTMLResponse)
+async def create_model(
+    request: Request,
+    models_name: str,
+    fields_selected: list[int] = Form(...),
+    user: User = Depends(staff_user),
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        print("Страница пост запрос создания модели")
+        fields = await get_sensor_values_for_id(session=session, fields_id=fields_selected)
+        fields_dict = dict()
+        for field in fields:
+            fields_dict[field.field] = f"{field.value} {field.measurement}"
+        id: int = await create_or_get_sensor_type(session=session, sensor_type_name=models_name)
+        new_model = Model(specification=fields_dict, sensor_type_id=id)
+        session.add(new_model)
+        await session.commit()
+        return RedirectResponse(url=request.url_for("get_add_accident_page", model_id=new_model.id),
+                                status_code=HTTPStatus.MOVED_PERMANENTLY)
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create model page."
+        })
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create model page."
+        })
+
+
+@router.get("/accident/create/{model_id}", response_class=HTMLResponse)
+async def get_add_accident_page(
+    request: Request,
+    model_id: int,
+    user: User = Depends(staff_user),
+    session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        print("Страница выбора аварий")
+        return templates.TemplateResponse(
+            "/staff/create_model/add_accident.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'title': "ISPU - Add accident!",
+                'model_id': model_id,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
+
+
+@router.post("/accident/create/{model_id}", response_class=HTMLResponse)
+async def post_add_accident_page(
+        request: Request,
+        model_id: int,
+        name: str = Form(...),
+        mechanical_accident: bool = Form(default=False),
+        change_value: str = Form(...),
+        user: User = Depends(staff_user),
+        session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        print("post_add_accident_page")
+        change_value_dict = {}
+        change_value_entries = change_value.split(',')
+        for entry in change_value_entries:
+            if ':' in entry:
+                key, value = entry.split(':', 1)
+                change_value_dict[key] = value
+
+        new_accident = Accident(
+            name=name,
+            mechanical_accident=mechanical_accident,
+            change_value=change_value_dict
+        )
+        session.add(new_accident)
+        await session.commit()
+
+        link_model = model_accident_association.insert().values(model_id=model_id, accident_id=new_accident.id)
+        await session.execute(link_model)
+        await session.commit()
+
+        return RedirectResponse(request.url_for("get_add_accident_page", model_id=model_id), status_code=HTTPStatus.MOVED_PERMANENTLY)
+
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create model page."
+        })
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create model page."
+        })
 
 
