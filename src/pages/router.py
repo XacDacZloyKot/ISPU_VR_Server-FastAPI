@@ -351,7 +351,7 @@ async def get_create_scenario_page(request: Request, user: User = Depends(staff_
         location_name = await get_location_names(session=session)
         model_name = await get_model_names(session=session)
         return templates.TemplateResponse(
-            "/staff/choice_location_and_model_for_scenario.html",
+            "/staff/create_scenario/choice_location_and_model_for_scenario.html",
             {
                 'request': request,
                 'user': user,
@@ -380,7 +380,7 @@ async def get_choice_accident_for_scenario(request: Request, location_selected: 
     try:
         accidents = await get_accidents_for_model(session=session, model_id=model_selected)
         return templates.TemplateResponse(
-            "/staff/choice_accident_for_scenario.html",
+            "/staff/create_scenario/choice_accident_for_scenario.html",
             {
                 'request': request,
                 'user': user,
