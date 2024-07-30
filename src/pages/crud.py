@@ -116,3 +116,15 @@ async def create_or_get_sensor_type(session: AsyncSession, sensor_type_name: str
 
     return new_sensor_type.id
 
+
+async def get_all_models(session: AsyncSession) -> Sequence[Model]:
+    query = select(Model)
+    result = await session.execute(query)
+    models = result.scalars().all()
+    return models
+
+
+async def get_models_for_id(session: AsyncSession, models_id: list[int]) -> Sequence[Model]:
+    result = await session.execute(select(Model).where(Model.id.in_(models_id)))
+    models = result.scalars().all()
+    return models

@@ -24,7 +24,7 @@ from src.pages.crud import (
     get_model_names,
     get_accidents_for_model,
     get_admission_for_id, get_name_sensor_value, get_sensor_value_for_name, get_sensor_values_for_id,
-    create_or_get_sensor_type,
+    create_or_get_sensor_type, get_all_models, get_models_for_id,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -33,7 +33,8 @@ from src.pages.utils import (authenticate,
                              get_last_admission_task,
                              logout as logout_func,
                              )
-from src.sensor.models import scenario_accident_association, Model, Accident, model_accident_association
+from src.sensor.models import scenario_accident_association, Model, Accident, model_accident_association, Location, \
+    LocationStatus, location_model_association
 
 router = APIRouter(
     prefix='/pages',
@@ -764,3 +765,64 @@ async def post_add_accident_page(
         })
 
 
+@router.get("/location/create/", response_class=HTMLResponse)
+async def get_create_location_page(request: Request,
+                                   user: User = Depends(staff_user),
+                                   session: AsyncSession = Depends(get_async_session)):
+    try:
+        models = await get_all_models(session=session)
+        return templates.TemplateResponse(
+            "/staff/create_location/create_location.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'models_options': models,
+                'status_options': LocationStatus,
+                'title': "ISPU - Create scenario!",
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create scenario page."
+        })
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create scenario page."})
+
+
+@router.post("/location/create/", response_class=HTMLResponse)
+async def post_create_location_page(request: Request,
+                                    model_selected: list[int] = Form(...),
+                                    name: str = Form(...), prefab: str = Form(...),
+                                    status: LocationStatus = Form(...),
+                                    user: User = Depends(staff_user),
+                                    session: AsyncSession = Depends(get_async_session)):
+    try:
+        new_location = Location(name=name, status=status, prefab=prefab)
+        session.add(new_location)
+        await session.flush()
+        location_model = [
+            {"location_id": new_location.id, "model_id": model_id}
+            for model_id in model_selected
+        ]
+        await session.execute(insert(location_model_association).values(location_model))
+        await session.commit()
+        return RedirectResponse(url=request.url_for("get_home_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create scenario page."
+        })
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create scenario page."})
