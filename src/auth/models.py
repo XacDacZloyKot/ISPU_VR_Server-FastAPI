@@ -3,7 +3,7 @@ from enum import Enum
 
 from fastapi_users.db import SQLAlchemyBaseUserTable
 from sqlalchemy import Integer, String, Boolean, ForeignKey, Column, TIMESTAMP, Enum as SQLAEnum, Table, select, func, \
-    Float, DateTime
+    Float, DateTime, Numeric, DECIMAL
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -49,7 +49,7 @@ class AdmissionStatus(Enum):
 class Admission(Base):
     __tablename__ = "admission"
 
-    rating: Mapped[str] = mapped_column(String(4), nullable=True, default="0", doc="Рейтинг")
+    rating: Mapped[DECIMAL] = mapped_column(Numeric(3, 1), nullable=True, default=0, doc="Рейтинг")
     status: Mapped[AdmissionStatus] = mapped_column(SQLAEnum(AdmissionStatus), default=AdmissionStatus.INACTIVE,
                                                     nullable=False, doc="Статус заявки")
     #  Создание связи ForeignKey
@@ -65,7 +65,7 @@ class Admission(Base):
     @classmethod
     async def get_average_rating_for_user(cls, user_id: int, session: AsyncSession) -> float:
         result = await session.execute(
-            select(func.avg(cls.rating).cast(Float)).where(user_id == cls.user_id)
+            select(func.avg(cls.rating)).where(cls.user_id == user_id)
         )
         average_rating = result.scalar()
         return average_rating or 0.0
@@ -73,7 +73,7 @@ class Admission(Base):
     @staticmethod
     def set_rating(instance, value):
         instance.rating = value
-        if value is not None and value != "0":
+        if value is not None and value != 0:
             instance.is_ready = datetime.utcnow()
             instance.status = "COMPLETED"
         else:
@@ -83,14 +83,17 @@ class Admission(Base):
 class Scenario(Base):
     __tablename__ = "scenario"
 
+    name: Mapped[str] = mapped_column(String(255), nullable=False, doc="Название локации")
     #  Создание связи ForeignKey
     location_id: Mapped[int] = mapped_column(ForeignKey("location.id"), nullable=False)
-    model_id: Mapped[int] = mapped_column(ForeignKey("model.id"), nullable=False)
+    sensor_id: Mapped[int] = mapped_column(ForeignKey("sensor.id"), nullable=False)
     # Связь объектов(ForeignKey)
     location: Mapped["Location"] = relationship("Location", back_populates="scenarios",
-                                                foreign_keys="Scenario.location_id", lazy="selectin")
-    model: Mapped["Model"] = relationship("Model", back_populates="scenarios", foreign_keys="Scenario.model_id",
-                                          lazy="selectin")
+                                                foreign_keys="Scenario.location_id",
+                                                lazy="selectin")
+    sensor: Mapped["Sensor"] = relationship("Sensor", back_populates="scenarios",
+                                            foreign_keys="Scenario.sensor_id",
+                                            lazy="selectin")
     #  Обратная совместимость
     admissions: Mapped[Admission] = relationship("Admission", back_populates="scenario", lazy="selectin")
     accidents = relationship("Accident", secondary=scenario_accident_association, back_populates="scenarios",

@@ -23,12 +23,12 @@ model_accident_association = Table(
     Column('accident_id', Integer, ForeignKey('accident.id'))
 )
 
-# Промежуточная таблица для связи Many-to-Many между Location и Model
-location_model_association = Table(
-    'location_model_association',
+# Промежуточная таблица для связи Many-to-Many между Location и Sensor
+location_sensor_association = Table(
+    'location_sensor_association',
     Base.metadata,
     Column('location_id', Integer, ForeignKey('location.id')),
-    Column('model_id', Integer, ForeignKey('model.id'))
+    Column('sensor_id', Integer, ForeignKey('sensor.id'))
 )
 
 
@@ -45,10 +45,8 @@ class Model(Base):
     #  Связь many to many(промежуточная таблица)
     accident = relationship("Accident", secondary=model_accident_association, back_populates="models",
                             lazy="subquery")
-    locations = relationship("Location", secondary=location_model_association, back_populates="models",
-                             lazy="subquery")
     #  Обратная совместимость
-    scenarios = relationship("Scenario", back_populates="model", lazy="selectin")
+    sensors = relationship("Sensor", back_populates="model", lazy="selectin")
 
     def __str__(self):
         return f"ID: {self.id} | Имя: {self.sensor_type.name}"
@@ -87,7 +85,7 @@ class Location(Base):
     name = Column(String(255), doc="Название локации")
     prefab = Column(String(300), doc="Путь до префаба")
     #  Связь many to many(промежуточная таблица)
-    models = relationship("Model", secondary=location_model_association, back_populates="locations",
+    sensors = relationship("Sensor", secondary=location_sensor_association, back_populates="locations",
                           lazy="subquery")
     status: Mapped[LocationStatus] = mapped_column(SQLAEnum(LocationStatus), default=LocationStatus.DEVELOPING,
                                                     nullable=False, doc="Статус заявки")
@@ -105,4 +103,23 @@ class SensorValue(Base):
     field = Column(String(128), doc="Поле датчика")
     value = Column(String(64), doc="Значение")
     measurement = Column(String(64), doc="Величина измерения")
+
+
+class Sensor(Base):
+    __tablename__ = "sensor"
+
+    name = Column(String(255), doc="Название датчика")
+    KKS = Column(String(255), doc="Название датчика")
+
+    # Many to Many
+    locations = relationship("Location", secondary=location_sensor_association, back_populates="sensors",
+                             lazy="subquery")
+    # FK
+    model_id = Column(Integer, ForeignKey('model.id'))
+    model = relationship("Model",
+                         foreign_keys="Sensor.model_id",
+                         back_populates="sensors",
+                         lazy="selectin")
+    # Обратная совместимость
+    scenarios = relationship("Scenario", back_populates="model", lazy="selectin")
 

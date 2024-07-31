@@ -34,7 +34,7 @@ from src.pages.utils import (authenticate,
                              logout as logout_func,
                              )
 from src.sensor.models import scenario_accident_association, Model, Accident, model_accident_association, Location, \
-    LocationStatus, location_model_association
+    LocationStatus, location_sensor_association
 
 router = APIRouter(
     prefix='/pages',
@@ -810,7 +810,7 @@ async def post_create_location_page(request: Request,
             {"location_id": new_location.id, "model_id": model_id}
             for model_id in model_selected
         ]
-        await session.execute(insert(location_model_association).values(location_model))
+        await session.execute(insert(location_sensor_association).values(location_model))
         await session.commit()
         return RedirectResponse(url=request.url_for("get_home_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
     except SQLAlchemyError as e:
