@@ -1,8 +1,8 @@
-"""Add name Scenario
+"""Add name in Scenario
 
-Revision ID: 0985e76094b1
-Revises: 7d61cdbbeae4
-Create Date: 2024-07-31 18:18:11.237431
+Revision ID: 70c2d585deaa
+Revises: 18c347fb5c5a
+Create Date: 2024-08-01 19:42:53.053484
 
 """
 from typing import Sequence, Union
@@ -12,8 +12,8 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '0985e76094b1'
-down_revision: Union[str, None] = '7d61cdbbeae4'
+revision: str = '70c2d585deaa'
+down_revision: Union[str, None] = '18c347fb5c5a'
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

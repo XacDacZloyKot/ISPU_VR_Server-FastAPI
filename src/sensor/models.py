@@ -20,33 +20,36 @@ model_accident_association = Table(
     'model_accident_association',
     Base.metadata,
     Column('model_id', Integer, ForeignKey('model.id')),
-    Column('accident_id', Integer, ForeignKey('accident.id'))
+    Column('accident_id', Integer, ForeignKey('accident.id')),
+    extend_existing = True
 )
 
-# Промежуточная таблица для связи Many-to-Many между Location и Sensor
-location_sensor_association = Table(
-    'location_sensor_association',
+# Промежуточная таблица для связи Many-to-Many между Sensor и Location
+sensor_location_association = Table(
+    'sensor_location_association',
     Base.metadata,
+    Column('sensor_id', Integer, ForeignKey('sensor.id')),
     Column('location_id', Integer, ForeignKey('location.id')),
-    Column('sensor_id', Integer, ForeignKey('sensor.id'))
+    extend_existing=True
 )
 
 
 class Model(Base):
     __tablename__ = "model"
 
-    specification = Column("specification", JSON, nullable=True)
+    specification: Mapped[dict] = mapped_column(JSON, nullable=True)
 
-    #  Создание связи ForeignKey
-    sensor_type_id = Column(Integer, ForeignKey('sensortype.id'))
-    # Связь объектов(ForeignKey)
-    sensor_type = relationship("SensorType", back_populates="models", foreign_keys="Model.sensor_type_id",
-                               lazy="selectin")
-    #  Связь many to many(промежуточная таблица)
-    accident = relationship("Accident", secondary=model_accident_association, back_populates="models",
-                            lazy="subquery")
-    #  Обратная совместимость
-    sensors = relationship("Sensor", back_populates="model", lazy="selectin")
+    # Связь с Sensor (один ко многим)
+    sensors = relationship("Sensor", back_populates="model")
+
+    # Связь с SensorType
+    sensor_type_id: Mapped[int] = mapped_column(ForeignKey('sensortype.id'))
+    sensor_type = relationship("SensorType", back_populates="models",
+                               foreign_keys='Model.sensor_type_id')
+
+    # Связь many-to-many через промежуточную таблицу
+    accidents = relationship("Accident", secondary=model_accident_association,
+                             back_populates="models", lazy="subquery")
 
     def __str__(self):
         return f"ID: {self.id} | Имя: {self.sensor_type.name}"
@@ -66,9 +69,11 @@ class Accident(Base):
     name = Column(String(255), doc="Ошибка")
     mechanical_accident = Column(Boolean, doc="Механическое повреждение")
     change_value = Column(JSON, doc="Изменяемое значение")
-    #  Связь many to many(промежуточная таблица)
-    models = relationship("Model", secondary=model_accident_association, back_populates="accident",
+
+    # Связь many-to-many(промежуточная таблица)
+    models = relationship("Model", secondary=model_accident_association, back_populates="accidents",
                           lazy="subquery")
+
     scenarios = relationship("Scenario", secondary=scenario_accident_association, back_populates="accidents",
                              lazy="subquery")
 
@@ -82,14 +87,15 @@ class LocationStatus(Enum):
 class Location(Base):
     __tablename__ = "location"
 
-    name = Column(String(255), doc="Название локации")
-    prefab = Column(String(300), doc="Путь до префаба")
-    #  Связь many to many(промежуточная таблица)
-    sensors = relationship("Sensor", secondary=location_sensor_association, back_populates="locations",
-                          lazy="subquery")
-    status: Mapped[LocationStatus] = mapped_column(SQLAEnum(LocationStatus), default=LocationStatus.DEVELOPING,
-                                                    nullable=False, doc="Статус заявки")
-    #  Обратная совместимость
+    status: Mapped[LocationStatus] = mapped_column(SQLAEnum(LocationStatus), default=LocationStatus.INACTIVE,
+                                                    nullable=False, doc="Статус локации")
+    name: Mapped[str] = mapped_column(String(255), doc="Название локации")
+    prefab: Mapped[str] = mapped_column(String(300), doc="Путь до префаба")
+
+    # Связь many-to-many через промежуточную таблицу с Sensor
+    sensors = relationship("Sensor", secondary="sensor_location_association", back_populates="locations")
+
+    # Обратная связь с Scenario
     scenarios = relationship("Scenario", back_populates="location", lazy="selectin")
 
     def __str__(self):
@@ -108,18 +114,16 @@ class SensorValue(Base):
 class Sensor(Base):
     __tablename__ = "sensor"
 
-    name = Column(String(255), doc="Название датчика")
-    KKS = Column(String(255), doc="Название датчика")
+    KKS: Mapped[str] = mapped_column(String(64), nullable=False, doc="Код ККС")
+    name: Mapped[str] = mapped_column(String(255), doc="Название датчика")
 
-    # Many to Many
-    locations = relationship("Location", secondary=location_sensor_association, back_populates="sensors",
-                             lazy="subquery")
-    # FK
-    model_id = Column(Integer, ForeignKey('model.id'))
-    model = relationship("Model",
-                         foreign_keys="Sensor.model_id",
-                         back_populates="sensors",
-                         lazy="selectin")
-    # Обратная совместимость
-    scenarios = relationship("Scenario", back_populates="model", lazy="selectin")
+    # Связь с Model (один ко многим)
+    model_id: Mapped[int] = mapped_column(ForeignKey("model.id"), nullable=False)
+    model = relationship("Model", back_populates="sensors",
+                         foreign_keys='Sensor.model_id')
 
+    # Связь с Location (многие ко многим через промежуточную таблицу)
+    locations = relationship("Location", secondary="sensor_location_association", back_populates="sensors")
+
+    # Связь с Scenario (многие к одному)
+    scenarios = relationship("Scenario", back_populates="sensor")
