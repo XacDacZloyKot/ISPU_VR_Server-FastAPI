@@ -21,7 +21,7 @@ from src.pages.crud import (
     get_users_without_scenario,
     get_admission_for_id, get_name_sensor_value, get_sensor_value_for_name, get_sensor_values_for_id,
     create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
-    get_sensor_for_id,
+    get_sensor_for_id, get_model_for_id,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -624,7 +624,6 @@ async def delete_admission(admission_id: int, session: AsyncSession = Depends(ge
 async def get_create_model_page(request: Request, user: User = Depends(staff_user),
                                 session: AsyncSession = Depends(get_async_session)):
     try:
-        print("Страница создания модели")
         sensor_value_names = await get_name_sensor_value(session=session)
         return templates.TemplateResponse(
             "/staff/create_model/choice_sensor_type.html",
@@ -686,7 +685,6 @@ async def create_model(
         session: AsyncSession = Depends(get_async_session)
 ):
     try:
-        print("Страница пост запрос создания модели")
         fields = await get_sensor_values_for_id(session=session, fields_id=fields_selected)
         fields_dict = dict()
         for field in fields:
@@ -721,7 +719,7 @@ async def get_add_accident_page(
         session: AsyncSession = Depends(get_async_session)
 ):
     try:
-        print("Страница выбора аварий")
+        model = await get_model_for_id(session=session, model_id=model_id)
         return templates.TemplateResponse(
             "/staff/create_model/add_accident.html",
             {
@@ -729,7 +727,7 @@ async def get_add_accident_page(
                 'user': user,
                 'menu': user_menu,
                 'title': "ISPU - Add accident!",
-                'model_id': model_id,
+                'model': model,
             }
         )
     except SQLAlchemyError as e:

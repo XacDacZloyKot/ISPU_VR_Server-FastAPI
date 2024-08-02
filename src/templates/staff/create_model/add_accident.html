@@ -3,6 +3,7 @@
 {% block css %}
 	<link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
 {% endblock %}
 
@@ -13,7 +14,7 @@
 
 {% block content %}
     <h1 class="title-orange">Введите параметры аварии</h1>
-    <form action="{{ url_for('post_add_accident_page', model_id=model_id) }}" method="POST" class="form-container">
+    <form action="{{ url_for('post_add_accident_page', model_id=model.id) }}" method="POST" class="form-container">
         <div class="form-group">
             <label for="name">Введите название аварии</label>
             <input type="text" id="name" name="name" required class="input" placeholder="Текст">
@@ -31,4 +32,38 @@
             <button type="submit" class="button orange submit">Добавить ещё</button>
         </div>
     </form>
+    <div class="table-wrapper table-container-50">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Прибор</th>
+                    <th>Параметры</th>
+                    <th>Ошибки</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{ model.id }}</td>
+                    <td>{{ model.sensor_type.name }}</td>
+                    <td>
+                        {% for field, value in model.specification.items() %}
+                            {{ field }}: {{ value }}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        {% for accident in model.accidents %}
+                            <div class="value-container">
+                                Название: {{ accident.name }}<br>
+                                Мех. Повреждение: {% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}<br>
+                                Параметры:<br>{% for field, value in accident.change_value.items() %}
+                                    {{ field }}: {{ value }}
+                                {% endfor %}
+                            </div>
+                        {% endfor %}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

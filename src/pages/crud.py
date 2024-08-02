@@ -61,7 +61,7 @@ async def get_location_for_id(location_id: int, session: AsyncSession) -> Locati
 
 
 async def get_model_for_id(model_id: int, session: AsyncSession) -> Model:
-    query = select(Model).where(model_id == Scenario.id)
+    query = select(Model).where(model_id == Model.id)
     result = await session.execute(query)
     model: Model = result.scalars().first()
     return model
