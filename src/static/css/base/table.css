@@ -84,3 +84,7 @@ tr:first-child th {
 .table-container-10{
     height: 10%;
 }
+
+.column-error{
+    font-size: 12px;
+}

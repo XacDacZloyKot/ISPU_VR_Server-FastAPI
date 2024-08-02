@@ -12,6 +12,15 @@
     <h1 class="title-orange">Активные задачи</h1>
     <div class="table">
         <table>
+            <thead>
+                <tr>
+                    <th>Название локации</th>
+                    <th>Название сценария</th>
+                    <th>Прибор</th>
+                    <th>Ошибки</th>
+                    <th>Статус</th>
+                </tr>
+            </thead>
             <tbody>
             {% for admission in admissions %}
                 <tr>
@@ -20,7 +29,12 @@
                     <td>
                         {{ admission.scenario.sensor.model.sensor_type.name }} KKS:{{ admission.scenario.sensor.KKS }}
                     </td>
-                    <td class="home-option-column">
+                    <td class="column-error">
+                        {% for accident in admission.scenario.accidents %}
+                        	{{ accident.name }},<br>
+                        {% endfor %}
+                    </td>
+                    <td>
                         {% macro get_status_class(status) %}
                             {% if status == "Не активно" %}
                                 status-red
