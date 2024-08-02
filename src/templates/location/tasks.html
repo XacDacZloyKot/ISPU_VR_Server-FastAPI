@@ -19,6 +19,7 @@
                     <th>Название сценария</th>
                     <th>Прибор</th>
                     <th>Ошибки</th>
+                    <th>Оценка</th>
                     <th>Статус</th>
                     <th>Опции</th>
                 </tr>
@@ -36,6 +37,7 @@
                         	{{ accident.name }},<br>
                         {% endfor %}
                     </td>
+                    <td>{% if admission.status.value == "Завершено" %}Оценка: {{ admission.rating }}{% else %}Работа не оценена{% endif %}</td>
                     <td>
                         {% macro get_status_class(status) %}
                             {% if status == "Не активно" %}
