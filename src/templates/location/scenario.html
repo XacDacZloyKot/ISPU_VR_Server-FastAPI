@@ -10,38 +10,37 @@
 {% endblock %}
 
 {% block content %}
-    <h1 class="title-orange">Локации</h1>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Название</th>
-                            <th>Статус локации</th>
-                            <th>Опции</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for scenario in scenarios %}
-                        <tr>
-                            <td>{{ scenario.id }}</td>
-                            <td>{{ scenario.location.name }}</td>
-                            <td>{{ scenario.location.status.value }}</td>
-                            <td>
-                                <div class="location-option-column">
-                                    <a href="{{ url_for("get_scenario_for_id_page", scenario_id=scenario.id) }}" class="location-link">
-                                        <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
-                                    </a>
-                                    {% if scenario.location.status.value == "Готова" %}
-                                        <a href="{{ url_for("get_task_assignment", scenario_id=scenario.id) }}" class="location-link">
-                                            <img src="/static/img/Subtract.svg" alt="Назначение" class="location-icon">
-                                        </a>
-                                    {% endif %}
-                                </div>
-                            </td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Статус локации</th>
+                    <th>Опции</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for scenario in scenarios %}
+                <tr>
+                    <td>{{ scenario.id }}</td>
+                    <td>{{ scenario.location.name }}</td>
+                    <td>{{ scenario.location.status.value }}</td>
+                    <td>
+                        <div class="location-option-column">
+                            <a href="{{ url_for("get_scenario_for_id_page", scenario_id=scenario.id) }}" class="location-link">
+                                <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
+                            </a>
+                            {% if scenario.location.status.value == "Готова" %}
+                                <a href="{{ url_for("get_task_assignment", scenario_id=scenario.id) }}" class="location-link">
+                                    <img src="/static/img/Subtract.svg" alt="Назначение" class="location-icon">
+                                </a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
 {% endblock %}

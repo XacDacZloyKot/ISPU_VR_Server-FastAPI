@@ -44,12 +44,16 @@ class Model(Base):
 
     # Связь с SensorType
     sensor_type_id: Mapped[int] = mapped_column(ForeignKey('sensortype.id'))
-    sensor_type = relationship("SensorType", back_populates="models",
-                               foreign_keys='Model.sensor_type_id')
+    sensor_type = relationship("SensorType",
+                               back_populates="models",
+                               foreign_keys='Model.sensor_type_id',
+                               lazy='selectin')
 
     # Связь many-to-many через промежуточную таблицу
-    accidents = relationship("Accident", secondary=model_accident_association,
-                             back_populates="models", lazy="subquery")
+    accidents = relationship("Accident",
+                             secondary=model_accident_association,
+                             back_populates="models",
+                             lazy="subquery")
 
     def __str__(self):
         return f"ID: {self.id} | Имя: {self.sensor_type.name}"

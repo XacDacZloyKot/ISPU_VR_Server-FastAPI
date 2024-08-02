@@ -86,15 +86,19 @@ class Scenario(Base):
     name = Column(String(255), nullable=False, doc="Название сценария")
     # Связь с Sensor
     sensor_id: Mapped[int] = mapped_column(ForeignKey("sensor.id"), nullable=False)
-    sensor = relationship("Sensor", back_populates="scenarios", foreign_keys='Scenario.sensor_id')
+    sensor = relationship("Sensor",
+                          back_populates="scenarios",
+                          foreign_keys='Scenario.sensor_id',
+                          lazy='selectin')
 
     # Связь с Location
     location_id: Mapped[int] = mapped_column(ForeignKey("location.id"), nullable=False)
     location = relationship("Location", back_populates="scenarios",
-                            foreign_keys='Scenario.location_id')
+                            foreign_keys='Scenario.location_id', lazy='selectin')
 
     # Обратная совместимость
     admissions = relationship("Admission", back_populates="scenario", lazy="selectin")
     accidents = relationship("Accident",
                              secondary=scenario_accident_association,
-                             back_populates="scenarios", lazy="selectin")
+                             back_populates="scenarios",
+                             lazy="selectin")

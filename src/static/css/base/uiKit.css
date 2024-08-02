@@ -126,9 +126,10 @@ input:focus {
 
 .status{
     padding: 4px 25px 4px 25px;
-    width: fit-content;
+    width: 100px;
     max-width: 120px;
     height: fit-content;
+    text-align: center;
     margin: 0;
 }
 

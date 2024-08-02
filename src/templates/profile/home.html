@@ -16,7 +16,10 @@
             {% for admission in admissions %}
                 <tr>
                     <td>{{ admission.scenario.location.name }}</td>
-                    <td>{{ admission.scenario.model.sensor_type.name }}</td>
+                    <td>{{ admission.scenario.name }}</td>
+                    <td>
+                        {{ admission.scenario.sensor.model.sensor_type.name }} KKS:{{ admission.scenario.sensor.KKS }}
+                    </td>
                     <td class="home-option-column">
                         {% macro get_status_class(status) %}
                             {% if status == "Не активно" %}
@@ -46,7 +49,7 @@
                     <div class="statistics-data__name-task">
                         <p class="statistics-data-name__title"> {{ last_admission.scenario.location.name }} </p>
                         <p class="statistics-data-name__description">
-                            {{ last_admission.scenario.model.sensor_type.name }}<br>
+                            {{ last_admission.scenario.sensor.model.sensor_type.name }}<br>
                         </p>
                     </div>
                     <div class="statistics-data__param">
