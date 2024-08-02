@@ -597,7 +597,7 @@ async def put_admission(
 
 
 @router.delete("/admission/delete/{admission_id}", name="delete_admission")
-async def delete_admission(admission_id: int, session: AsyncSession = Depends(get_async_session)):
+async def delete_admission(admission_id: int, session: AsyncSession = Depends(get_async_session), user: User = Depends(staff_user)):
     try:
         result = await session.execute(select(Admission).filter_by(id=admission_id))
         admission = result.scalars().first()

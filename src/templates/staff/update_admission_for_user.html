@@ -3,6 +3,23 @@
 {% block css %}
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/select.css') }}">
+    <script>
+        function confirmDelete(url) {
+            if (confirm("Вы уверены, что хотите удалить эту запись?")) {
+                fetch(url, {
+                    method: 'DELETE'
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = "{{ url_for('get_profile_for_id_page', user_id=admission.user_id) }}";
+                    } else {
+                        alert("Не удалось удалить запись.");
+                    }
+                }).catch(error => {
+                    console.error("Ошибка:", error);
+                });
+            }
+        }
+    </script>
 {% endblock %}
 
 {% block navTitle %}
@@ -34,7 +51,8 @@
         </div>
         <div class="submit-container">
             <button type="submit" class="button orange submit">Изменить данные</button>
-            <a href="{{ url_for("delete_admission", admission_id=admission.id) }}" class="button orange slim">Удалить</a>
+            <button type="button" onclick="confirmDelete('{{ url_for('delete_admission', admission_id=admission.id) }}')" class="button orange">Удалить</button>
         </div>
     </form>
 {% endblock %}
+
