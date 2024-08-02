@@ -16,6 +16,7 @@
                 <tr>
                     <th>ID</th>
                     <th>Название</th>
+                    <th>Прибор</th>
                     <th>Статус локации</th>
                     <th>Опции</th>
                 </tr>
@@ -24,7 +25,12 @@
             {% for scenario in scenarios %}
                 <tr>
                     <td>{{ scenario.id }}</td>
-                    <td>{{ scenario.location.name }}</td>
+                    <td>{{ scenario.location.name }}<br>{{ scenario.name }}</td>
+                    <td>
+                        Назначение: {{ scenario.sensor.name }}<br>
+                        ККС: {{ scenario.sensor.KKS }}<br>
+                        Датчик: {{ scenario.sensor.model.sensor_type.name }}<br>
+                    </td>
                     <td>{{ scenario.location.status.value }}</td>
                     <td>
                         <div class="location-option-column">

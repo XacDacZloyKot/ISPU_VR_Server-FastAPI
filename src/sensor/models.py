@@ -124,7 +124,8 @@ class Sensor(Base):
     # Связь с Model (один ко многим)
     model_id: Mapped[int] = mapped_column(ForeignKey("model.id"), nullable=False)
     model = relationship("Model", back_populates="sensors",
-                         foreign_keys='Sensor.model_id')
+                         foreign_keys='Sensor.model_id',
+                         lazy='selectin')
 
     # Связь с Location (многие ко многим через промежуточную таблицу)
     locations = relationship("Location", secondary="sensor_location_association", back_populates="sensors")
