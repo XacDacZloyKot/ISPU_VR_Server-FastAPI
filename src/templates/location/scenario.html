@@ -17,6 +17,7 @@
                     <th>ID</th>
                     <th>Название</th>
                     <th>Прибор</th>
+                    <th>Ошибки</th>
                     <th>Статус локации</th>
                     <th>Опции</th>
                 </tr>
@@ -30,6 +31,11 @@
                         Назначение: {{ scenario.sensor.name }}<br>
                         ККС: {{ scenario.sensor.KKS }}<br>
                         Датчик: {{ scenario.sensor.model.sensor_type.name }}<br>
+                    </td>
+                    <td class="column-error">
+                        {% for accident in scenario.accidents %}
+                        	{{ accident.name }},<br>
+                        {% endfor %}
                     </td>
                     <td>{{ scenario.location.status.value }}</td>
                     <td>

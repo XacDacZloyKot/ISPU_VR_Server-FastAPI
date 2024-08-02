@@ -6,24 +6,23 @@
 {% endblock %}
 
 {% block navTitle %}
-	<p class="navbar__title">Сценарий #{{ scenarios.id }}</p>
+	<p class="navbar__title">Сценарий #{{ scenarios.id }}. Локация "{{ scenarios.location.name }}"</p>
 {% endblock %}
 
 {% block content %}
-    <h1 class="title-orange">Локация "{{ scenarios.location.name }}"</h1>
-    <div class="locatinon-container">
-        <div class="locatinon-data">
-            <div class="locatinon-data__name">
-                <p class="locatinon-data__title"> {{ scenarios.location.name }} </p>
+    <div class="location-container">
+        <div class="location-data">
+            <div class="location-data__name">
+                <p class="location-data__title"> {{ scenarios.location.name }} </p>
             </div>
-            <div class="locatinon-data__param">
-                <div class="locatinon-data__param-insert">
-                    <p class="locatinon-data-param__name">Статус:  </p>
-                    <p class="locatinon-data-param__value">{{ scenarios.location.status.value }}</p>
+            <div class="location-data__param">
+                <div class="location-data__param-insert">
+                    <p class="location-data-param__name">Статус:</p>
+                    <p class="location-data-param__value">{{ scenarios.location.status.value }}</p>
                 </div>
-                <div class="locatinon-data__param-insert">
-                    <p class="locatinon-data-param__name">Ошибка в модели (Id:{{ scenarios.model.id }}): {{ scenarios.model.sensor_type.name }}</p>
-                    <p class="locatinon-data-param__value">{{ scenarios.model.name }}</p>
+                <div class="location-data__param-insert">
+                    <p class="location-data-param__name">Ошибка в датчике (Id:{{ scenarios.sensor.id }}): {{ scenarios.sensor.KKS }}</p>
+                    <p class="location-data-param__value">{{ scenarios.sensor.model.name }}</p>
                 </div>
             </div>
         </div>
@@ -36,22 +35,26 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>KKS</th>
                     <th>Название</th>
+                    <th>Прибор</th>
                     <th>Параметры</th>
                     <th>Наличие ошибки</th>
                 </tr>
             </thead>
             <tbody>
-            {% for model in scenarios.location.models %}
+            {% for sensor in scenarios.location.sensors %}
                 <tr>
-                    <td>{{ model.id }}</td>
-                    <td>{{ model.sensor_type.name }}</td>
+                    <td>{{ sensor.id }}</td>
+                    <td>{{ sensor.KKS }}</td>
+                    <td>{{ sensor.name }}</td>
+                    <td>{{ sensor.model.sensor_type.name }}</td>
                     <td>
-                        {% for field, value in model.specification.items() %}
+                        {% for field, value in sensor.model.specification.items() %}
                             {{ field }}: {{ value }}<br>
                         {% endfor %}
                     </td>
-                    <td>{% if scenarios.model.id == model.id %}Да{% else %}Нет{% endif %}</td>
+                    <td>{% if scenarios.sensor.id == sensor.id %}Да{% else %}Нет{% endif %}</td>
                 </tr>
             {% endfor %}
             </tbody>

@@ -1,9 +1,9 @@
-.locatinon-container{
+.location-container{
     display: flex;
     flex-direction: column;
 }
 
-.locatinon-data{
+.location-data{
     border-radius: 8px;
     border: 1px solid var(--color-primary-400);
     margin-top: 10px;
@@ -11,7 +11,7 @@
     padding-bottom: 15px;
 }
 
-.locatinon-data__name{
+.location-data__name{
     display: flex;
     flex-direction: row;
     /* gap: 10px; */
@@ -21,14 +21,14 @@
     margin-bottom: 10px;
 }
 
-.locatinon-data__title {
+.location-data__title {
     margin: 0;
     font-family: inherit;
     font-size: 15px;
     font-weight: 700;
 }
 
-.locatinon-data__param{
+.location-data__param{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -37,17 +37,17 @@
     padding-right: 15px;
 }
 
-.locatinon-data__param-insert{
+.location-data__param-insert{
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     gap: 5px;
 }
 
-.locatinon-data-param__name{
+.location-data-param__name{
     margin: 0;
 }
 
-.locatinon-data-param__value{
+.location-data-param__value{
     margin: 0;
 }

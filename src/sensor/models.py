@@ -97,7 +97,9 @@ class Location(Base):
     prefab: Mapped[str] = mapped_column(String(300), doc="Путь до префаба")
 
     # Связь many-to-many через промежуточную таблицу с Sensor
-    sensors = relationship("Sensor", secondary="sensor_location_association", back_populates="locations")
+    sensors = relationship("Sensor",
+                           secondary="sensor_location_association",
+                           back_populates="locations",lazy='selectin')
 
     # Обратная связь с Scenario
     scenarios = relationship("Scenario", back_populates="location", lazy="selectin")
