@@ -55,7 +55,7 @@
                     <td>{{ admission.scenario.location.name }}</td>
                     <td>{{ admission.scenario.name }}</td>
                     <td>
-                        {{ admission.scenario.sensor.model.sensor_type.name }} KKS:{{ admission.scenario.sensor.KKS }}
+                        {{ admission.scenario.sensor.model.sensor_type.name }}<br> KKS:{{ admission.scenario.sensor.KKS }}
                     </td>
                     <td>{% if admission.status.value == "Завершено" %}Оценка: {{ admission.rating }}{% else %}Работа не оценена{% endif %}</td>
                     <td>

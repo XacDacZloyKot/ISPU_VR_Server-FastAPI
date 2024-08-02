@@ -1,0 +1,60 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/location/create_scenario.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+
+{% endblock %}
+
+{% block navTitle %}
+    <p class="navbar__title">Создание сценария</p>
+{% endblock %}
+
+{% block content %}
+    <h1 class="title-orange">Выбор локации и датчика</h1>
+    <form action="{{ url_for('post_create_scenario', location_id=location_selected, sensor_id=sensor_selected) }}" method="post" class="form-container-height">
+        <p class="title-table">Ошибки</p>
+        <div class="table-wrapper table-container-75">
+            <table class="table-container">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Механическое повреждение</th>
+                        <th>Подразделение</th>
+                        <th>Назначение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for option in accidents_options %}
+                        <tr>
+                            <td>{{ option.id }}</td>
+                            <td>{{ option.name }}</td>
+                            <td>{% if option.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
+                            <td>
+                                {% for field, value in option.change_value.items() %}
+                                    {{ field }}: {{ value }}<br>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <div>
+                                    <input class="checkbox-input" title="Accident" type="checkbox" id="{{ option.id }}"
+                                           name="accident_selected" value="{{ option.id }}">
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="form-group title-table-center">
+            <label for="name" class="title-table">Название сценария: </label>
+            <input type="text" id="name" name="name" required class="input" placeholder="Название сценария">
+        </div>
+        <div class="submit-container">
+            <button type="submit" class="button orange submit">Добавить сценарий</button>
+        </div>
+    </form>
+{% endblock %}

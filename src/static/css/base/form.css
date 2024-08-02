@@ -40,3 +40,8 @@
 .input-json{
     width: 600px;
 }
+
+.form-container-height{
+    max-height: 600px;
+    height: calc(100% - 30px);
+}

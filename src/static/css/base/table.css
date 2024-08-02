@@ -88,3 +88,13 @@ tr:first-child th {
 .column-error{
     font-size: 12px;
 }
+
+.title-table{
+    margin: 0 0 10px 0;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.title-table-center{
+    margin: 10px 0 10px 0;
+}

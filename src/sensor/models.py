@@ -134,3 +134,6 @@ class Sensor(Base):
 
     # Связь с Scenario (многие к одному)
     scenarios = relationship("Scenario", back_populates="sensor")
+
+    def __str__(self):
+        return f"ID: {self.id} | {self.name} | {self.model_id}"

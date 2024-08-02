@@ -1,9 +1,17 @@
 from sqlalchemy import select, func
 from typing import List, Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from src.auth import Admission, AdmissionStatus, User, Scenario
-from src.sensor import Location, Model, Accident, model_accident_association, SensorValue, SensorType
+from src.sensor import (Location,
+                        Model,
+                        Accident,
+                        model_accident_association,
+                        SensorValue,
+                        SensorType,
+                        Sensor,
+                        )
 
 
 async def get_admission_for_user_id(user_id: int, session: AsyncSession, include_completed: bool = True) -> Sequence[Admission]:
@@ -46,7 +54,7 @@ async def get_scenario_for_id(scenario_id: int, session: AsyncSession) -> Scenar
 
 
 async def get_location_for_id(location_id: int, session: AsyncSession) -> Location:
-    query = select(Location).where(location_id == Scenario.id)
+    query = select(Location).where(location_id == Location.id)
     result = await session.execute(query)
     location: Location = result.scalars().first()
     return location
@@ -67,7 +75,14 @@ async def get_location_names(session: AsyncSession) -> List[dict]:
     return location_list
 
 
-async def get_model_names(session: AsyncSession) -> List[str]:
+async def get_location_list(session: AsyncSession) -> Sequence[Location]:
+    locations_query = select(Location)
+    result = await session.execute(locations_query)
+    location_results = result.scalars().all()
+    return location_results
+
+
+async def get_model_names(session: AsyncSession) -> List[dict]:
     models_query = select(Model)
     result = await session.execute(models_query)
     model_results = result.scalars().all()
@@ -75,11 +90,25 @@ async def get_model_names(session: AsyncSession) -> List[str]:
     return model_list
 
 
+async def get_sensor_list(session: AsyncSession) -> Sequence[Sensor]:
+    sensors_query = select(Sensor)
+    result = await session.execute(sensors_query)
+    sensor_results = result.scalars().all()
+    return sensor_results
+
+
 async def get_accidents_for_model(session: AsyncSession, model_id: int) -> Sequence[Accident]:
     query = select(Accident).join(model_accident_association).join(Model).where(model_id == Model.id)
     result = await session.execute(query)
     accidents = result.scalars().all()
     return accidents
+
+
+async def get_sensor_for_id(session: AsyncSession, sensor_id: int) -> Sensor:
+    query = select(Sensor).where(sensor_id == Sensor.id)
+    result = await session.execute(query)
+    sensor = result.scalar_one_or_none()
+    return sensor
 
 
 async def get_name_sensor_value(session: AsyncSession):

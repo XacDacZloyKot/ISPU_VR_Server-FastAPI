@@ -1,0 +1,52 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/location/create_scenario.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+
+{% endblock %}
+
+{% block navTitle %}
+	<p class="navbar__title">Создание сценария</p>
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('get_choice_accident_for_scenario_page', location_selected=location_selected) }}" method="post" class="form-container-height">
+        <p class="title-table">Приборы</p>
+        <div class="table-wrapper form-container-height">
+            <table class="table-container">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название прибора</th>
+                        <th>Место</th>
+                        <th>Параметры</th>
+                        <th>Назначение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for option in sensor_options %}
+                        <tr>
+                            <td>{{ option.id }}</td>
+                            <td>{{ option.model.sensor_type.name }}</td>
+                            <td>{{ option.name }}<br>ККС:{{ option.KKS }}</td>
+                            <td class="column-error">
+                                {% for field, value in option.model.specification.items() %}
+                                    {{ field }}: {{ value }}<br>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <input type="radio" id="html" class="checkbox-input" name="sensor_selected" value="{{ option.id }}" title="radio-box">
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="submit-container">
+            <button type="submit" class="button orange submit">Выбрать аварии</button>
+        </div>
+    </form>
+{% endblock %}
