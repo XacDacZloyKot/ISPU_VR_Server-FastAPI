@@ -10,81 +10,83 @@
 {% endblock %}
 
 {% block content %}
-    <div class="location-container">
-        <div class="location-data">
-            <div class="location-data__name">
-                <p class="location-data__title"> {{ scenarios.location.name }} </p>
-            </div>
-            <div class="location-data__param">
-                <div class="location-data__param-insert">
-                    <p class="location-data-param__name">Статус:</p>
-                    <p class="location-data-param__value">{{ scenarios.location.status.value }}</p>
+    <div class="location-info-container">
+        <div class="location-container">
+            <div class="location-data">
+                <div class="location-data__name">
+                    <p class="location-data__title"> {{ scenarios.location.name }} </p>
                 </div>
-                <div class="location-data__param-insert">
-                    <p class="location-data-param__name">Ошибка в датчике (Id:{{ scenarios.sensor.id }}): {{ scenarios.sensor.KKS }}</p>
-                    <p class="location-data-param__value">{{ scenarios.sensor.model.name }}</p>
+                <div class="location-data__param">
+                    <div class="location-data__param-insert">
+                        <p class="location-data-param__name">Статус:</p>
+                        <p class="location-data-param__value">{{ scenarios.location.status.value }}</p>
+                    </div>
+                    <div class="location-data__param-insert">
+                        <p class="location-data-param__name">Ошибка в датчике (Id:{{ scenarios.sensor.id }}): {{ scenarios.sensor.KKS }}</p>
+                        <p class="location-data-param__value">{{ scenarios.sensor.model.name }}</p>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <h2 class="title-blue">
-        Приборы
-    </h2>
-    <div class="table-wrapper table-container-30">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>KKS</th>
-                    <th>Название</th>
-                    <th>Прибор</th>
-                    <th>Параметры</th>
-                    <th>Наличие ошибки</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for sensor in scenarios.location.sensors %}
-                <tr>
-                    <td>{{ sensor.id }}</td>
-                    <td>{{ sensor.KKS }}</td>
-                    <td>{{ sensor.name }}</td>
-                    <td>{{ sensor.model.sensor_type.name }}</td>
-                    <td>
-                        {% for field, value in sensor.model.specification.items() %}
-                            {{ field }}: {{ value }}<br>
-                        {% endfor %}
-                    </td>
-                    <td>{% if scenarios.sensor.id == sensor.id %}Да{% else %}Нет{% endif %}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </div>
-    <h2 class="title-red">
-        Авария
-    </h2>
-    <div class="table-wrapper table-container-30">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Название</th>
-                    <th>Параметры</th>
-                    <th>Механическая ошибки</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for accident in scenarios.accidents %}
-                <tr>
-                    <td>{{ accident.id }}</td>
-                    <td>{{ accident.name }}</td>
-                    <td>{% for field, value in accident.change_value.items() %}
-                            {{ field }}: {{ value }}<br>
-                        {% endfor %}</td>
-                    <td>{% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
+        <h2 class="title-blue">
+            Приборы
+        </h2>
+        <div class="table-wrapper sensor-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>KKS</th>
+                        <th>Название</th>
+                        <th>Прибор</th>
+                        <th>Параметры</th>
+                        <th>Наличие ошибки</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for sensor in scenarios.location.sensors %}
+                    <tr>
+                        <td>{{ sensor.id }}</td>
+                        <td>{{ sensor.KKS }}</td>
+                        <td>{{ sensor.name }}</td>
+                        <td>{{ sensor.model.sensor_type.name }}</td>
+                        <td>
+                            {% for field, value in sensor.model.specification.items() %}
+                                {{ field }}: {{ value }}<br>
+                            {% endfor %}
+                        </td>
+                        <td>{% if scenarios.sensor.id == sensor.id %}Да{% else %}Нет{% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <h2 class="title-red">
+            Авария
+        </h2>
+        <div class="table-wrapper accident-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Параметры</th>
+                        <th>Механическая ошибки</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for accident in scenarios.accidents %}
+                    <tr>
+                        <td>{{ accident.id }}</td>
+                        <td>{{ accident.name }}</td>
+                        <td>{% for field, value in accident.change_value.items() %}
+                                {{ field }}: {{ value }}<br>
+                            {% endfor %}</td>
+                        <td>{% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 {% endblock %}

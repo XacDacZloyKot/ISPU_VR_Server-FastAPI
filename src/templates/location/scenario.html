@@ -3,6 +3,7 @@
 {% block css %}
 	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
 {% endblock %}
 
 {% block navTitle %}
@@ -10,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="table-wrapper">
+    <div class="table-wrapper form-container-height-full">
         <table>
             <thead>
                 <tr>

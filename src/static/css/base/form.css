@@ -45,3 +45,12 @@
     max-height: 600px;
     height: calc(100% - 30px);
 }
+
+.screen-container-height{
+    max-height: 300px;
+}
+
+.form-container-height-full{
+    max-height: 640px;
+    height: calc(100% - 30px);
+}

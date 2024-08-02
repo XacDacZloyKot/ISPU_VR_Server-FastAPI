@@ -86,6 +86,7 @@ tr:first-child th {
 }
 
 .column-error{
+    padding: 6px 4px 6px 4px;
     font-size: 12px;
 }
 
