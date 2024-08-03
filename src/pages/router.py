@@ -907,3 +907,30 @@ async def post_task_assignment_for_curr_user(request: Request, user_id: int, tas
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
+
+
+@router.get("/location", response_class=HTMLResponse)
+async def get_location_page(request: Request, user: User = Depends(current_user),
+                            session: AsyncSession = Depends(get_async_session)):
+    try:
+        locations = await get_location_list(session=session)
+        return templates.TemplateResponse(
+            "/location/location.html",
+            {
+                'request': request,
+                'user': user,
+                "locations": locations,
+                'title': "ISPU - Scenario",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+
+

@@ -35,6 +35,7 @@ user_menu = [
         "access": "staff",
         "urls": [
             ("Сценарии", "get_scenario_page"),
+            ("Локации", "get_location_page"),
         ]
     },
     {
