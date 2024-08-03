@@ -1,0 +1,81 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+	<p class="navbar__title">Локация #{{ location.id }} "{{ location.name }}"</p>
+{% endblock %}
+
+{% block content %}
+    <div class="location-info-container">
+        <div class="location-container">
+            <div class="location-data">
+                <div class="location-data__name">
+                    <p class="location-data__title">{{ location.name }} ID:{{ location.id }}</p>
+                </div>
+                <div class="location-data__param">
+                    <div class="location-data__param-insert">
+                        <p class="location-data-param__name">Статус:</p>
+                        <p class="location-data-param__value">{{ location.status.value }}</p>
+                    </div>
+                    <div class="location-data__param-insert">
+                        <p class="location-data-param__name">Префаб:</p>
+                        <p class="location-data-param__value">{{ location.prefab }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if location.sensors %}
+            <h2 class="title-blue">
+                Приборы
+            </h2>
+            <div class="table-wrapper sensor-table-full">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>KKS</th>
+                            <th>Название</th>
+                            <th>Прибор</th>
+                            <th>Параметры</th>
+                            <th>Ошибки</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for sensor in location.sensors %}
+                        <tr>
+                            <td>{{ sensor.id }}</td>
+                            <td>{{ sensor.KKS }}</td>
+                            <td>{{ sensor.name }}</td>
+                            <td>{{ sensor.model.sensor_type.name }}</td>
+                            <td>
+                                {% for field, value in sensor.model.specification.items() %}
+                                    {{ field }}: {{ value }}<br>
+                                {% endfor %}
+                            </td>
+                            <td>
+                            {% for accident in sensor.model.accidents %}
+                                <div class="value-container">
+                                    {{ accident.name }}:<br>
+                                    {% for field, value in accident.change_value.items() %}
+                                        {{ field }}: {{ value }}<br>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+        <h2 class="title-blue">
+            Приборы ещё не назначены
+        </h2>
+        {% endif %}
+    </div>
+{% endblock %}

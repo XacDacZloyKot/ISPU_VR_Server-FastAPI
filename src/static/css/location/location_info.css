@@ -70,6 +70,10 @@
     height: 300px;
 }
 
+.sensor-table-full{
+    height: 600px;
+}
+
 .accident-table{
     height: 190px;
 }
