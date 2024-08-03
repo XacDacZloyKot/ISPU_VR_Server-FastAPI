@@ -36,6 +36,8 @@ user_menu = [
         "urls": [
             ("Сценарии", "get_scenario_page"),
             ("Локации", "get_location_page"),
+            ("Модели", "get_model_page"),
+            ("Сенсоры", "get_sensor_page"),
         ]
     },
     {

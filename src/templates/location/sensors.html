@@ -1,0 +1,61 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+	<p class="navbar__title">Модели</p>
+{% endblock %}
+
+{% block content %}
+    <div class="table-wrapper form-container-height-full">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Параметры модели</th>
+                    <th>Ошибки</th>
+                    <th>Опции</th>
+                </tr>
+            </thead>
+            <td>
+            {% for sensor in sensors %}
+                <tr>
+                    <td>{{ sensor.id }}</td>
+                    <td>{{ sensor.name }}<br>{{ sensor.KKS }}</td>
+                    <td>
+                        <div class="value-container">
+                            ID: {{ sensor.model.id }}<br>
+                            Прибор: {{ sensor.model.sensor_type.name }}<br>
+                            Параметры:<br>
+                            {% for field, value in sensor.model.specification.items() %}
+                                {{ field }}: {{ value }}<br>
+                            {% endfor %}
+                        </div>
+                    </td>
+                    <td>
+                        {% for accident in sensor.model.accidents %}
+                                {{ accident.name }},<br>
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <div class="location-option-column">
+                            <a href="" class="location-link unready">
+                                <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
+                            </a>
+                            <a href="#" class="location-link unready">
+                                <img src="/static/img/Redact.svg" alt="Назначение" class="location-icon">
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

@@ -909,7 +909,7 @@ async def post_task_assignment_for_curr_user(request: Request, user_id: int, tas
                                                                             "with the assignment task page."})
 
 
-@router.get("/location", response_class=HTMLResponse)
+@router.get("/locations", response_class=HTMLResponse)
 async def get_location_page(request: Request, user: User = Depends(current_user),
                             session: AsyncSession = Depends(get_async_session)):
     try:
@@ -934,7 +934,7 @@ async def get_location_page(request: Request, user: User = Depends(current_user)
                                                                                                 " with the scripts."})
 
 
-@router.get("/model", response_class=HTMLResponse)
+@router.get("/models", response_class=HTMLResponse)
 async def get_model_page(request: Request, user: User = Depends(current_user),
                             session: AsyncSession = Depends(get_async_session)):
     try:
@@ -945,6 +945,31 @@ async def get_model_page(request: Request, user: User = Depends(current_user),
                 'request': request,
                 'user': user,
                 "models": models,
+                'title': "ISPU - Scenario",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+
+
+@router.get("/sensors", response_class=HTMLResponse)
+async def get_sensor_page(request: Request, user: User = Depends(current_user),
+                            session: AsyncSession = Depends(get_async_session)):
+    try:
+        sensors = await get_all_sensors(session=session)
+        return templates.TemplateResponse(
+            "/location/sensors.html",
+            {
+                'request': request,
+                'user': user,
+                "sensors": sensors,
                 'title': "ISPU - Scenario",
                 'menu': user_menu,
             }
