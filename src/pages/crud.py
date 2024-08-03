@@ -152,6 +152,12 @@ async def get_all_models(session: AsyncSession) -> Sequence[Model]:
     models = result.scalars().all()
     return models
 
+async def get_all_sensors(session: AsyncSession) -> Sequence[Model]:
+    query = select(Sensor)
+    result = await session.execute(query)
+    sensors = result.scalars().all()
+    return sensors
+
 
 async def get_models_for_id(session: AsyncSession, models_id: list[int]) -> Sequence[Model]:
     result = await session.execute(select(Model).where(Model.id.in_(models_id)))

@@ -21,7 +21,7 @@ from src.pages.crud import (
     get_users_without_scenario,
     get_admission_for_id, get_name_sensor_value, get_sensor_value_for_name, get_sensor_values_for_id,
     create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
-    get_sensor_for_id, get_model_for_id,
+    get_sensor_for_id, get_model_for_id, get_all_sensors,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -797,14 +797,14 @@ async def get_create_location_page(request: Request,
                                    user: User = Depends(staff_user),
                                    session: AsyncSession = Depends(get_async_session)):
     try:
-        models = await get_all_models(session=session)
+        sensors = await get_all_sensors(session=session)
         return templates.TemplateResponse(
             "/staff/create_location/create_location.html",
             {
                 'request': request,
                 'user': user,
                 'menu': user_menu,
-                'models_options': models,
+                'sensors_options': sensors,
                 'status_options': LocationStatus,
                 'title': "ISPU - Create scenario!",
             }
@@ -824,7 +824,7 @@ async def get_create_location_page(request: Request,
 
 @router.post("/location/create/", response_class=HTMLResponse)
 async def post_create_location_page(request: Request,
-                                    model_selected: list[int] = Form(...),
+                                    sensor_selected: list[int] = Form(...),
                                     name: str = Form(...), prefab: str = Form(...),
                                     status: LocationStatus = Form(...),
                                     user: User = Depends(staff_user),
@@ -834,8 +834,8 @@ async def post_create_location_page(request: Request,
         session.add(new_location)
         await session.flush()
         location_model = [
-            {"location_id": new_location.id, "model_id": model_id}
-            for model_id in model_selected
+            {"location_id": new_location.id, "sensor_id": sensor_id}
+            for sensor_id in sensor_selected
         ]
         await session.execute(insert(sensor_location_association).values(location_model))
         await session.commit()

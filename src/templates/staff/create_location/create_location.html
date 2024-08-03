@@ -2,8 +2,10 @@
 
 {% block css %}
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/select.css') }}">
-    <link rel="stylesheet" href="{{ url_for('static', path='css/base/multiple_select.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/location/create_location.css') }}">
 {% endblock %}
 
 {% block navTitle %}
@@ -28,15 +30,38 @@
                 <div class="select-arrow-1"></div>
             </div>
         </div>
-        <div class="form-group">
-            <label for="model_selected">Список датчиков:</label>
-            <div class="select select--multiple">
-                <select name="model_selected" id="model_selected" class="multi-select" multiple size="10">
-                    {% for option in models_options %}
-                        <option value="{{ option.id }}">{{ option.sensor_type.name }}</option>
+        <div class="table-wrapper table-container">
+            <table class="table-container">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название прибора</th>
+                        <th>Место</th>
+                        <th>Параметры</th>
+                        <th>Назначение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for option in sensors_options %}
+                        <tr>
+                            <td>{{ option.id }}</td>
+                            <td>{{ option.model.sensor_type.name }}</td>
+                            <td>{{ option.name }}<br>ККС:{{ option.KKS }}</td>
+                            <td class="column-error">
+                                {% for field, value in option.model.specification.items() %}
+                                    {{ field }}: {{ value }}<br>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <div>
+                                    <input class="checkbox-input" title="Sensor" type="checkbox" id="{{ option.id }}"
+                                           name="sensor_selected" value="{{ option.id }}">
+                                </div>
+                            </td>
+                        </tr>
                     {% endfor %}
-                </select>
-            </div>
+                </tbody>
+            </table>
         </div>
         <div class="form-group">
             <label for="prefab">Префаб: </label>
