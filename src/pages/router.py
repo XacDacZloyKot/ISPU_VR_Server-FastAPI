@@ -934,3 +934,27 @@ async def get_location_page(request: Request, user: User = Depends(current_user)
                                                                                                 " with the scripts."})
 
 
+@router.get("/model", response_class=HTMLResponse)
+async def get_model_page(request: Request, user: User = Depends(current_user),
+                            session: AsyncSession = Depends(get_async_session)):
+    try:
+        models = await get_all_models(session=session)
+        return templates.TemplateResponse(
+            "/location/model.html",
+            {
+                'request': request,
+                'user': user,
+                "models": models,
+                'title': "ISPU - Scenario",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+
