@@ -3,6 +3,7 @@
 {% block css %}
     <link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/profile/home.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/profile/profile.css') }}">
 {% endblock %}
 
 {% block navTitle %}
@@ -46,7 +47,10 @@
         <br>
         </div>
     </div>
-    <h1 class="title-orange">Активные задачи</h1>
+    <div class="title_add_task">
+        <h2 class="title-orange">Активные задачи</h2>
+        <a href="{{ url_for("get_task_assignment_for_curr_user", user_id=user_for_id.id) }}" class="button orange slim-title">Добавить</a>
+    </div>
     <div class="table">
         <table>
             <tbody>

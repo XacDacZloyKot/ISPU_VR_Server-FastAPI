@@ -1,0 +1,56 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/profile/add_task_user.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+	<p class="navbar__title">Сценарии</p>
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('post_task_assignment_for_curr_user', user_id=user_id) }}" method="post">
+        <div class="table-wrapper table-task-container">
+            <table class="table-container">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Прибор</th>
+                    <th>Ошибки</th>
+                    <th>Назначение</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for scenario in scenarios %}
+                    <tr>
+                        <td>{{ scenario.id }}</td>
+                        <td>{{ scenario.location.name }}<br>{{ scenario.name }}</td>
+                        <td>
+                            Назначение: {{ scenario.sensor.name }}<br>
+                            ККС: {{ scenario.sensor.KKS }}<br>
+                            Датчик: {{ scenario.sensor.model.sensor_type.name }}<br>
+                        </td>
+                        <td class="column-error">
+                            {% for accident in scenario.accidents %}
+                                {{ accident.name }},<br>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <div>
+                                <input class="checkbox-input" title="Scenario" type="checkbox" id="{{ scenario.id }}"
+                                       name="tasks_ids" value="{{ scenario.id }}">
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+        <div class="submit-container">
+            <button type="submit" class="button orange submit">Добавить задачу</button>
+        </div>
+    </form>
+{% endblock %}

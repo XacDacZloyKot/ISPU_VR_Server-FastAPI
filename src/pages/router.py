@@ -21,7 +21,7 @@ from src.pages.crud import (
     get_users_without_scenario,
     get_admission_for_id, get_name_sensor_value, get_sensor_value_for_name, get_sensor_values_for_id,
     create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
-    get_sensor_for_id, get_model_for_id, get_all_sensors,
+    get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -295,7 +295,7 @@ async def get_task_assignment(request: Request, scenario_id: int, current_user: 
         scenario = await get_scenario_for_id(scenario_id=scenario_id, session=session)
         users = await get_users_without_scenario(scenario_id=scenario_id, session=session)
         return templates.TemplateResponse(
-            "/staff/add_task_user.html",
+            "/staff/assignment_task/add_task_user.html",
             {
                 'request': request,
                 'user': current_user,
@@ -853,3 +853,57 @@ async def post_create_location_page(request: Request,
         return templates.TemplateResponse("auth/loginAdmin.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."})
+
+
+@router.get("/scenario/add_user/{user_id}", response_class=HTMLResponse)
+async def get_task_assignment_for_curr_user(request: Request, user_id: int, current_user: User = Depends(staff_user),
+                                            session: AsyncSession = Depends(get_async_session)):
+    try:
+        scenarios = await get_scenarios_active_list(session=session)
+        return templates.TemplateResponse(
+            "/staff/assignment_task/task_for_curr_user.html",
+            {
+                'request': request,
+                'user_id': user_id,
+                'user': current_user,
+                'scenarios': scenarios,
+                'title': "ISPU - Assignment task!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})
+
+
+@router.post("/scenario/add_user/{user_id}", response_class=HTMLResponse)
+async def post_task_assignment_for_curr_user(request: Request, user_id: int, tasks_ids: list[int] = Form(...),
+                               current_user: User = Depends(staff_user),
+                               session: AsyncSession = Depends(get_async_session)):
+    try:
+        for task_id in tasks_ids:
+            admission = Admission(status=AdmissionStatus.ACTIVE, user_id=user_id, rating="0", scenario_id=task_id)
+            session.add(admission)
+        await session.commit()
+        response = RedirectResponse(url=request.url_for("get_profile_for_id_page", user_id=user_id),
+                                    status_code=HTTPStatus.MOVED_PERMANENTLY)
+        return response
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the assignment task page."})

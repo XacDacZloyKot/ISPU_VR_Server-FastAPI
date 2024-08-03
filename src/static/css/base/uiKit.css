@@ -63,6 +63,10 @@
     height: 24px;
 }
 
+.slim-title{
+    height: 35px;
+}
+
 /* Input fields */
 input {
     width: 100%;

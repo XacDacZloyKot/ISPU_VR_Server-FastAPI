@@ -5,6 +5,7 @@ from sqlalchemy.orm import joinedload
 
 from src.auth import Admission, AdmissionStatus, User, Scenario
 from src.sensor import (Location,
+                        LocationStatus,
                         Model,
                         Accident,
                         model_accident_association,
@@ -51,6 +52,18 @@ async def get_scenario_for_id(scenario_id: int, session: AsyncSession) -> Scenar
     result = await session.execute(query)
     scenario: Scenario = result.scalars().first()
     return scenario
+
+
+async def get_scenarios_active_list(session: AsyncSession) -> Sequence[Scenario]:
+    query = (
+        select(Scenario)
+        .join(Location)
+        .where(LocationStatus.COMPLETED == Location.status)
+    )
+    result = await session.execute(query)
+    scenarios = result.scalars().all()
+
+    return scenarios
 
 
 async def get_location_for_id(location_id: int, session: AsyncSession) -> Location:
