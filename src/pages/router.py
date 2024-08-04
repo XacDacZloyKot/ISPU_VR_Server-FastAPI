@@ -21,7 +21,8 @@ from src.pages.crud import (
     get_users_without_scenario,
     get_admission_for_id, get_name_sensor_value, get_sensor_value_for_name, get_sensor_values_for_id,
     create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
-    get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list,
+    get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list, get_all_sensor_types,
+    get_all_sensor_values,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -348,7 +349,7 @@ async def get_create_scenario_page(request: Request, user: User = Depends(staff_
     try:
         location = await get_location_list(session=session)
         return templates.TemplateResponse(
-            "/staff/create_scenario/choice_location.html",
+            "/staff/create/scenario/choice_location.html",
             {
                 'request': request,
                 'user': user,
@@ -377,7 +378,7 @@ async def get_choice_model_for_scenario_page(request: Request, location_selected
         location = await get_location_for_id(session=session, location_id=location_selected)
         sensors = location.sensors
         return templates.TemplateResponse(
-            "/staff/create_scenario/choice_model.html",
+            "/staff/create/scenario/choice_model.html",
             {
                 'request': request,
                 'user': user,
@@ -407,7 +408,7 @@ async def get_choice_accident_for_scenario_page(request: Request, location_selec
         sensor = await get_sensor_for_id(session=session, sensor_id=sensor_selected)
         print(sensor.model.accidents)
         return templates.TemplateResponse(
-            "/staff/create_scenario/choice_accident.html",
+            "/staff/create/scenario/choice_accident.html",
             {
                 'request': request,
                 'user': user,
@@ -626,7 +627,7 @@ async def get_create_model_page(request: Request, user: User = Depends(staff_use
     try:
         sensor_value_names = await get_name_sensor_value(session=session)
         return templates.TemplateResponse(
-            "/staff/create_model/choice_sensor_type.html",
+            "/staff/create/model/choice_sensor_type.html",
             {
                 'request': request,
                 'user': user,
@@ -654,7 +655,7 @@ async def get_choice_fields(request: Request, model_selected: str = Form(...), u
         print("Страница выбора полей")
         values = await get_sensor_value_for_name(session=session, sensor_name=model_selected)
         return templates.TemplateResponse(
-            "/staff/create_model/choice_fields.html",
+            "/staff/create/model/choice_fields.html",
             {
                 'request': request,
                 'user': user,
@@ -721,7 +722,7 @@ async def get_add_accident_page(
     try:
         model = await get_model_for_id(session=session, model_id=model_id)
         return templates.TemplateResponse(
-            "/staff/create_model/add_accident.html",
+            "/staff/create/model/add_accident.html",
             {
                 'request': request,
                 'user': user,
@@ -799,7 +800,7 @@ async def get_create_location_page(request: Request,
     try:
         sensors = await get_all_sensors(session=session)
         return templates.TemplateResponse(
-            "/staff/create_location/create_location.html",
+            "/staff/create/location/create_location.html",
             {
                 'request': request,
                 'user': user,
@@ -1063,3 +1064,75 @@ async def get_model_for_id_page(request: Request, model_id: int, current_user: U
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
+
+
+@router.get("/model/update/{model_id}", response_class=HTMLResponse)
+async def get_update_model_page(request: Request, model_id: int, current_user: User = Depends(staff_user),
+                                session: AsyncSession = Depends(get_async_session)):
+    try:
+        model = await get_model_for_id(model_id=model_id, session=session)
+        sensor_types = await get_all_sensor_types(session=session)
+        sensor_values = await get_all_sensor_values(session=session)
+        selected_fields = model.specification
+        selected_fields['sensor_type'] = model.sensor_type.name
+
+        return templates.TemplateResponse(
+            "/staff/update/model/update_model.html",
+            {
+                "request": request,
+                'user': current_user,
+                "model": model,
+                "sensor_types": sensor_types,
+                "sensor_values": sensor_values,
+                'selected_fields': selected_fields,
+                'title': "ISPU - User Profile!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+
+
+@router.post("/model/update/{model_id}", response_class=HTMLResponse)
+async def post_update_model_page(request: Request, model_id: int, fields_selected: list[int] = Form(...),
+                                 model_sensor_type: str = Form(...),
+                                 current_user: User = Depends(staff_user),
+                                 session: AsyncSession = Depends(get_async_session)):
+    try:
+        model = await get_model_for_id(model_id=model_id, session=session)
+        fields = await get_sensor_values_for_id(session=session, fields_id=fields_selected)
+        fields_dict = dict()
+        for field in fields:
+            fields_dict[field.field] = f"{field.value} {field.measurement}"
+        id: int = await create_or_get_sensor_type(session=session, sensor_type_name=model_sensor_type)
+        model.specification = fields_dict
+        model.sensor_type_id = id
+        session.add(model)
+        await session.commit()
+        return RedirectResponse(url=request.url_for("get_model_for_id_page", model_id=model.id),
+                                status_code=HTTPStatus.MOVED_PERMANENTLY)
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+
+
+
+
+
+
+

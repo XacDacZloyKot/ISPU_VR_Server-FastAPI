@@ -15,7 +15,8 @@ from src.sensor import (Location,
                         )
 
 
-async def get_admission_for_user_id(user_id: int, session: AsyncSession, include_completed: bool = True) -> Sequence[Admission]:
+async def get_admission_for_user_id(user_id: int, session: AsyncSession, include_completed: bool = True) -> Sequence[
+    Admission]:
     if include_completed:
         query = select(Admission).where(user_id == Admission.user_id)
     else:
@@ -165,7 +166,8 @@ async def get_all_models(session: AsyncSession) -> Sequence[Model]:
     models = result.scalars().all()
     return models
 
-async def get_all_sensors(session: AsyncSession) -> Sequence[Model]:
+
+async def get_all_sensors(session: AsyncSession) -> Sequence[Sensor]:
     query = select(Sensor)
     result = await session.execute(query)
     sensors = result.scalars().all()
@@ -176,3 +178,17 @@ async def get_models_for_id(session: AsyncSession, models_id: list[int]) -> Sequ
     result = await session.execute(select(Model).where(Model.id.in_(models_id)))
     models = result.scalars().all()
     return models
+
+
+async def get_all_sensor_types(session: AsyncSession) -> Sequence[SensorType]:
+    query = select(SensorType).order_by(SensorType.name)
+    result = await session.execute(query)
+    sensors_types = result.scalars().all()
+    return sensors_types
+
+
+async def get_all_sensor_values(session: AsyncSession) -> Sequence[SensorValue]:
+    query = select(SensorValue).order_by(SensorValue.sensor_type)
+    result = await session.execute(query)
+    sensors_values = result.scalars().all()
+    return sensors_values

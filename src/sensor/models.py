@@ -116,6 +116,9 @@ class SensorValue(Base):
     value = Column(String(64), doc="Значение")
     measurement = Column(String(64), doc="Величина измерения")
 
+    def __str__(self):
+        return f"{self.sensor_type} | {self.field}: {self.value} {self.measurement}"
+
 
 class Sensor(Base):
     __tablename__ = "sensor"
