@@ -1,0 +1,47 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+    <p class="navbar__title">Модель #{{ model.id }} Датчик:{{ model.name }}</p>
+{% endblock %}
+
+{% block content %}
+    <div class="location-info-container">
+        <div class="">
+            <div class="location-data">
+                <div class="location-data__name">
+                    <p class="location-data__title">Параметры датчика:</p>
+                </div>
+                <div class="location-data__param">
+                    <div class="location-data-param__value">
+                        {% for field, value in model.specification.items() %}
+                            {{ field }}: {{ value }},<br>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="location-data">
+                    <div class="location-data__name">
+                        <p class="location-data__title">Ошибки датчика:</p>
+                    </div>
+                    <div class="location-data__param">
+                        <div class="location-data-param__value">
+                            {% for accident in model.accidents %}
+                                <div class="value-container">
+                                    {{ accident.name }}:<br>
+                                    {% for field, value in accident.change_value.items() %}
+                                        {{ field }}: {{ value }},<br>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+{% endblock %}
