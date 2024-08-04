@@ -1072,9 +1072,6 @@ async def get_update_model_page(request: Request, model_id: int, current_user: U
     try:
         model = await get_model_for_id(model_id=model_id, session=session)
         sensor_types = await get_all_sensor_types(session=session)
-        sensor_values = await get_all_sensor_values(session=session)
-        selected_fields = model.specification
-        selected_fields['sensor_type'] = model.sensor_type.name
 
         return templates.TemplateResponse(
             "/staff/update/model/update_model.html",
@@ -1083,7 +1080,38 @@ async def get_update_model_page(request: Request, model_id: int, current_user: U
                 'user': current_user,
                 "model": model,
                 "sensor_types": sensor_types,
+                'title': "ISPU - User Profile!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+
+
+@router.post("/model/update/fields/{model_id}", response_class=HTMLResponse)
+async def get_update_model_page_choice_field(request: Request, model_id: int, current_user: User = Depends(staff_user),
+                                             model_sensor_type: str = Form(...),
+                                             session: AsyncSession = Depends(get_async_session)):
+    try:
+        model = await get_model_for_id(model_id=model_id, session=session)
+        sensor_values = await get_sensor_value_for_name(sensor_name=model_sensor_type, session=session)
+        selected_fields = model.specification
+        return templates.TemplateResponse(
+            "/staff/update/model/update_model_field.html",
+            {
+                "request": request,
+                'user': current_user,
+                "model": model,
                 "sensor_values": sensor_values,
+                "model_sensor_type": model_sensor_type,
                 'selected_fields': selected_fields,
                 'title': "ISPU - User Profile!",
                 'menu': user_menu,

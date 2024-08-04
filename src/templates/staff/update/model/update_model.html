@@ -12,11 +12,11 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('post_update_model_page', model_id=model.id) }}" method="post" class="form-container">
+    <form action="{{ url_for('get_update_model_page_choice_field', model_id=model.id) }}" method="post" class="form-container">
         <div class="form-group">
             <label for="model_sensor_type">Датчик:</label>
             <div class="select-wrapper">
-                <select name="model_sensor_type" id="model_sensor_type" required>
+                <select name="model_sensor_type" id="model_sensor_type">
                     {% for option in sensor_types %}
                         <option value="{{ option.name }}" {% if option.id == model.sensor_type.id %}selected{% endif %}>
                             {{ option.name }}
@@ -26,21 +26,8 @@
                 <div class="select-arrow-1"></div>
             </div>
         </div>
-        <div class="form-group">
-            <label for="fields-id">Параметры:</label>
-            <div class="select select--multiple">
-                <select name="fields_selected" id="fields-id" class="multi-select" multiple size="10">
-                    {% for option in sensor_values %}
-                        {% set option_value = option.value ~ ' ' ~ option.measurement %}
-                        <option value="{{ option.id }}" {% if option_value in selected_fields.values() and option.sensor_type == selected_fields.sensor_type %}selected{% endif %}>
-                            {{ option.sensor_type }} {{ option.field }}: {{ option.value }} {{ option.measurement }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
         <div class="submit-container">
-            <button type="submit" class="button orange submit">Создать</button>
+            <button type="submit" class="button orange submit">Выбор параметров</button>
         </div>
     </form>
 {% endblock %}
