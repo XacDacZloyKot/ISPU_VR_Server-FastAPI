@@ -1,0 +1,60 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+    <p class="navbar__title">Сенсор #{{ sensor.id }} "{{ sensor.name }}"</p>
+{% endblock %}
+
+{% block content %}
+    <div class="location-info-container">
+        <div class="">
+            <div class="location-data">
+                <div class="location-data__name">
+                    <p class="location-data__title">{{ sensor.name }} ID:{{ sensor.id }}</p>
+                </div>
+                <div class="location-data__param">
+                    <div class="location-data__param-insert">
+                        <p class="location-data-param__name">Датчик:</p>
+                        <p class="location-data-param__value">{{ sensor.model.sensor_type.name }}</p>
+                        <p class="location-data-param__name">ККС:</p>
+                        <p class="location-data-param__value">{{ sensor.KKS }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="location-data">
+                <div class="location-data__name">
+                    <p class="location-data__title">Параметры датчика:</p>
+                </div>
+                <div class="location-data__param">
+                    <div class="location-data-param__value">
+                        {% for field, value in sensor.model.specification.items() %}
+                            {{ field }}: {{ value }},<br>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            <div class="location-data">
+                    <div class="location-data__name">
+                        <p class="location-data__title">Ошибки датчика:</p>
+                    </div>
+                    <div class="location-data__param">
+                        <div class="location-data-param__value">
+                            {% for accident in sensor.model.accidents %}
+                                <div class="value-container">
+                                    {{ accident.name }}:<br>
+                                    {% for field, value in accident.change_value.items() %}
+                                        {{ field }}: {{ value }},<br>
+                                    {% endfor %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+{% endblock %}

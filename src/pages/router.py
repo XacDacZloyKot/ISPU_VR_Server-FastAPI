@@ -1009,3 +1009,30 @@ async def get_location_for_id_page(request: Request, location_id: int, current_u
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the profile page."})
+
+
+@router.get("/sensor/{sensor_id}", response_class=HTMLResponse)
+async def get_sensor_for_id_page(request: Request, sensor_id: int, current_user: User = Depends(staff_user),
+                                   session: AsyncSession = Depends(get_async_session)):
+    try:
+        sensor = await get_sensor_for_id(sensor_id=sensor_id, session=session)
+        return templates.TemplateResponse(
+            "/location/sensor_info.html",
+            {
+                "request": request,
+                'user': current_user,
+                "sensor": sensor,
+                'title': "ISPU - User Profile!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the profile page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the profile page."})
