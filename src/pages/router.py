@@ -1057,9 +1057,9 @@ async def get_model_for_id_page(request: Request, model_id: int, current_user: U
         print(f"SQLAlchemy error occurred: {e}")
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
-                                                                            "with the sensor page."})
+                                                                            "with the model page."})
     except Exception as e:
         print(e)
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
-                                                                            "with the sensor page."})
+                                                                            "with the model page."})
