@@ -550,7 +550,7 @@ async def get_update_user_page(request: Request, user_id: int, user: User = Depe
     try:
         current_user = await get_user_for_id(user_id=user_id, session=session)
         return templates.TemplateResponse(
-            "/staff/update_user.html",
+            "/staff/update/user/update_user.html",
             {
                 'request': request,
                 'user': user,
@@ -614,7 +614,7 @@ async def get_update_admission_page(
     try:
         admission = await get_admission_for_id(admission_id=admission_id, session=session)
         return templates.TemplateResponse(
-            "/staff/update_admission_for_user.html",
+            "/staff/update/admission/update_admission_for_user.html",
             {
                 'request': request,
                 'user': user,
@@ -665,7 +665,7 @@ async def put_admission(
         })
     except ValidationError as e:
         error_message = str(e)
-        return templates.TemplateResponse("/staff/update_admission_for_user.html", {
+        return templates.TemplateResponse("/staff/update/admission/update_admission_for_user.html", {
             "request": request,
             "error": error_message,
             'admission': admission,
@@ -1162,6 +1162,62 @@ async def post_update_model_page(request: Request, model_id: int, fields_selecte
 # endregion
 
 
+#  region Update Sensor
+@router.get("/sensor/update/{sensor_id}", response_class=HTMLResponse)
+async def get_update_sensor_page(request: Request, sensor_id: int, current_user: User = Depends(staff_user),
+                                session: AsyncSession = Depends(get_async_session)):
+    try:
+        models = await get_all_models(session=session)
+        sensor = await get_sensor_for_id(session=session, sensor_id=sensor_id)
+        return templates.TemplateResponse(
+            "/staff/update/sensor/update_sensor.html",
+            {
+                "request": request,
+                'user': current_user,
+                "models": models,
+                "sensor": sensor,
+                'title': "ISPU - User Profile!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+
+
+@router.post("/sensor/update/{sensor_id}", response_class=HTMLResponse)
+async def post_update_model_page(request: Request, sensor_id: int, model_selected: int = Form(...),
+                                 name: str = Form(...),
+                                 KKS: str = Form(...),
+                                 current_user: User = Depends(staff_user),
+                                 session: AsyncSession = Depends(get_async_session)):
+    try:
+        sensor = await get_sensor_for_id(session=session, sensor_id=sensor_id)
+        sensor.KKS = KKS
+        sensor.name = name
+        sensor.model_id = model_selected
+        session.add(sensor)
+        await session.commit()
+        return RedirectResponse(url=request.url_for("get_sensor_page"),
+                                status_code=HTTPStatus.MOVED_PERMANENTLY)
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the sensor page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the sensor page."})
+# endregion
 
 
 

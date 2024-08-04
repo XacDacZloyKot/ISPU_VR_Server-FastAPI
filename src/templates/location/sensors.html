@@ -1,31 +1,31 @@
 {% extends '/location/base.html' %}
 
 {% block css %}
-	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
 {% endblock %}
 
 {% block navTitle %}
-	<p class="navbar__title">Модели</p>
+    <p class="navbar__title">Сенсоры</p>
 {% endblock %}
 
 {% block content %}
     <div class="table-wrapper form-container-height-full">
         <table>
             <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Название</th>
-                    <th>Параметры модели</th>
-                    <th>Ошибки</th>
-                    <th>Опции</th>
-                </tr>
+            <tr>
+                <th>ID</th>
+                <th>Название</th>
+                <th>Параметры модели</th>
+                <th>Ошибки</th>
+                <th>Опции</th>
+            </tr>
             </thead>
             <td>
-            {% for sensor in sensors %}
-                <tr>
+                {% for sensor in sensors %}
+                    <tr>
                     <td>{{ sensor.id }}</td>
                     <td>{{ sensor.name }}<br>{{ sensor.KKS }}</td>
                     <td>
@@ -40,21 +40,23 @@
                     </td>
                     <td>
                         {% for accident in sensor.model.accidents %}
-                                {{ accident.name }},<br>
+                            {{ accident.name }},<br>
                         {% endfor %}
                     </td>
                     <td>
                         <div class="location-option-column">
-                            <a href="{{ url_for("get_sensor_for_id_page", sensor_id=sensor.id) }}" class="location-link">
+                            <a href="{{ url_for("get_sensor_for_id_page", sensor_id=sensor.id) }}"
+                               class="location-link">
                                 <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
                             </a>
-                            <a href="#" class="location-link unready">
+                            <a href="{{ url_for("get_update_sensor_page", sensor_id=sensor.id) }}"
+                               class="location-link">
                                 <img src="/static/img/Redact.svg" alt="Назначение" class="location-icon">
                             </a>
                         </div>
                     </td>
-                </tr>
-            {% endfor %}
+                    </tr>
+                {% endfor %}
             </tbody>
         </table>
     </div>
