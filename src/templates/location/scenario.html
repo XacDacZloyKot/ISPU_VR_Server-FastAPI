@@ -44,6 +44,9 @@
                             <a href="{{ url_for("get_scenario_for_id_page", scenario_id=scenario.id) }}" class="location-link">
                                 <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
                             </a>
+                            <a href="{{ url_for("get_update_scenario_page", scenario_id=scenario.id) }}" class="location-link">
+                                <img src="/static/img/Redact.svg" alt="Детально" class="location-icon">
+                            </a>
                             {% if scenario.location.status.value == "Готова" %}
                                 <a href="{{ url_for("get_task_assignment", scenario_id=scenario.id) }}" class="location-link">
                                     <img src="/static/img/Subtract.svg" alt="Назначение" class="location-icon">

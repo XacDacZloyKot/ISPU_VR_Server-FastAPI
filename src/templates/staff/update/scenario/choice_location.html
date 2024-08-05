@@ -1,0 +1,57 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/location/create_scenario.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+
+{% endblock %}
+
+{% block navTitle %}
+	<p class="navbar__title">Обновление сценария #{{ scenario.id }} {{ scenario.name }}</p>
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('get_choice_sensor_for_update_scenario_page', scenario_id=scenario.id) }}" method="post" class="form-container-height">
+        <p class="title-table">Локации</p>
+        <div class="table-wrapper form-container-height">
+            <table class="table-container">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Приборы</th>
+                        <th>Назначение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for option in locations %}
+                        <tr>
+                            <td>{{ option.id }}</td>
+                            <td>{{ option.name }}</td>
+                            <td class="column-error">
+                                {% for sensor in option.sensors %}
+                                    {{ sensor.name }}<br>
+                                    ККС:{{ sensor.KKS }}<br>
+                                    Прибор:{{ sensor.model.sensor_type.name }}<br><br>
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <input type="radio" id="html" class="checkbox-input"
+                                       name="location_selected"
+                                       value="{{ option.id }}" title="radio-box"
+                                       {% if option.id == scenario.location.id %}
+                                           checked
+                                       {% endif %}>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="submit-container">
+            <button type="submit" class="button orange submit">Выбрать прибора</button>
+        </div>
+    </form>
+{% endblock %}

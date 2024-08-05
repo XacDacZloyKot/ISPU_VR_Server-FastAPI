@@ -22,7 +22,7 @@ from src.pages.crud import (
     get_admission_for_id, get_name_sensor_value, get_sensor_value_for_name, get_sensor_values_for_id,
     create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
     get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list, get_all_sensor_types,
-    get_all_sensor_values, delete_all_connection_location_model,
+    get_all_sensor_values, delete_all_connection_location_model, delete_all_connection_scenario_accident,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -1295,7 +1295,6 @@ async def post_update_location_page(request: Request,
             "error": "There is some problem with the create scenario page."})
 # endregion
 
-
 # region Update Scenario
 
 
@@ -1304,15 +1303,17 @@ async def get_update_scenario_page(request: Request, scenario_id: int,
                                    user: User = Depends(staff_user),
                                    session: AsyncSession = Depends(get_async_session)):
     try:
-        location = await get_location_list(session=session)
+        scenario = await get_scenario_for_id(session=session, scenario_id=scenario_id)
+        locations = await get_location_list(session=session)
         return templates.TemplateResponse(
-            "/staff/create/scenario/choice_location.html",
+            "/staff/update/scenario/choice_location.html",
             {
                 'request': request,
                 'user': user,
                 'menu': user_menu,
-                'title': "ISPU - Create scenario!",
-                'location_options': location,
+                'title': "ISPU - Update scenario!",
+                'locations': locations,
+                'scenario': scenario,
             }
         )
     except SQLAlchemyError as e:
@@ -1327,22 +1328,29 @@ async def get_update_scenario_page(request: Request, scenario_id: int,
                                                                             "with the create scenario page."})
 
 
-@router.post("/scenario/create/model/", response_class=HTMLResponse)
-async def get_choice_model_for_scenario_page(request: Request, location_selected: int = Form(...),
-                                             user: User = Depends(staff_user),
-                                             session: AsyncSession = Depends(get_async_session)):
+@router.post("/scenario/update/model/{scenario_id}", response_class=HTMLResponse)
+async def get_choice_sensor_for_update_scenario_page(request: Request, scenario_id: int,
+                                                     location_selected: int = Form(...),
+                                                     user: User = Depends(staff_user),
+                                                     session: AsyncSession = Depends(get_async_session)):
     try:
+        scenario = await get_scenario_for_id(session=session, scenario_id=scenario_id)
         location = await get_location_for_id(session=session, location_id=location_selected)
+        is_changed = False
+        if scenario.location.id == location.id:
+            is_changed = True
         sensors = location.sensors
         return templates.TemplateResponse(
-            "/staff/create/scenario/choice_model.html",
+            "/staff/update/scenario/choice_sensor.html",
             {
                 'request': request,
                 'user': user,
                 'menu': user_menu,
-                'title': "ISPU - Create scenario!",
+                'title': "ISPU - Update scenario!",
                 'location_selected': location_selected,
+                'scenario': scenario,
                 'sensor_options': sensors,
+                'is_changed': is_changed,
             }
         )
     except SQLAlchemyError as e:
@@ -1357,23 +1365,29 @@ async def get_choice_model_for_scenario_page(request: Request, location_selected
                                                                             "with the create scenario page."})
 
 
-@router.post("/scenario/create/accident/{location_selected}", response_class=HTMLResponse)
-async def get_choice_accident_for_scenario_page(request: Request, location_selected: int,
-                                                sensor_selected: int = Form(...), user: User = Depends(staff_user),
-                                                session: AsyncSession = Depends(get_async_session)):
+@router.post("/scenario/update/accident/{scenario_id}", response_class=HTMLResponse)
+async def get_choice_accident_for_update_scenario_page(request: Request,
+                                                       scenario_id: int, location_selected: int = Form(...),
+                                                       sensor_selected: int = Form(None), user: User = Depends(staff_user),
+                                                       session: AsyncSession = Depends(get_async_session)):
     try:
+        scenario = await get_scenario_for_id(session=session, scenario_id=scenario_id)
         sensor = await get_sensor_for_id(session=session, sensor_id=sensor_selected)
-        print(sensor.model.accidents)
+        is_changed = False
+        if scenario.sensor.id == sensor.id:
+            is_changed = True
         return templates.TemplateResponse(
-            "/staff/create/scenario/choice_accident.html",
+            "/staff/update/scenario/choice_accident.html",
             {
                 'request': request,
                 'user': user,
                 'menu': user_menu,
-                'title': "ISPU - Create scenario!",
+                'title': "ISPU - Update scenario!",
                 'location_selected': location_selected,
                 'sensor_selected': sensor_selected,
+                'scenario': scenario,
                 'accidents_options': sensor.model.accidents,
+                'is_changed': is_changed,
             }
         )
     except SQLAlchemyError as e:
@@ -1388,35 +1402,41 @@ async def get_choice_accident_for_scenario_page(request: Request, location_selec
                                                                             "with the create scenario page."})
 
 
-@router.post("/scenario/create/{location_id}/{sensor_id}", response_class=HTMLResponse)
-async def post_create_scenario(request: Request, location_id: int, sensor_id: int,
-                               accident_selected: list[int] = Form(...), name: str = Form(max_length=255),
+@router.post("/scenario/update/{scenario_id}/", response_class=HTMLResponse)
+async def post_update_scenario(request: Request,
+                               scenario_id: int,
+                               location_selected: int = Form(...), sensor_selected: int = Form(...),
+                               accident_selected: list[int] = Form(...),
+                               name: str = Form(max_length=255),
                                user: User = Depends(staff_user),
                                session: AsyncSession = Depends(get_async_session)):
     try:
-        new_scenario = Scenario(location_id=location_id, sensor_id=sensor_id, name=name)
-        session.add(new_scenario)
-        await session.flush()
-        scenario_accidents = [
-            {"scenario_id": new_scenario.id, "accident_id": accident_id}
+        scenario = await get_scenario_for_id(scenario_id=scenario_id, session=session)
+        await delete_all_connection_scenario_accident(session=session, scenario_id=scenario_id)
+        scenario.name = name
+        scenario.sensor_id = sensor_selected
+        scenario.location_id = location_selected
+        session.add(scenario)
+        sensor_accident = [
+            {"scenario_id": scenario.id, "accident_id": accident_id}
             for accident_id in accident_selected
         ]
-        await session.execute(insert(scenario_accident_association).values(scenario_accidents))
+        await session.execute(insert(scenario_accident_association).values(sensor_accident))
         await session.commit()
-        return RedirectResponse(url=request.url_for("get_scenario_for_id_page", scenario_id=new_scenario.id),
-                                status_code=HTTPStatus.MOVED_PERMANENTLY)
+        return RedirectResponse(url=request.url_for("get_scenario_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
-                                                                   "error": "There is some problem "
-                                                                            "with the assignment task page."})
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create scenario page."
+        })
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
-                                                                   "error": "There is some problem "
-                                                                            "with the assignment task page."})
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the create scenario page."})
 # endregion
 
 

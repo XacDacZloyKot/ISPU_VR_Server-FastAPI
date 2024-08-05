@@ -12,7 +12,8 @@ from src.sensor import (Location,
                         SensorValue,
                         SensorType,
                         Sensor,
-                        sensor_location_association
+                        sensor_location_association,
+                        scenario_accident_association
                         )
 
 
@@ -202,6 +203,15 @@ from sqlalchemy.ext.asyncio import AsyncSession
 async def delete_all_connection_location_model(session: AsyncSession, location_id: int) -> None:
     try:
         query = delete(sensor_location_association).where(sensor_location_association.c.location_id == location_id)
+        await session.execute(query)
+    except Exception as e:
+        print(f"An error occurred while deleting connections: {e}")
+        raise
+
+
+async def delete_all_connection_scenario_accident(session: AsyncSession, scenario_id: int) -> None:
+    try:
+        query = delete(scenario_accident_association).where(scenario_accident_association.c.scenario_id == scenario_id)
         await session.execute(query)
     except Exception as e:
         print(f"An error occurred while deleting connections: {e}")
