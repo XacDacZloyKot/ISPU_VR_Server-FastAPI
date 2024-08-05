@@ -1,4 +1,4 @@
-from sqlalchemy import select, func
+from sqlalchemy import select, func, delete
 from typing import List, Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -12,6 +12,7 @@ from src.sensor import (Location,
                         SensorValue,
                         SensorType,
                         Sensor,
+                        sensor_location_association
                         )
 
 
@@ -192,3 +193,16 @@ async def get_all_sensor_values(session: AsyncSession) -> Sequence[SensorValue]:
     result = await session.execute(query)
     sensors_values = result.scalars().all()
     return sensors_values
+
+
+from sqlalchemy import delete
+from sqlalchemy.ext.asyncio import AsyncSession
+
+
+async def delete_all_connection_location_model(session: AsyncSession, location_id: int) -> None:
+    try:
+        query = delete(sensor_location_association).where(sensor_location_association.c.location_id == location_id)
+        await session.execute(query)
+    except Exception as e:
+        print(f"An error occurred while deleting connections: {e}")
+        raise
