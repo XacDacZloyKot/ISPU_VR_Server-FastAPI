@@ -1,7 +1,8 @@
+from fastapi import HTTPException
 from sqlalchemy import select, func, delete
 from typing import List, Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy import delete
 
 from src.auth import Admission, AdmissionStatus, User, Scenario
 from src.sensor import (Location,
@@ -96,7 +97,6 @@ async def get_location_list(session: AsyncSession) -> Sequence[Location]:
     result = await session.execute(locations_query)
     location_results = result.scalars().all()
     return location_results
-
 
 async def get_model_names(session: AsyncSession) -> List[dict]:
     models_query = select(Model)
@@ -196,9 +196,6 @@ async def get_all_sensor_values(session: AsyncSession) -> Sequence[SensorValue]:
     return sensors_values
 
 
-from sqlalchemy import delete
-from sqlalchemy.ext.asyncio import AsyncSession
-
 
 async def delete_all_connection_location_model(session: AsyncSession, location_id: int) -> None:
     try:
@@ -213,6 +210,40 @@ async def delete_all_connection_scenario_accident(session: AsyncSession, scenari
     try:
         query = delete(scenario_accident_association).where(scenario_accident_association.c.scenario_id == scenario_id)
         await session.execute(query)
+    except Exception as e:
+        print(f"An error occurred while deleting connections: {e}")
+        raise
+
+
+async def delete_accident_for_model(session: AsyncSession, model_id: int, accident_id: int) -> None:
+    try:
+        query = (
+            select(model_accident_association)
+            .where(model_accident_association.c.model_id == model_id)
+            .where(model_accident_association.c.accident_id == accident_id)
+        )
+        result = await session.execute(query)
+        accident_connection = result.scalars().first()
+
+        if accident_connection is None:
+            raise HTTPException(status_code=404, detail="Admission not found")
+
+        await session.delete(accident_connection)
+        await session.commit()
+    except Exception as e:
+        print(f"An error occurred while deleting connections: {e}")
+        raise
+
+
+async def delete_accident_for_scenario(session: AsyncSession, scenario_id: int, accident_id: int) -> None:
+    try:
+        query = (
+            delete(scenario_accident_association)
+            .where(scenario_accident_association.c.scenario_id == scenario_id)
+            .where(scenario_accident_association.c.accident_id == accident_id)
+        )
+        await session.execute(query)
+        await session.commit()
     except Exception as e:
         print(f"An error occurred while deleting connections: {e}")
         raise

@@ -52,6 +52,14 @@
     margin: 0;
 }
 
+.location-data-param-value__button-container{
+    display: grid;
+    gap: 10px;
+    align-items: center;
+    grid-template-columns: 1fr 100px;
+
+}
+
 .location-info-container{
     height: 100%;
     display: flex;

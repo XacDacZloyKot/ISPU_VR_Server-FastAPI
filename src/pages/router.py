@@ -7,11 +7,11 @@ from fastapi import Request, Form, Depends
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import ValidationError
-from sqlalchemy import select, insert, update
+from sqlalchemy import select, insert, update, delete
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.auth.base_config import get_jwt_strategy, current_user, staff_user
+from src.auth.base_config import get_jwt_strategy, current_user, staff_user, administrator_user
 from src.auth.models import User, Admission, AdmissionStatus, Scenario
 from src.database import get_async_session
 from src.pages.crud import (
@@ -22,7 +22,8 @@ from src.pages.crud import (
     get_admission_for_id, get_name_sensor_value, get_sensor_value_for_name, get_sensor_values_for_id,
     create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
     get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list, get_all_sensor_types,
-    get_all_sensor_values, delete_all_connection_location_model, delete_all_connection_scenario_accident,
+    delete_all_connection_location_model, delete_all_connection_scenario_accident, delete_accident_for_scenario,
+    delete_accident_for_model,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -232,6 +233,7 @@ async def get_tasks_page(request: Request, user: User = Depends(current_user),
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
                                                                                                 "with the task page."})
 
+
 # region ID_Page
 @router.get("/users/{user_id}", response_class=HTMLResponse)
 async def get_profile_for_id_page(request: Request, user_id: int, current_user: User = Depends(staff_user),
@@ -318,7 +320,7 @@ async def get_location_for_id_page(request: Request, location_id: int, current_u
 
 @router.get("/sensor/{sensor_id}", response_class=HTMLResponse)
 async def get_sensor_for_id_page(request: Request, sensor_id: int, current_user: User = Depends(staff_user),
-                                   session: AsyncSession = Depends(get_async_session)):
+                                 session: AsyncSession = Depends(get_async_session)):
     try:
         sensor = await get_sensor_for_id(sensor_id=sensor_id, session=session)
         return templates.TemplateResponse(
@@ -368,6 +370,8 @@ async def get_model_for_id_page(request: Request, model_id: int, current_user: U
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
+
+
 # endregion
 
 
@@ -680,7 +684,8 @@ async def put_admission(
 
 
 @router.delete("/admission/delete/{admission_id}", name="delete_admission")
-async def delete_admission(admission_id: int, session: AsyncSession = Depends(get_async_session), user: User = Depends(staff_user)):
+async def delete_admission(admission_id: int, session: AsyncSession = Depends(get_async_session),
+                           user: User = Depends(staff_user)):
     try:
         result = await session.execute(select(Admission).filter_by(id=admission_id))
         admission = result.scalars().first()
@@ -968,8 +973,8 @@ async def get_task_assignment_for_curr_user(request: Request, user_id: int, curr
 
 @router.post("/scenario/add_user/{user_id}", response_class=HTMLResponse)
 async def post_task_assignment_for_curr_user(request: Request, user_id: int, tasks_ids: list[int] = Form(...),
-                               current_user: User = Depends(staff_user),
-                               session: AsyncSession = Depends(get_async_session)):
+                                             current_user: User = Depends(staff_user),
+                                             session: AsyncSession = Depends(get_async_session)):
     try:
         for task_id in tasks_ids:
             admission = Admission(status=AdmissionStatus.ACTIVE, user_id=user_id, rating="0", scenario_id=task_id)
@@ -1020,7 +1025,7 @@ async def get_location_page(request: Request, user: User = Depends(current_user)
 
 @router.get("/models", response_class=HTMLResponse)
 async def get_model_page(request: Request, user: User = Depends(current_user),
-                            session: AsyncSession = Depends(get_async_session)):
+                         session: AsyncSession = Depends(get_async_session)):
     try:
         models = await get_all_models(session=session)
         return templates.TemplateResponse(
@@ -1045,7 +1050,7 @@ async def get_model_page(request: Request, user: User = Depends(current_user),
 
 @router.get("/sensors", response_class=HTMLResponse)
 async def get_sensor_page(request: Request, user: User = Depends(current_user),
-                            session: AsyncSession = Depends(get_async_session)):
+                          session: AsyncSession = Depends(get_async_session)):
     try:
         sensors = await get_all_sensors(session=session)
         return templates.TemplateResponse(
@@ -1066,6 +1071,8 @@ async def get_sensor_page(request: Request, user: User = Depends(current_user),
         print(e)
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
+
+
 # endregion
 
 
@@ -1161,13 +1168,15 @@ async def post_update_model_page(request: Request, model_id: int, fields_selecte
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
+
+
 # endregion
 
 
 #  region Update Sensor
 @router.get("/sensor/update/{sensor_id}", response_class=HTMLResponse)
 async def get_update_sensor_page(request: Request, sensor_id: int, current_user: User = Depends(staff_user),
-                                session: AsyncSession = Depends(get_async_session)):
+                                 session: AsyncSession = Depends(get_async_session)):
     try:
         models = await get_all_models(session=session)
         sensor = await get_sensor_for_id(session=session, sensor_id=sensor_id)
@@ -1219,6 +1228,8 @@ async def post_update_model_page(request: Request, sensor_id: int, model_selecte
         return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the sensor page."})
+
+
 # endregion
 
 
@@ -1293,7 +1304,10 @@ async def post_update_location_page(request: Request,
         return templates.TemplateResponse("auth/loginAdmin.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."})
+
+
 # endregion
+
 
 # region Update Scenario
 
@@ -1368,7 +1382,8 @@ async def get_choice_sensor_for_update_scenario_page(request: Request, scenario_
 @router.post("/scenario/update/accident/{scenario_id}", response_class=HTMLResponse)
 async def get_choice_accident_for_update_scenario_page(request: Request,
                                                        scenario_id: int, location_selected: int = Form(...),
-                                                       sensor_selected: int = Form(None), user: User = Depends(staff_user),
+                                                       sensor_selected: int = Form(None),
+                                                       user: User = Depends(staff_user),
                                                        session: AsyncSession = Depends(get_async_session)):
     try:
         scenario = await get_scenario_for_id(session=session, scenario_id=scenario_id)
@@ -1440,4 +1455,45 @@ async def post_update_scenario(request: Request,
 # endregion
 
 
+# region DeleteAccidentForScenario
+@router.post("/accident/delete/{accident_id}/{scenario_id}")
+async def delete_accident_for_scenario_page(accident_id: int, scenario_id: int,
+                                       session: AsyncSession = Depends(get_async_session),
+                                       user: User = Depends(administrator_user)):
+    try:
+        await delete_accident_for_scenario(session=session, scenario_id=scenario_id, accident_id=accident_id)
+        return {"detail": "Accident deleted successfully"}
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
+# endregion
 
+
+# region DeleteAccidentForModel
+@router.post("/accident/delete/{accident_id}/{model_id}")
+async def delete_accident_for_model_page(accident_id: int, model_id: int,
+                                         session: AsyncSession = Depends(get_async_session),
+                                         user: User = Depends(administrator_user)):
+    try:
+        query = (
+            delete(model_accident_association)
+            .where(model_accident_association.c.model_id == model_id)
+            .where(model_accident_association.c.accident_id == accident_id)
+        )
+        await session.execute(query)
+        await session.commit()
+        return {"status": "success"}
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        raise HTTPException(status_code=500, detail="Internal server error")
+# endregion

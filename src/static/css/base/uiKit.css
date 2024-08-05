@@ -67,6 +67,11 @@
     height: 35px;
 }
 
+.white{
+    background-color: var(--color-white);
+}
+
+
 /* Input fields */
 input {
     width: 100%;

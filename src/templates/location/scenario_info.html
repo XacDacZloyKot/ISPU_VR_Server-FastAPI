@@ -3,6 +3,24 @@
 {% block css %}
 	<link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
+    <script>
+        function confirmDelete(url) {
+            if (confirm("Вы уверены, что хотите удалить эту аварию?")) {
+                fetch(url, {
+                    method: 'POST'
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = "{{ url_for('get_scenario_for_id_page', scenario_id=scenarios.id) }}";
+                    } else {
+                        alert("Не удалось удалить запись.");
+                    }
+                }).catch(error => {
+                    console.error("Ошибка:", error);
+                });
+            }
+        }
+    </script>
 {% endblock %}
 
 {% block navTitle %}
@@ -72,6 +90,7 @@
                         <th>Название</th>
                         <th>Параметры</th>
                         <th>Механическая ошибки</th>
+                        <th>Опции</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -83,6 +102,11 @@
                                 {{ field }}: {{ value }}<br>
                             {% endfor %}</td>
                         <td>{% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
+                        <td>
+                            <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_scenario_page', accident_id=accident.id, scenario_id=scenarios.id) }}')" class="button white">
+                                <img src="/static/img/delete.svg" alt="Редактирование" class="location-icon">
+                            </button>
+                        </td>
                     </tr>
                 {% endfor %}
                 </tbody>

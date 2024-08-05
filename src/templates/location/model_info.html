@@ -4,6 +4,24 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
+    <script>
+        function confirmDelete(url) {
+            if (confirm("Вы уверены, что хотите удалить эту аварию?")) {
+                fetch(url, {
+                    method: 'POST'
+                }).then(response => {
+                    if (response.ok) {
+                        window.location.href = "{{ url_for('get_model_for_id_page', model_id=model.id) }}";
+                    } else {
+                        alert("Не удалось удалить запись.");
+                    }
+                }).catch(error => {
+                    console.error("Ошибка:", error);
+                });
+            }
+        }
+    </script>
 {% endblock %}
 
 {% block navTitle %}
@@ -30,7 +48,7 @@
                         <p class="location-data__title">Ошибки датчика:</p>
                     </div>
                     <div class="location-data__param">
-                        <div class="location-data-param__value">
+                        <div class="location-data-param__value location-data-param-value__button-container">
                             {% for accident in model.accidents %}
                                 <div class="value-container">
                                     {{ accident.name }}:<br>
@@ -38,6 +56,9 @@
                                         {{ field }}: {{ value }},<br>
                                     {% endfor %}
                                 </div>
+                                <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_model_page', accident_id=accident.id, model_id=model.id) }}')" class="button white">
+                                    <img src="/static/img/delete.svg" alt="Редактирование" class="location-icon">
+                                </button>
                             {% endfor %}
                         </div>
                     </div>
