@@ -219,17 +219,11 @@ async def delete_all_connection_scenario_accident(session: AsyncSession, scenari
 async def delete_accident_for_model(session: AsyncSession, model_id: int, accident_id: int) -> None:
     try:
         query = (
-            select(model_accident_association)
+            delete(model_accident_association)
             .where(model_accident_association.c.model_id == model_id)
             .where(model_accident_association.c.accident_id == accident_id)
         )
-        result = await session.execute(query)
-        accident_connection = result.scalars().first()
-
-        if accident_connection is None:
-            raise HTTPException(status_code=404, detail="Admission not found")
-
-        await session.delete(accident_connection)
+        await session.execute(query)
         await session.commit()
     except Exception as e:
         print(f"An error occurred while deleting connections: {e}")

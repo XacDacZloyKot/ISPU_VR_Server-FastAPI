@@ -4,7 +4,7 @@
 	<link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', path='css/location/scenario.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/location/accident.css') }}">
     <script>
         function confirmDelete(url) {
             if (confirm("Вы уверены, что хотите удалить эту аварию?")) {
@@ -80,12 +80,12 @@
                 </tbody>
             </table>
         </div>
-    <div class="title_add_accident">
-        <h2 class="title-red slim-title">
-            Авария
-        </h2>
-        <a href="{{ url_for("get_add_accident_for_scenario_page", scenario_id=scenarios.id) }}" class="button red slim-title">Добавить</a>
-    </div>
+        <div class="title_add_accident">
+            <h2 class="title-red slim-title">
+                Авария
+            </h2>
+            <a href="{{ url_for("get_add_accident_for_scenario_page", scenario_id=scenarios.id) }}" class="button red slim-title">Добавить</a>
+        </div>
         <div class="table-wrapper accident-table">
             <table>
                 <thead>
@@ -108,7 +108,7 @@
                         <td>{% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
                         <td>
                             <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_scenario_page', accident_id=accident.id, scenario_id=scenarios.id) }}')" class="button white">
-                                <img src="/static/img/delete.svg" alt="Редактирование" class="location-icon">
+                                <img src="/static/img/delete.svg" alt="Удаление" class="location-icon">
                             </button>
                         </td>
                     </tr>

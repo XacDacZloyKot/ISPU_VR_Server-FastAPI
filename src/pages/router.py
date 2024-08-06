@@ -1458,7 +1458,7 @@ async def post_update_scenario(request: Request,
 
 
 # region DeleteAccidentForScenario
-@router.post("/accident/delete/{accident_id}/{scenario_id}")
+@router.post("/accident/delete/scenario/{accident_id}/{scenario_id}")
 async def delete_accident_for_scenario_page(accident_id: int, scenario_id: int,
                                             session: AsyncSession = Depends(get_async_session),
                                             user: User = Depends(administrator_user)):
@@ -1479,19 +1479,13 @@ async def delete_accident_for_scenario_page(accident_id: int, scenario_id: int,
 
 
 # region DeleteAccidentForModel
-@router.post("/accident/delete/{accident_id}/{model_id}")
+@router.post("/accident/delete/model/{accident_id}/{model_id}")
 async def delete_accident_for_model_page(accident_id: int, model_id: int,
                                          session: AsyncSession = Depends(get_async_session),
                                          user: User = Depends(administrator_user)):
     try:
-        query = (
-            delete(model_accident_association)
-            .where(model_accident_association.c.model_id == model_id)
-            .where(model_accident_association.c.accident_id == accident_id)
-        )
-        await session.execute(query)
-        await session.commit()
-        return {"status": "success"}
+        await delete_accident_for_model(session=session, model_id=model_id, accident_id=accident_id)
+        return {"detail": "Accident deleted successfully"}
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
@@ -1504,10 +1498,11 @@ async def delete_accident_for_model_page(accident_id: int, model_id: int,
 
 # endregion
 
+
 # region AddAccidentForScenario
 
 
-@router.get("/accident/add/{scenario_id}", response_class=HTMLResponse)
+@router.get("/accident/scenario/add/{scenario_id}", response_class=HTMLResponse)
 async def get_add_accident_for_scenario_page(
         request: Request,
         scenario_id: int,
@@ -1570,4 +1565,37 @@ async def post_add_accident_for_scenario_page(
             "request": request,
             "error": "There is some problem with the add accident page."
         })
+# endregion
+
+
+# region AddAccidentForModel
+@router.get("/accident/model/add/{model_id}", response_class=HTMLResponse)
+async def get_add_accident_model_page(
+        request: Request,
+        model_id: int,
+        user: User = Depends(staff_user),
+        session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        model = await get_model_for_id(session=session, model_id=model_id)
+        return templates.TemplateResponse(
+            "/staff/update/accident/add_accident_model.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'title': "ISPU - Add accident!",
+                'model': model,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
 # endregion

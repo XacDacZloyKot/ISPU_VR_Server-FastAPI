@@ -4,7 +4,6 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
-	<link rel="stylesheet" href="{{ url_for('static', path='css/location/accident.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
     <script>
         function confirmDelete(url) {
@@ -31,7 +30,7 @@
 
 {% block content %}
     <div class="location-info-container">
-        <div>
+        <div class="">
             <div class="location-data">
                 <div class="location-data__name">
                     <p class="location-data__title">Параметры датчика:</p>
@@ -44,42 +43,26 @@
                     </div>
                 </div>
             </div>
+            <div class="location-data">
+                    <div class="location-data__name">
+                        <p class="location-data__title">Ошибки датчика:</p>
+                    </div>
+                    <div class="location-data__param">
+                        <div class="location-data-param__value location-data-param-value__button-container">
+                            {% for accident in model.accidents %}
+                                <div class="value-container">
+                                    {{ accident.name }}:<br>
+                                    {% for field, value in accident.change_value.items() %}
+                                        {{ field }}: {{ value }},<br>
+                                    {% endfor %}
+                                </div>
+                                <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_model_page', accident_id=accident.id, model_id=model.id) }}')" class="button white">
+                                    <img src="/static/img/delete.svg" alt="Редактирование" class="location-icon">
+                                </button>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
         </div>
     </div>
-    <div class="title_add_accident">
-    <h2 class="title-red slim-title">
-        Авария
-    </h2>
-    <a href="{{ url_for("get_add_accident_model_page", model_id=model.id) }}" class="button red slim-title">Добавить</a>
-</div>
-    <div class="table-wrapper table-accident-table-info">
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Название</th>
-                    <th>Параметры</th>
-                    <th>Механическая ошибки</th>
-                    <th>Опции</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for accident in model.accidents %}
-                <tr>
-                    <td>{{ accident.id }}</td>
-                    <td>{{ accident.name }}</td>
-                    <td>{% for field, value in accident.change_value.items() %}
-                            {{ field }}: {{ value }}<br>
-                        {% endfor %}</td>
-                    <td>{% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
-                    <td>
-                        <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_model_page', accident_id=accident.id, model_id=model.id) }}')" class="button white">
-                            <img src="/static/img/delete.svg" alt="Редактирование" class="location-icon">
-                        </button>
-                    </td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        </div>
 {% endblock %}
