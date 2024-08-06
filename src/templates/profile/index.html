@@ -1,0 +1,18 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/profile/home.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+    <p class="navbar__title">Домашняя страница</p>
+{% endblock %}
+
+{% block content %}
+    <h1>Главная страница</h1>
+    {% if error %}
+        <h2 class="error">
+            {{ error }}
+        </h2>
+    {% endif %}
+{% endblock %}

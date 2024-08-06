@@ -14,6 +14,8 @@ from src.auth.schemas import UserRead, UserCreate
 from src.pages.router import router as router_pages, templates
 from src.sensor.router import router as router_sensor
 
+DEBUG = False
+
 app = FastAPI(
     title="ISPU App"
 )
@@ -40,23 +42,34 @@ app.add_middleware(
 )
 
 
-# Благодаря этой функции клиент видит ошибки, происходящие на сервере, вместо "Internal server error"
 @app.exception_handler(ValidationException)
 async def validation_exception_handler(request: Request, exc: ValidationException):
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content=jsonable_encoder({"detail": exc.errors()}),
-    )
+    if DEBUG:
+        return JSONResponse(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            content=jsonable_encoder({"detail": exc.errors()}),
+        )
+    return templates.TemplateResponse("/support_pages/error.html", {"request": request, "error": "Validation error occurred."})
 
 
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request: Request, exc: HTTPException):
+    if DEBUG:
+        return JSONResponse(
+            status_code=exc.status_code,
+            content={"detail": exc.detail},
+        )
     if exc.status_code == 401:  # Unauthorized
         return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Please log in to continue"})
-    return JSONResponse(
-        status_code=exc.status_code,
-        content={"detail": exc.detail},
-    )
+    return templates.TemplateResponse("/support_pages/error.html", {"request": request, "error": str(exc.detail)})
+
+
+@app.exception_handler(Exception)
+async def generic_exception_handler(request: Request, exc: Exception):
+    print(f"An error occurred: {exc}")
+    if DEBUG:
+        return templates.TemplateResponse("/support_pages/error.html", {"request": request, "error": str(exc)})
+    return templates.TemplateResponse("/support_pages/error.html", {"request": request, "error": "An unexpected error occurred."})
 
 
 app.include_router(

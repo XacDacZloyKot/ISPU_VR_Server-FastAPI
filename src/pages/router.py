@@ -46,6 +46,16 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, "templates\\")
 templates = Jinja2Templates(directory=TEMPLATES_DIR)
 
 
+@router.get("/", response_class=HTMLResponse)
+async def index_page(request: Request, user=Depends(current_user)):
+    return templates.TemplateResponse("/profile/index.html", {
+        "request": request,
+        'user': user,
+        'menu': user_menu,
+        'title': "ISPU - Главная страница!"
+    })
+
+
 @router.get("/loginAdmin", response_class=HTMLResponse)
 async def get_login_admin(request: Request):
     return templates.TemplateResponse("/auth/loginAdmin.html", {"request": request})
@@ -58,7 +68,7 @@ async def post_login_admin(request: Request, email: str = Form(...), password: s
         return templates.TemplateResponse("/auth/loginAdmin.html", {"request": request, "error": "Failed to login"})
 
     token = await get_jwt_strategy().write_token(user)
-    response = RedirectResponse(url="/pages/home/", status_code=302)
+    response = RedirectResponse(url=request.url_for("index_page"), status_code=302)
     response.set_cookie(key="user-cookie", value=token, httponly=True, path="/")
     return response
 
@@ -124,33 +134,6 @@ async def post_registration(request: Request,
                                                                                                 " with the scripts."})
 
 
-@router.get("/scenario", response_class=HTMLResponse)
-async def get_scenario_page(request: Request, user: User = Depends(current_user),
-                            session: AsyncSession = Depends(get_async_session)):
-    try:
-        query = select(Scenario).order_by(Scenario.id)
-        result = await session.execute(query)
-        scenarios = result.scalars().all()
-        return templates.TemplateResponse(
-            "/location/scenario.html",
-            {
-                'request': request,
-                'user': user,
-                "scenarios": scenarios,
-                'title': "ISPU - Scenario",
-                'menu': user_menu,
-            }
-        )
-    except SQLAlchemyError as e:
-        print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
-                                                                                                " with the scripts."})
-    except Exception as e:
-        print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
-                                                                                                " with the scripts."})
-
-
 @router.get("/home", response_class=HTMLResponse)
 async def get_home_page(request: Request, user: User = Depends(current_user),
                         session: AsyncSession = Depends(get_async_session)):
@@ -172,66 +155,12 @@ async def get_home_page(request: Request, user: User = Depends(current_user),
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
+        return templates.TemplateResponse('profile/index.html', {"request": request, "error": "There is some problem "
                                                                                                 "with the home page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
+        return templates.TemplateResponse('profile/index.html', {"request": request, "error": "There is some problem "
                                                                                                 "with the home page."})
-
-
-@router.get("/users", response_class=HTMLResponse)
-async def get_users_page(request: Request, user: User = Depends(staff_user),
-                         session: AsyncSession = Depends(get_async_session)):
-    try:
-        query = select(User).where(False == User.is_superuser, False == User.is_staff)
-        result = await session.execute(query)
-        users = result.scalars().all()
-        return templates.TemplateResponse(
-            "/staff/user.html",
-            {
-                "request": request,
-                'user': user,
-                "users": users,
-                'title': "ISPU - Users",
-                'menu': user_menu,
-            }
-        )
-    except SQLAlchemyError as e:
-        print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
-                                                                                                "with the user page."})
-    except Exception as e:
-        print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
-                                                                                                "with the user page."})
-
-
-@router.get("/tasks", response_class=HTMLResponse)
-async def get_tasks_page(request: Request, user: User = Depends(current_user),
-                         session: AsyncSession = Depends(get_async_session)):
-    try:
-        query = select(Admission).where(user.id == Admission.user_id).order_by("status")
-        result = await session.execute(query)
-        admission = result.scalars().all()
-        return templates.TemplateResponse(
-            "/location/tasks.html",
-            {
-                "request": request,
-                'user': user,
-                "admissions": admission,
-                'title': "ISPU - Tasks!",
-                'menu': user_menu,
-            }
-        )
-    except SQLAlchemyError as e:
-        print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
-                                                                                                "with the task page."})
-    except Exception as e:
-        print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There is some problem "
-                                                                                                "with the task page."})
 
 
 # region ID_Page
@@ -256,12 +185,12 @@ async def get_profile_for_id_page(request: Request, user_id: int, current_user: 
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the profile page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the profile page."})
 
@@ -283,11 +212,11 @@ async def get_scenario_for_id_page(request: Request, scenario_id: int, user: Use
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
 
 
@@ -308,12 +237,12 @@ async def get_location_for_id_page(request: Request, location_id: int, current_u
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the location page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the location page."})
 
@@ -335,12 +264,12 @@ async def get_sensor_for_id_page(request: Request, sensor_id: int, current_user:
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the sensor page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the sensor page."})
 
@@ -362,12 +291,12 @@ async def get_model_for_id_page(request: Request, model_id: int, current_user: U
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
 
@@ -394,12 +323,12 @@ async def get_task_assignment(request: Request, scenario_id: int, current_user: 
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
 
@@ -418,13 +347,13 @@ async def post_task_assignment(request: Request, scenario_id: int, user_ids: lis
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
 
@@ -446,12 +375,12 @@ async def get_create_scenario_page(request: Request, user: User = Depends(staff_
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
 
@@ -476,12 +405,12 @@ async def get_choice_model_for_scenario_page(request: Request, location_selected
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
 
@@ -507,12 +436,12 @@ async def get_choice_accident_for_scenario_page(request: Request, location_selec
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
 
@@ -537,13 +466,13 @@ async def post_create_scenario(request: Request, location_id: int, sensor_id: in
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
 
@@ -565,12 +494,12 @@ async def get_update_user_page(request: Request, user_id: int, user: User = Depe
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the update user page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the update user page."})
 
@@ -594,14 +523,14 @@ async def put_user(request: Request, user_id: int,
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the update user page."
         })
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the update user page."
         })
@@ -631,13 +560,13 @@ async def get_update_admission_page(
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the update admission page."
         })
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the update admission page."
         })
@@ -663,7 +592,7 @@ async def put_admission(
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the update admission page."
         })
@@ -672,12 +601,11 @@ async def put_admission(
         return templates.TemplateResponse("/staff/update/admission/update_admission_for_user.html", {
             "request": request,
             "error": error_message,
-            'admission': admission,
         })
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the update admission page."
         })
@@ -708,7 +636,7 @@ async def delete_admission(admission_id: int, session: AsyncSession = Depends(ge
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
-@router.get("/model/create", response_class=HTMLResponse)
+@router.get("/model/create/sensor/", response_class=HTMLResponse)
 async def get_create_model_page(request: Request, user: User = Depends(staff_user),
                                 session: AsyncSession = Depends(get_async_session)):
     try:
@@ -725,12 +653,12 @@ async def get_create_model_page(request: Request, user: User = Depends(staff_use
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
 
@@ -754,12 +682,12 @@ async def get_choice_fields(request: Request, model_selected: str = Form(...), u
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
 
@@ -786,14 +714,14 @@ async def create_model(
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create model page."
         })
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create model page."
         })
@@ -820,12 +748,12 @@ async def get_add_accident_page(
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
 
@@ -867,20 +795,20 @@ async def post_add_accident_page(
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create model page."
         })
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create model page."
         })
 
 
-@router.get("/location/create/", response_class=HTMLResponse)
+@router.get("/location/create/sensor/", response_class=HTMLResponse)
 async def get_create_location_page(request: Request,
                                    user: User = Depends(staff_user),
                                    session: AsyncSession = Depends(get_async_session)):
@@ -899,13 +827,13 @@ async def get_create_location_page(request: Request,
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."
         })
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."})
 
@@ -931,14 +859,14 @@ async def post_create_location_page(request: Request,
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."
         })
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."})
 
@@ -961,12 +889,12 @@ async def get_task_assignment_for_curr_user(request: Request, user_id: int, curr
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
 
@@ -986,18 +914,99 @@ async def post_task_assignment_for_curr_user(request: Request, user_id: int, tas
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
 
 
 # region GetModelList
+
+@router.get("/users", response_class=HTMLResponse)
+async def get_users_page(request: Request, user: User = Depends(staff_user),
+                         session: AsyncSession = Depends(get_async_session)):
+    try:
+        query = select(User).where(False == User.is_superuser, False == User.is_staff)
+        result = await session.execute(query)
+        users = result.scalars().all()
+        return templates.TemplateResponse(
+            "/staff/user.html",
+            {
+                "request": request,
+                'user': user,
+                "users": users,
+                'title': "ISPU - Users",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the user page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the user page."})
+
+
+@router.get("/tasks", response_class=HTMLResponse)
+async def get_tasks_page(request: Request, user: User = Depends(current_user),
+                         session: AsyncSession = Depends(get_async_session)):
+    try:
+        query = select(Admission).where(user.id == Admission.user_id).order_by("status")
+        result = await session.execute(query)
+        admission = result.scalars().all()
+        return templates.TemplateResponse(
+            "/location/tasks.html",
+            {
+                "request": request,
+                'user': user,
+                "admissions": admission,
+                'title': "ISPU - Tasks!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the task page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There is some problem "
+                                                                                                "with the task page."})
+
+
+@router.get("/scenario", response_class=HTMLResponse)
+async def get_scenario_page(request: Request, user: User = Depends(current_user),
+                            session: AsyncSession = Depends(get_async_session)):
+    try:
+        query = select(Scenario).order_by(Scenario.id)
+        result = await session.execute(query)
+        scenarios = result.scalars().all()
+        return templates.TemplateResponse(
+            "/location/scenario.html",
+            {
+                'request': request,
+                'user': user,
+                "scenarios": scenarios,
+                'title': "ISPU - Scenario",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
+                                                                                                " with the scripts."})
+
 @router.get("/locations", response_class=HTMLResponse)
 async def get_location_page(request: Request, user: User = Depends(current_user),
                             session: AsyncSession = Depends(get_async_session)):
@@ -1015,11 +1024,11 @@ async def get_location_page(request: Request, user: User = Depends(current_user)
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
 
 
@@ -1040,11 +1049,11 @@ async def get_model_page(request: Request, user: User = Depends(current_user),
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
 
 
@@ -1065,11 +1074,11 @@ async def get_sensor_page(request: Request, user: User = Depends(current_user),
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request, "error": "There was some problem"
+        return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
 
 
@@ -1097,12 +1106,12 @@ async def get_update_model_page(request: Request, model_id: int, current_user: U
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
 
@@ -1130,12 +1139,12 @@ async def get_update_model_page_choice_field(request: Request, model_id: int, cu
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
 
@@ -1160,12 +1169,12 @@ async def post_update_model_page(request: Request, model_id: int, fields_selecte
                                 status_code=HTTPStatus.MOVED_PERMANENTLY)
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
 
@@ -1193,12 +1202,12 @@ async def get_update_sensor_page(request: Request, sensor_id: int, current_user:
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the model page."})
 
@@ -1220,12 +1229,12 @@ async def post_update_model_page(request: Request, sensor_id: int, model_selecte
                                 status_code=HTTPStatus.MOVED_PERMANENTLY)
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the sensor page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the sensor page."})
 
@@ -1258,13 +1267,13 @@ async def get_update_location_page(request: Request,
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."
         })
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."})
 
@@ -1294,14 +1303,14 @@ async def post_update_location_page(request: Request,
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."
         })
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."})
 
@@ -1332,12 +1341,12 @@ async def get_update_scenario_page(request: Request, scenario_id: int,
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
 
@@ -1369,12 +1378,12 @@ async def get_choice_sensor_for_update_scenario_page(request: Request, scenario_
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
 
@@ -1407,12 +1416,12 @@ async def get_choice_accident_for_update_scenario_page(request: Request,
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create scenario page."})
 
@@ -1442,14 +1451,14 @@ async def post_update_scenario(request: Request,
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."
         })
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."})
 
@@ -1527,12 +1536,12 @@ async def get_add_accident_for_scenario_page(
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
 
@@ -1554,14 +1563,14 @@ async def post_add_accident_for_scenario_page(
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the add accident page."
         })
     except Exception as e:
         print(e)
         await session.rollback()
-        return templates.TemplateResponse("auth/loginAdmin.html", {
+        return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the add accident page."
         })
@@ -1590,12 +1599,12 @@ async def get_add_accident_model_page(
         )
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
     except Exception as e:
         print(e)
-        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+        return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
 # endregion
