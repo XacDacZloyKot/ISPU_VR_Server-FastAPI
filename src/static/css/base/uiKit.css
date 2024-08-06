@@ -59,6 +59,23 @@
     background-color: var(--color-secondary-100);
 }
 
+/* Orange red */
+.red{
+    background-color: var(--color-scarlet);
+}
+
+.red:hover {
+    background-color: var(--color-scarlet-200);
+}
+
+.red:active {
+    background-color: var(--color-secondary-400);
+}
+
+.red:focus-visible {
+    background-color: var(--color-secondary-100);
+}
+
 .slim{
     height: 24px;
 }

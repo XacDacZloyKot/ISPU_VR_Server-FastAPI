@@ -1,0 +1,56 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+	<link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+	<p class="navbar__title">Добавление аварий для сценария #{{ scenario.id }} {{ scenario.name }}</p>
+{% endblock %}
+
+
+{% block content %}
+    <h1 class="title-orange">Добавьте аварии</h1>
+    <form action="{{ url_for('post_add_accident_for_scenario_page', scenario_id=scenario.id) }}" method="POST" class="form-container-height">
+        <div class="table-wrapper table-container-75">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Название</th>
+                        <th>Параметры</th>
+                        <th>Механическая ошибка</th>
+                        <th>Добавление</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for model_accident in model_accidents %}
+                        <tr>
+                            <td>{{ model_accident.id }}</td>
+                            <td>{{ model_accident.name }}</td>
+                            <td>
+                                {% for field, value in model_accident.change_value.items() %}
+                                    {{ field }}: {{ value }},<br>
+                                {% endfor %}
+                            </td>
+                            <td>{% if model_accident.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
+                            <td>
+                                <input class="checkbox-input" title="Accident" type="checkbox" id="{{ model_accident.id }}"
+                                                       name="accidents_selected" value="{{ model_accident.id }}"
+                                {% if model_accident in scenario_accidents %}
+                                    checked
+                                {% endif %} >
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    <div class="submit-container">
+        <button type="submit" class="button orange submit">Добавить</button>
+    </div>
+    </form>
+{% endblock %}

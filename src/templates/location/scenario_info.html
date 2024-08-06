@@ -4,6 +4,7 @@
 	<link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/location/location.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/location/scenario.css') }}">
     <script>
         function confirmDelete(url) {
             if (confirm("Вы уверены, что хотите удалить эту аварию?")) {
@@ -79,9 +80,12 @@
                 </tbody>
             </table>
         </div>
-        <h2 class="title-red">
+    <div class="title_add_accident">
+        <h2 class="title-red slim-title">
             Авария
         </h2>
+        <a href="{{ url_for("get_add_accident_for_scenario_page", scenario_id=scenarios.id) }}" class="button red slim-title">Добавить</a>
+    </div>
         <div class="table-wrapper accident-table">
             <table>
                 <thead>

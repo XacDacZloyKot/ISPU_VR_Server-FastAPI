@@ -23,7 +23,7 @@ from src.pages.crud import (
     create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
     get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list, get_all_sensor_types,
     delete_all_connection_location_model, delete_all_connection_scenario_accident, delete_accident_for_scenario,
-    delete_accident_for_model,
+    delete_accident_for_model, add_accidents_for_scenario,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -1452,14 +1452,16 @@ async def post_update_scenario(request: Request,
         return templates.TemplateResponse("auth/loginAdmin.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."})
+
+
 # endregion
 
 
 # region DeleteAccidentForScenario
 @router.post("/accident/delete/{accident_id}/{scenario_id}")
 async def delete_accident_for_scenario_page(accident_id: int, scenario_id: int,
-                                       session: AsyncSession = Depends(get_async_session),
-                                       user: User = Depends(administrator_user)):
+                                            session: AsyncSession = Depends(get_async_session),
+                                            user: User = Depends(administrator_user)):
     try:
         await delete_accident_for_scenario(session=session, scenario_id=scenario_id, accident_id=accident_id)
         return {"detail": "Accident deleted successfully"}
@@ -1471,6 +1473,8 @@ async def delete_accident_for_scenario_page(accident_id: int, scenario_id: int,
         print(e)
         await session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
 # endregion
 
 
@@ -1496,4 +1500,74 @@ async def delete_accident_for_model_page(accident_id: int, model_id: int,
         print(e)
         await session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
+
+
+# endregion
+
+# region AddAccidentForScenario
+
+
+@router.get("/accident/add/{scenario_id}", response_class=HTMLResponse)
+async def get_add_accident_for_scenario_page(
+        request: Request,
+        scenario_id: int,
+        user: User = Depends(staff_user),
+        session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        scenario: Scenario = await get_scenario_for_id(scenario_id=scenario_id, session=session)
+        scenario_accidents = scenario.accidents
+        model_accidents = scenario.sensor.model.accidents
+        return templates.TemplateResponse(
+            "/staff/update/accident/add_accident_scenario.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'title': "ISPU - Add accident!",
+                'scenario_accidents': scenario_accidents,
+                'model_accidents': model_accidents,
+                'scenario': scenario,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("auth/loginAdmin.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the create model page."})
+
+
+@router.post("/accident/add/{scenario_id}", response_class=HTMLResponse)
+async def post_add_accident_for_scenario_page(
+        request: Request,
+        scenario_id: int,
+        accidents_selected: list[int] = Form(None),
+        user: User = Depends(staff_user),
+        session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        await delete_all_connection_scenario_accident(session=session, scenario_id=scenario_id)
+        await add_accidents_for_scenario(session=session, accidents_id=accidents_selected, scenario_id=scenario_id)
+        return RedirectResponse(request.url_for("get_scenario_for_id_page", scenario_id=scenario_id),
+                                status_code=HTTPStatus.MOVED_PERMANENTLY)
+
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the add accident page."
+        })
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        return templates.TemplateResponse("auth/loginAdmin.html", {
+            "request": request,
+            "error": "There is some problem with the add accident page."
+        })
 # endregion

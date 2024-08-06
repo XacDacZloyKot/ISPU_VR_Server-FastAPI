@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from sqlalchemy import select, func, delete
+from sqlalchemy import select, func, delete, insert
 from typing import List, Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete
@@ -196,11 +196,11 @@ async def get_all_sensor_values(session: AsyncSession) -> Sequence[SensorValue]:
     return sensors_values
 
 
-
 async def delete_all_connection_location_model(session: AsyncSession, location_id: int) -> None:
     try:
         query = delete(sensor_location_association).where(sensor_location_association.c.location_id == location_id)
         await session.execute(query)
+        await session.commit()
     except Exception as e:
         print(f"An error occurred while deleting connections: {e}")
         raise
@@ -210,6 +210,7 @@ async def delete_all_connection_scenario_accident(session: AsyncSession, scenari
     try:
         query = delete(scenario_accident_association).where(scenario_accident_association.c.scenario_id == scenario_id)
         await session.execute(query)
+        await session.commit()
     except Exception as e:
         print(f"An error occurred while deleting connections: {e}")
         raise
@@ -247,3 +248,20 @@ async def delete_accident_for_scenario(session: AsyncSession, scenario_id: int, 
     except Exception as e:
         print(f"An error occurred while deleting connections: {e}")
         raise
+
+
+async def add_accidents_for_scenario(session: AsyncSession, scenario_id: int, accidents_id: list[int] | None) -> None:
+    try:
+        if not accidents_id:
+            return None
+        scenario_accidents = [
+            {"scenario_id": scenario_id, "accident_id": accident_id}
+            for accident_id in accidents_id
+        ]
+        await session.execute(insert(scenario_accident_association).values(scenario_accidents))
+        await session.commit()
+    except Exception as e:
+        print(f"An error occurred while adding accidents: {e}")
+        await session.rollback()
+        raise
+
