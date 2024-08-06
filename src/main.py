@@ -89,7 +89,7 @@ app.include_router(router_pages)
 
 if __name__ == "__main__":
     try:
-        uvicorn.run(app, port=8000, host="0.0.0.0")
+        uvicorn.run(app, port=8000, host="0.0.0.0", log_level="critical")
     except Exception as e:
         print("Error occurred:", e)
         sys.exit(1)

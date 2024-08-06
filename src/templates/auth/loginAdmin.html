@@ -17,7 +17,9 @@
             {% if error %}
                 <p class="login-container-lable">{{ error }}</p>
             {% endif %}
-            <p class="error">Неверный логин или пароль. Повторите попытку</p>
+            {% if error %}
+                <p class="error">Неверный логин или пароль. Повторите попытку</p>
+            {% endif %}
             <form action="{{ url_for('post_login_admin') }}" method="POST" class="login-container-form">
                 <div class="form-group">
                     <label for="email">E-mail</label>

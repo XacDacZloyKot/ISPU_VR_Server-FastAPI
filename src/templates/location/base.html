@@ -17,7 +17,7 @@
                 <img src="{{ url_for('static', path='/img/logo.png') }}" alt="" class="logo sidebar-logo">
                 <nav class="navigation">
                     {% for item in menu %}
-                        {% if (item.access == "staff" and (user.is_staff == True or user.is_superuser == True)) or item.access == "user" or (item.access == "admin" and user.is_superuser == True) %}
+                        {% if (item.access == "staff" and (user.is_staff == True or user.is_superuser == True)) or (item.access == "user" and user.is_staff == False and user.is_superuser == False) or (item.access == "admin" and user.is_superuser == True) %}
                     	    <div class="nav-category">
                             <p class="nav-category__title">{{ item.name }}</p>
                             <div class="container-menu-link">

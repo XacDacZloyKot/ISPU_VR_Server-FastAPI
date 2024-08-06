@@ -23,7 +23,7 @@ from src.pages.crud import (
     create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
     get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list, get_all_sensor_types,
     delete_all_connection_location_model, delete_all_connection_scenario_accident, delete_accident_for_scenario,
-    delete_accident_for_model, add_accidents_for_scenario,
+    delete_accident_for_model, add_accidents_for_scenario, create_sensor,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -33,7 +33,7 @@ from src.pages.utils import (authenticate,
                              logout as logout_func,
                              )
 from src.sensor.models import scenario_accident_association, Model, Accident, model_accident_association, Location, \
-    LocationStatus, sensor_location_association
+    LocationStatus, sensor_location_association, Sensor
 
 router = APIRouter(
     prefix='/pages',
@@ -358,6 +358,7 @@ async def post_task_assignment(request: Request, scenario_id: int, user_ids: lis
                                                                             "with the assignment task page."})
 
 
+# region CreateScenario
 @router.get("/scenario/create", response_class=HTMLResponse)
 async def get_create_scenario_page(request: Request, user: User = Depends(staff_user),
                                    session: AsyncSession = Depends(get_async_session)):
@@ -475,8 +476,10 @@ async def post_create_scenario(request: Request, location_id: int, sensor_id: in
         return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
+# endregion
 
 
+# region UpdateUser
 @router.get("/users/update/{user_id}", response_class=HTMLResponse)
 async def get_update_user_page(request: Request, user_id: int, user: User = Depends(staff_user),
                                session: AsyncSession = Depends(get_async_session)):
@@ -534,8 +537,10 @@ async def put_user(request: Request, user_id: int,
             "request": request,
             "error": "There is some problem with the update user page."
         })
+# endregion
 
 
+# region UpdateAdmission
 @router.get("/admission/update/{admission_id}", response_class=HTMLResponse)
 async def get_update_admission_page(
         request: Request,
@@ -609,8 +614,10 @@ async def put_admission(
             "request": request,
             "error": "There is some problem with the update admission page."
         })
+# endregion
 
 
+# region DeleteAdmission
 @router.delete("/admission/delete/{admission_id}", name="delete_admission")
 async def delete_admission(admission_id: int, session: AsyncSession = Depends(get_async_session),
                            user: User = Depends(staff_user)):
@@ -634,8 +641,10 @@ async def delete_admission(admission_id: int, session: AsyncSession = Depends(ge
         print(e)
         await session.rollback()
         raise HTTPException(status_code=500, detail="Internal server error")
+# endregion
 
 
+# region CreateModel
 @router.get("/model/create/sensor/", response_class=HTMLResponse)
 async def get_create_model_page(request: Request, user: User = Depends(staff_user),
                                 session: AsyncSession = Depends(get_async_session)):
@@ -725,8 +734,61 @@ async def create_model(
             "request": request,
             "error": "There is some problem with the create model page."
         })
+# endregion
 
 
+# region CreateSensor
+@router.get("/sensor/create/", response_class=HTMLResponse)
+async def get_create_sensor_page(request: Request, current_user: User = Depends(staff_user),
+                                 session: AsyncSession = Depends(get_async_session)):
+    try:
+        models = await get_all_models(session=session)
+        return templates.TemplateResponse(
+            "/staff/create/sensor/create_sensor.html",
+            {
+                "request": request,
+                'user': current_user,
+                "models": models,
+                'title': "ISPU - User Profile!",
+                'menu': user_menu,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("profile/index.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("profile/index.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the model page."})
+
+
+@router.post("/sensor/create/", response_class=HTMLResponse)
+async def post_update_model_page(request: Request, model_selected: int = Form(...),
+                                 name: str = Form(...),
+                                 KKS: str = Form(...),
+                                 current_user: User = Depends(staff_user),
+                                 session: AsyncSession = Depends(get_async_session)):
+    try:
+        await create_sensor(session=session, model_id=model_selected, name=name, KKS=KKS)
+        return RedirectResponse(url=request.url_for("get_sensor_page"),
+                                status_code=HTTPStatus.MOVED_PERMANENTLY)
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("profile/index.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the sensor page."})
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("profile/index.html", {"request": request,
+                                                                   "error": "There is some problem "
+                                                                            "with the sensor page."})
+# endregion
+
+
+# region AddAccidentModel
 @router.get("/accident/create/{model_id}", response_class=HTMLResponse)
 async def get_add_accident_page(
         request: Request,
@@ -806,8 +868,10 @@ async def post_add_accident_page(
             "request": request,
             "error": "There is some problem with the create model page."
         })
+# endregion
 
 
+# region CreateLocation
 @router.get("/location/create/sensor/", response_class=HTMLResponse)
 async def get_create_location_page(request: Request,
                                    user: User = Depends(staff_user),
@@ -855,7 +919,7 @@ async def post_create_location_page(request: Request,
         ]
         await session.execute(insert(sensor_location_association).values(location_model))
         await session.commit()
-        return RedirectResponse(url=request.url_for("get_home_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
+        return RedirectResponse(url=request.url_for("get_location_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
@@ -869,8 +933,10 @@ async def post_create_location_page(request: Request,
         return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create scenario page."})
+# endregion
 
 
+# region AssigmentTaskForUser
 @router.get("/scenario/add_user/{user_id}", response_class=HTMLResponse)
 async def get_task_assignment_for_curr_user(request: Request, user_id: int, current_user: User = Depends(staff_user),
                                             session: AsyncSession = Depends(get_async_session)):
@@ -923,6 +989,7 @@ async def post_task_assignment_for_curr_user(request: Request, user_id: int, tas
         return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the assignment task page."})
+# endregion
 
 
 # region GetModelList
@@ -1006,6 +1073,7 @@ async def get_scenario_page(request: Request, user: User = Depends(current_user)
         print(e)
         return templates.TemplateResponse("profile/index.html", {"request": request, "error": "There was some problem"
                                                                                                 " with the scripts."})
+
 
 @router.get("/locations", response_class=HTMLResponse)
 async def get_location_page(request: Request, user: User = Depends(current_user),

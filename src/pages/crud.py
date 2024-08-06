@@ -259,3 +259,8 @@ async def add_accidents_for_scenario(session: AsyncSession, scenario_id: int, ac
         await session.rollback()
         raise
 
+
+async def create_sensor(session: AsyncSession, KKS: str, name: str, model_id: int) -> None:
+    new_sensor_type = Sensor(name=name, KKS=KKS, model_id=model_id)
+    session.add(new_sensor_type)
+    await session.commit()
