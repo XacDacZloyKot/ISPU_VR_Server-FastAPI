@@ -8,13 +8,14 @@ from fastapi.exceptions import ValidationException, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 
 from src.auth.base_config import fastapi_users, auth_backend
 from src.auth.schemas import UserRead, UserCreate
 from src.pages.router import router as router_pages, templates
 from src.sensor.router import router as router_sensor
 
-DEBUG = False
+DEBUG = True
 
 app = FastAPI(
     title="ISPU App"
@@ -59,8 +60,11 @@ async def http_exception_handler(request: Request, exc: HTTPException):
             status_code=exc.status_code,
             content={"detail": exc.detail},
         )
-    if exc.status_code == 401:  # Unauthorized
+    if exc.status_code == 401:
         return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Please log in to continue"})
+    if exc.status_code == 404:
+        return templates.TemplateResponse("/auth/loginUser.html",
+                                          {"request": request, "error": "Page not found."})
     return templates.TemplateResponse("/support_pages/error.html", {"request": request, "error": str(exc.detail)})
 
 
@@ -70,6 +74,12 @@ async def generic_exception_handler(request: Request, exc: Exception):
     if DEBUG:
         return templates.TemplateResponse("/support_pages/error.html", {"request": request, "error": str(exc)})
     return templates.TemplateResponse("/support_pages/error.html", {"request": request, "error": "An unexpected error occurred."})
+
+
+@app.exception_handler(404)
+async def not_found_exception_handler(request: Request, exc: HTTPException):
+    return templates.TemplateResponse("/auth/loginUser.html",
+                                      {"request": request, "error": "Page not found."})
 
 
 app.include_router(
@@ -89,7 +99,8 @@ app.include_router(router_pages)
 
 if __name__ == "__main__":
     try:
-        uvicorn.run(app, port=8000, host="0.0.0.0", log_level="critical")
+        log_level = "debug" if DEBUG else "critical"
+        uvicorn.run(app, port=8000, host="0.0.0.0", log_level=log_level)
     except Exception as e:
         print("Error occurred:", e)
         sys.exit(1)
