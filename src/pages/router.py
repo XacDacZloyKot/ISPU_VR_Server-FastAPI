@@ -360,7 +360,7 @@ async def post_task_assignment(request: Request, scenario_id: int, user_ids: lis
 
 # region CreateScenario
 @router.get("/scenario/create", response_class=HTMLResponse)
-async def get_create_scenario_page(request: Request, user: User = Depends(staff_user),
+async def get_create_scenario_page(request: Request, user: User = Depends(administrator_user),
                                    session: AsyncSession = Depends(get_async_session)):
     try:
         location = await get_location_list(session=session)
@@ -388,7 +388,7 @@ async def get_create_scenario_page(request: Request, user: User = Depends(staff_
 
 @router.post("/scenario/create/model/", response_class=HTMLResponse)
 async def get_choice_model_for_scenario_page(request: Request, location_selected: int = Form(...),
-                                             user: User = Depends(staff_user),
+                                             user: User = Depends(administrator_user),
                                              session: AsyncSession = Depends(get_async_session)):
     try:
         location = await get_location_for_id(session=session, location_id=location_selected)
@@ -418,7 +418,7 @@ async def get_choice_model_for_scenario_page(request: Request, location_selected
 
 @router.post("/scenario/create/accident/{location_selected}", response_class=HTMLResponse)
 async def get_choice_accident_for_scenario_page(request: Request, location_selected: int,
-                                                sensor_selected: int = Form(...), user: User = Depends(staff_user),
+                                                sensor_selected: int = Form(...), user: User = Depends(administrator_user),
                                                 session: AsyncSession = Depends(get_async_session)):
     try:
         sensor = await get_sensor_for_id(session=session, sensor_id=sensor_selected)
@@ -450,7 +450,7 @@ async def get_choice_accident_for_scenario_page(request: Request, location_selec
 @router.post("/scenario/create/{location_id}/{sensor_id}", response_class=HTMLResponse)
 async def post_create_scenario(request: Request, location_id: int, sensor_id: int,
                                accident_selected: list[int] = Form(...), name: str = Form(max_length=255),
-                               user: User = Depends(staff_user),
+                               user: User = Depends(administrator_user),
                                session: AsyncSession = Depends(get_async_session)):
     try:
         new_scenario = Scenario(location_id=location_id, sensor_id=sensor_id, name=name)
@@ -646,7 +646,7 @@ async def delete_admission(admission_id: int, session: AsyncSession = Depends(ge
 
 # region CreateModel
 @router.get("/model/create/sensor/", response_class=HTMLResponse)
-async def get_create_model_page(request: Request, user: User = Depends(staff_user),
+async def get_create_model_page(request: Request, user: User = Depends(administrator_user),
                                 session: AsyncSession = Depends(get_async_session)):
     try:
         sensor_value_names = await get_name_sensor_value(session=session)
@@ -673,7 +673,7 @@ async def get_create_model_page(request: Request, user: User = Depends(staff_use
 
 
 @router.post("/model/create/fields/", response_class=HTMLResponse)
-async def get_choice_fields(request: Request, model_selected: str = Form(...), user: User = Depends(staff_user),
+async def get_choice_fields(request: Request, model_selected: str = Form(...), user: User = Depends(administrator_user),
                             session: AsyncSession = Depends(get_async_session)):
     try:
         print("Страница выбора полей")
@@ -706,7 +706,7 @@ async def create_model(
         request: Request,
         models_name: str,
         fields_selected: list[int] = Form(...),
-        user: User = Depends(staff_user),
+        user: User = Depends(administrator_user),
         session: AsyncSession = Depends(get_async_session)
 ):
     try:
@@ -739,7 +739,7 @@ async def create_model(
 
 # region CreateSensor
 @router.get("/sensor/create/", response_class=HTMLResponse)
-async def get_create_sensor_page(request: Request, current_user: User = Depends(staff_user),
+async def get_create_sensor_page(request: Request, current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
         models = await get_all_models(session=session)
@@ -769,7 +769,7 @@ async def get_create_sensor_page(request: Request, current_user: User = Depends(
 async def post_update_model_page(request: Request, model_selected: int = Form(...),
                                  name: str = Form(...),
                                  KKS: str = Form(...),
-                                 current_user: User = Depends(staff_user),
+                                 current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
         await create_sensor(session=session, model_id=model_selected, name=name, KKS=KKS)
@@ -874,7 +874,7 @@ async def post_add_accident_page(
 # region CreateLocation
 @router.get("/location/create/sensor/", response_class=HTMLResponse)
 async def get_create_location_page(request: Request,
-                                   user: User = Depends(staff_user),
+                                   user: User = Depends(administrator_user),
                                    session: AsyncSession = Depends(get_async_session)):
     try:
         sensors = await get_all_sensors(session=session)
@@ -907,7 +907,7 @@ async def post_create_location_page(request: Request,
                                     sensor_selected: list[int] = Form(...),
                                     name: str = Form(...), prefab: str = Form(...),
                                     status: LocationStatus = Form(...),
-                                    user: User = Depends(staff_user),
+                                    user: User = Depends(administrator_user),
                                     session: AsyncSession = Depends(get_async_session)):
     try:
         new_location = Location(name=name, status=status, prefab=prefab)
@@ -1022,7 +1022,7 @@ async def get_users_page(request: Request, user: User = Depends(staff_user),
 
 
 @router.get("/tasks", response_class=HTMLResponse)
-async def get_tasks_page(request: Request, user: User = Depends(current_user),
+async def get_tasks_page(request: Request, user: User = Depends(staff_user),
                          session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(Admission).where(user.id == Admission.user_id).order_by("status")
@@ -1049,7 +1049,7 @@ async def get_tasks_page(request: Request, user: User = Depends(current_user),
 
 
 @router.get("/scenario", response_class=HTMLResponse)
-async def get_scenario_page(request: Request, user: User = Depends(current_user),
+async def get_scenario_page(request: Request, user: User = Depends(staff_user),
                             session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(Scenario).order_by(Scenario.id)
@@ -1076,7 +1076,7 @@ async def get_scenario_page(request: Request, user: User = Depends(current_user)
 
 
 @router.get("/locations", response_class=HTMLResponse)
-async def get_location_page(request: Request, user: User = Depends(current_user),
+async def get_location_page(request: Request, user: User = Depends(staff_user),
                             session: AsyncSession = Depends(get_async_session)):
     try:
         locations = await get_location_list(session=session)
@@ -1101,7 +1101,7 @@ async def get_location_page(request: Request, user: User = Depends(current_user)
 
 
 @router.get("/models", response_class=HTMLResponse)
-async def get_model_page(request: Request, user: User = Depends(current_user),
+async def get_model_page(request: Request, user: User = Depends(staff_user),
                          session: AsyncSession = Depends(get_async_session)):
     try:
         models = await get_all_models(session=session)
@@ -1126,7 +1126,7 @@ async def get_model_page(request: Request, user: User = Depends(current_user),
 
 
 @router.get("/sensors", response_class=HTMLResponse)
-async def get_sensor_page(request: Request, user: User = Depends(current_user),
+async def get_sensor_page(request: Request, user: User = Depends(staff_user),
                           session: AsyncSession = Depends(get_async_session)):
     try:
         sensors = await get_all_sensors(session=session)
@@ -1155,7 +1155,7 @@ async def get_sensor_page(request: Request, user: User = Depends(current_user),
 
 #  region Update Model
 @router.get("/model/update/{model_id}", response_class=HTMLResponse)
-async def get_update_model_page(request: Request, model_id: int, current_user: User = Depends(staff_user),
+async def get_update_model_page(request: Request, model_id: int, current_user: User = Depends(administrator_user),
                                 session: AsyncSession = Depends(get_async_session)):
     try:
         model = await get_model_for_id(model_id=model_id, session=session)
@@ -1185,7 +1185,7 @@ async def get_update_model_page(request: Request, model_id: int, current_user: U
 
 
 @router.post("/model/update/fields/{model_id}", response_class=HTMLResponse)
-async def get_update_model_page_choice_field(request: Request, model_id: int, current_user: User = Depends(staff_user),
+async def get_update_model_page_choice_field(request: Request, model_id: int, current_user: User = Depends(administrator_user),
                                              model_sensor_type: str = Form(...),
                                              session: AsyncSession = Depends(get_async_session)):
     try:
@@ -1220,7 +1220,7 @@ async def get_update_model_page_choice_field(request: Request, model_id: int, cu
 @router.post("/model/update/{model_id}", response_class=HTMLResponse)
 async def post_update_model_page(request: Request, model_id: int, fields_selected: list[int] = Form(...),
                                  model_sensor_type: str = Form(...),
-                                 current_user: User = Depends(staff_user),
+                                 current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
         model = await get_model_for_id(model_id=model_id, session=session)
@@ -1252,7 +1252,7 @@ async def post_update_model_page(request: Request, model_id: int, fields_selecte
 
 #  region Update Sensor
 @router.get("/sensor/update/{sensor_id}", response_class=HTMLResponse)
-async def get_update_sensor_page(request: Request, sensor_id: int, current_user: User = Depends(staff_user),
+async def get_update_sensor_page(request: Request, sensor_id: int, current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
         models = await get_all_models(session=session)
@@ -1284,7 +1284,7 @@ async def get_update_sensor_page(request: Request, sensor_id: int, current_user:
 async def post_update_model_page(request: Request, sensor_id: int, model_selected: int = Form(...),
                                  name: str = Form(...),
                                  KKS: str = Form(...),
-                                 current_user: User = Depends(staff_user),
+                                 current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
         sensor = await get_sensor_for_id(session=session, sensor_id=sensor_id)
@@ -1314,7 +1314,7 @@ async def post_update_model_page(request: Request, sensor_id: int, model_selecte
 @router.get("/location/update/{location_id}", response_class=HTMLResponse)
 async def get_update_location_page(request: Request,
                                    location_id: int,
-                                   user: User = Depends(staff_user),
+                                   user: User = Depends(administrator_user),
                                    session: AsyncSession = Depends(get_async_session)):
     try:
         location: Location = await get_location_for_id(session=session, location_id=location_id)
@@ -1352,7 +1352,7 @@ async def post_update_location_page(request: Request,
                                     sensor_selected: list[int] = Form(...),
                                     name: str = Form(...), prefab: str = Form(...),
                                     status: LocationStatus = Form(...),
-                                    user: User = Depends(staff_user),
+                                    user: User = Depends(administrator_user),
                                     session: AsyncSession = Depends(get_async_session)):
     try:
         location = await get_location_for_id(session=session, location_id=location_id)
@@ -1391,7 +1391,7 @@ async def post_update_location_page(request: Request,
 
 @router.get("/scenario/update/{scenario_id}", response_class=HTMLResponse)
 async def get_update_scenario_page(request: Request, scenario_id: int,
-                                   user: User = Depends(staff_user),
+                                   user: User = Depends(administrator_user),
                                    session: AsyncSession = Depends(get_async_session)):
     try:
         scenario = await get_scenario_for_id(session=session, scenario_id=scenario_id)
@@ -1422,7 +1422,7 @@ async def get_update_scenario_page(request: Request, scenario_id: int,
 @router.post("/scenario/update/model/{scenario_id}", response_class=HTMLResponse)
 async def get_choice_sensor_for_update_scenario_page(request: Request, scenario_id: int,
                                                      location_selected: int = Form(...),
-                                                     user: User = Depends(staff_user),
+                                                     user: User = Depends(administrator_user),
                                                      session: AsyncSession = Depends(get_async_session)):
     try:
         scenario = await get_scenario_for_id(session=session, scenario_id=scenario_id)
@@ -1460,7 +1460,7 @@ async def get_choice_sensor_for_update_scenario_page(request: Request, scenario_
 async def get_choice_accident_for_update_scenario_page(request: Request,
                                                        scenario_id: int, location_selected: int = Form(...),
                                                        sensor_selected: int = Form(None),
-                                                       user: User = Depends(staff_user),
+                                                       user: User = Depends(administrator_user),
                                                        session: AsyncSession = Depends(get_async_session)):
     try:
         scenario = await get_scenario_for_id(session=session, scenario_id=scenario_id)
@@ -1500,7 +1500,7 @@ async def post_update_scenario(request: Request,
                                location_selected: int = Form(...), sensor_selected: int = Form(...),
                                accident_selected: list[int] = Form(...),
                                name: str = Form(max_length=255),
-                               user: User = Depends(staff_user),
+                               user: User = Depends(administrator_user),
                                session: AsyncSession = Depends(get_async_session)):
     try:
         scenario = await get_scenario_for_id(scenario_id=scenario_id, session=session)
