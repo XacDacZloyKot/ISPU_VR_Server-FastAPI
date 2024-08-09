@@ -1022,7 +1022,7 @@ async def get_users_page(request: Request, user: User = Depends(staff_user),
 
 
 @router.get("/tasks", response_class=HTMLResponse)
-async def get_tasks_page(request: Request, user: User = Depends(staff_user),
+async def get_tasks_page(request: Request, user: User = Depends(current_user),
                          session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(Admission).where(user.id == Admission.user_id).order_by("status")

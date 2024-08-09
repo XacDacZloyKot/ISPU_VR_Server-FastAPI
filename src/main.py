@@ -15,7 +15,7 @@ from src.auth.schemas import UserRead, UserCreate
 from src.pages.router import router as router_pages, templates
 from src.sensor.router import router as router_sensor
 
-DEBUG = True
+DEBUG = False
 
 app = FastAPI(
     title="ISPU App"
@@ -80,6 +80,12 @@ async def generic_exception_handler(request: Request, exc: Exception):
 async def not_found_exception_handler(request: Request, exc: HTTPException):
     return templates.TemplateResponse("/auth/loginUser.html",
                                       {"request": request, "error": "Page not found."})
+
+
+@app.exception_handler(401)
+async def not_found_exception_handler(request: Request, exc: HTTPException):
+    return templates.TemplateResponse("/auth/loginUser.html",
+                                      {"request": request, "error": "Please log in to continue"})
 
 
 app.include_router(
