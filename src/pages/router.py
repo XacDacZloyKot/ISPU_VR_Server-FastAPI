@@ -30,7 +30,7 @@ from src.pages.utils import (authenticate,
                              user_menu,
                              create,
                              get_last_admission_task,
-                             logout as logout_func,
+                             logout as logout_func, create_json_scenario, start_app,
                              )
 from src.sensor.models import scenario_accident_association, Model, Accident, model_accident_association, Location, \
     LocationStatus, sensor_location_association, Sensor
@@ -1675,4 +1675,46 @@ async def get_add_accident_model_page(
         return templates.TemplateResponse("profile/index.html", {"request": request,
                                                                    "error": "There is some problem "
                                                                             "with the create model page."})
+# endregion
+
+# region StartApp
+
+
+@router.get("/scenario/start/{admission_id}", response_class=HTMLResponse)
+async def start_admission_app(
+        request: Request,
+        admission_id: int,
+        user: User = Depends(current_user),
+        session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        admission = await get_admission_for_id(admission_id=admission_id, session=session)
+        path_parent = request.headers.get("REFERER")
+        create_json_scenario(admission_json=admission.json_dump())
+        start_app()
+        response = RedirectResponse(url=path_parent, status_code=302)
+        return response
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("profile/index.html", {
+            "request": request,
+            "error": "There is some problem with start app.",
+            'user': user,
+            'menu': user_menu
+        })
+    except IOError as e:
+        return templates.TemplateResponse("profile/index.html", {
+            "request": request,
+            "error": str(e),
+            'user': user,
+            'menu': user_menu
+        })
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("profile/index.html", {
+            "request": request,
+            "error": "There is some problem with start app.",
+            'user': user,
+            'menu': user_menu
+        })
 # endregion

@@ -49,10 +49,12 @@
                                class="location-link">
                                 <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
                             </a>
-                            <a href="{{ url_for("get_update_sensor_page", sensor_id=sensor.id) }}"
-                               class="location-link">
-                                <img src="/static/img/Redact.svg" alt="Назначение" class="location-icon">
-                            </a>
+                            {% if user.is_superuser %}
+                                <a href="{{ url_for("get_update_sensor_page", sensor_id=sensor.id) }}"
+                                   class="location-link">
+                                    <img src="/static/img/Redact.svg" alt="Назначение" class="location-icon">
+                                </a>
+                            {% endif %}
                         </div>
                     </td>
                     </tr>

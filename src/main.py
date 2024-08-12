@@ -14,8 +14,9 @@ from src.auth.base_config import fastapi_users, auth_backend
 from src.auth.schemas import UserRead, UserCreate
 from src.pages.router import router as router_pages, templates
 from src.sensor.router import router as router_sensor
+from src.api.v1.admission.router import router as router_admission
 
-DEBUG = False
+DEBUG = True
 
 app = FastAPI(
     title="ISPU App"
@@ -88,6 +89,7 @@ async def not_found_exception_handler(request: Request, exc: HTTPException):
                                       {"request": request, "error": "Please log in to continue"})
 
 
+
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
     prefix="/auth/jwt",
@@ -102,6 +104,7 @@ app.include_router(
 
 app.include_router(router_sensor)
 app.include_router(router_pages)
+app.include_router(router_admission)
 
 if __name__ == "__main__":
     try:

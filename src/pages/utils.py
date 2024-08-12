@@ -1,4 +1,6 @@
 import contextlib
+import os
+import subprocess
 
 from fastapi import HTTPException, Request
 from fastapi.responses import Response
@@ -7,9 +9,9 @@ from fastapi.security import OAuth2PasswordRequestForm
 from datetime import datetime
 
 from sqlalchemy import Sequence
-from typing_extensions import Optional, List
+import json
 
-from src.auth.models import Admission, User
+from src.auth.models import Admission, User, Scenario
 from src.auth.base_config import auth_backend, get_jwt_strategy
 from src.auth.manager import get_user_manager
 from src.auth.utils import get_user_db
@@ -128,3 +130,18 @@ def get_last_admission_task(list_admission_tasks: Sequence[Admission]) -> Admiss
         return None
     last_admission = max(filtered_admissions, key=lambda admission: admission.is_ready)
     return last_admission
+
+
+def create_json_scenario(admission_json, path="C:\\Users\\treen\\Desktop\\text.json"):
+    with open(path, "w", encoding="utf-8") as file:
+        file.write(admission_json)
+
+
+def start_app(path="C:\\Users\\treen\\Desktop\\build\\Myproject.exe"):
+    try:
+        if os.path.exists(path):
+            subprocess.Popen(path, shell=True)
+        else:
+            raise IOError("Проект не найден")
+    except Exception as e:
+        raise Exception(str(e))

@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 from enum import Enum
 
@@ -78,6 +79,40 @@ class Admission(Base):
             instance.status = "COMPLETED"
         else:
             instance.is_ready = None
+
+    def json_dump(self) -> str:
+        json_object = {
+            'response': {
+                'id': self.id,
+                'status': 200,
+                'scenario': {
+                    'id': self.scenario.id,
+                    'name': self.scenario.name,
+                    'sensor': {
+                        'id': self.scenario.sensor.id,
+                        'name': self.scenario.sensor.name,
+                        'KKS': self.scenario.sensor.KKS,
+                        'model': {
+                            'id': self.scenario.sensor.model.id,
+                            'name': self.scenario.sensor.model.sensor_type.name,
+                            'specification': self.scenario.sensor.model.specification,
+                        }
+                    },
+                    'accidents': [
+                        {
+                            'name': accident.name,
+                            'mechanical_accident': accident.mechanical_accident,
+                            'change_value': accident.change_value,
+                        }
+                        for accident in self.scenario.accidents
+                    ]
+                }
+            }
+        }
+        return json.dumps(json_object, ensure_ascii=False)
+
+    def __str__(self):
+        return f"ID: {self.id} | name: {self.scenario.name} | Rating: {self.rating}"
 
 
 class Scenario(Base):
