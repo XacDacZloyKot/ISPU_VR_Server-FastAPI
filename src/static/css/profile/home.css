@@ -131,3 +131,8 @@ thead th {
 .column-error{
     font-size: 12px;
 }
+
+.error{
+    color: red;
+    font-weight: 600;
+}

@@ -437,10 +437,17 @@ async def get_create_scenario_page(request: Request, user: User = Depends(admini
 
 
 @router.post("/scenario/create/model/", response_class=HTMLResponse)
-async def get_choice_model_for_scenario_page(request: Request, location_selected: int = Form(...),
+async def get_choice_model_for_scenario_page(request: Request, location_selected: int = Form(None),
                                              user: User = Depends(administrator_user),
                                              session: AsyncSession = Depends(get_async_session)):
     try:
+        if not location_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали локацию!",
+                'user': user,
+                'menu': user_menu
+            })
         location = await get_location_for_id(session=session, location_id=location_selected)
         sensors = location.sensors
         return templates.TemplateResponse(
@@ -474,12 +481,18 @@ async def get_choice_model_for_scenario_page(request: Request, location_selected
 
 @router.post("/scenario/create/accident/{location_selected}", response_class=HTMLResponse)
 async def get_choice_accident_for_scenario_page(request: Request, location_selected: int,
-                                                sensor_selected: int = Form(...),
+                                                sensor_selected: int = Form(None),
                                                 user: User = Depends(administrator_user),
                                                 session: AsyncSession = Depends(get_async_session)):
     try:
+        if not sensor_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали сенсор!",
+                'user': user,
+                'menu': user_menu
+            })
         sensor = await get_sensor_for_id(session=session, sensor_id=sensor_selected)
-        print(sensor.model.accidents)
         return templates.TemplateResponse(
             "/staff/create/scenario/choice_accident.html",
             {
@@ -512,10 +525,17 @@ async def get_choice_accident_for_scenario_page(request: Request, location_selec
 
 @router.post("/scenario/create/{location_id}/{sensor_id}", response_class=HTMLResponse)
 async def post_create_scenario(request: Request, location_id: int, sensor_id: int,
-                               accident_selected: list[int] = Form(...), name: str = Form(max_length=255),
+                               accident_selected: list[int] = Form(None), name: str = Form(max_length=255),
                                user: User = Depends(administrator_user),
                                session: AsyncSession = Depends(get_async_session)):
     try:
+        if not accident_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали аварию!",
+                'user': user,
+                'menu': user_menu
+            })
         new_scenario = Scenario(location_id=location_id, sensor_id=sensor_id, name=name)
         session.add(new_scenario)
         await session.flush()
