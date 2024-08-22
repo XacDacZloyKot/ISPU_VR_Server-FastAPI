@@ -18,7 +18,7 @@
             <div class="select-wrapper">
                 <select name="model_sensor_type" id="model_sensor_type">
                     {% for option in sensor_types %}
-                        <option value="{{ option.name }}" {% if option.id == model.sensor_type.id %}selected{% endif %}>
+                        <option value="{{ option.name }}" {% if option.id == model.model_type.id %}selected{% endif %}>
                             {{ option.name }}
                         </option>
                     {% endfor %}

@@ -13,7 +13,7 @@ sys.path.append(os.path.join(sys.path[0], 'src'))
 from src.database import Base
 from src.config import DB_HOST, DB_PORT, DB_USER, DB_NAME, DB_PASS
 from src.auth.models import User, Admission, Scenario
-from src.sensor.models import Model, SensorType, Accident, Location, Sensor, SensorValue
+from src.sensor.models import Model, ModelType, Accident, Location, Sensor, ModelValue
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

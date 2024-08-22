@@ -1,7 +1,7 @@
 .sidebar{
     background-color: var(--color-light);
-    min-width: 300px;
-    width: 300px;
+    min-width: 250px;
+    width: 250px;
     height: 100%;
     padding: 15px;
     border-right: solid 0.5px var(--color-primary-200);

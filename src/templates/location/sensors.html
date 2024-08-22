@@ -31,7 +31,7 @@
                     <td>
                         <div class="value-container">
                             ID: {{ sensor.model.id }}<br>
-                            Прибор: {{ sensor.model.sensor_type.name }}<br>
+                            Прибор: {{ sensor.model.model_type.name }}<br>
                             Параметры:<br>
                             {% for field, value in sensor.model.specification.items() %}
                                 {{ field }}: {{ value }}<br>

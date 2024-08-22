@@ -20,7 +20,7 @@
                     {% for option in sensor_values %}
                         {% set option_value = option.value ~ ' ' ~ option.measurement %}
                         <option value="{{ option.id }}" {% if option_value in selected_fields.values() %}selected{% endif %}>
-                            {{ option.sensor_type }} {{ option.field }}: {{ option.value }} {{ option.measurement }}
+                            {{ option.model_type }} {{ option.field }}: {{ option.value }} {{ option.measurement }}
                         </option>
                     {% endfor %}
                 </select>

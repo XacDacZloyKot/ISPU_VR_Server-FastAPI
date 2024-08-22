@@ -850,7 +850,7 @@ async def create_model(
         for field in fields:
             fields_dict[field.field] = f"{field.value} {field.measurement}"
         id: int = await create_or_get_sensor_type(session=session, sensor_type_name=models_name)
-        new_model = Model(specification=fields_dict, sensor_type_id=id)
+        new_model = Model(specification=fields_dict, model_type_id=id)
         session.add(new_model)
         await session.commit()
         return RedirectResponse(url=request.url_for("get_add_accident_page", model_id=new_model.id),
@@ -1505,7 +1505,7 @@ async def post_update_model_page(request: Request, model_id: int, fields_selecte
             fields_dict[field.field] = f"{field.value} {field.measurement}"
         id: int = await create_or_get_sensor_type(session=session, sensor_type_name=model_sensor_type)
         model.specification = fields_dict
-        model.sensor_type_id = id
+        model.model_type = id
         session.add(model)
         await session.commit()
         return RedirectResponse(url=request.url_for("get_model_for_id_page", model_id=model.id),

@@ -94,7 +94,7 @@ class Admission(Base):
                         'KKS': self.scenario.sensor.KKS,
                         'model': {
                             'id': self.scenario.sensor.model.id,
-                            'name': self.scenario.sensor.model.sensor_type.name,
+                            'name': self.scenario.sensor.model.model_type.name,
                             'specification': self.scenario.sensor.model.specification,
                         }
                     },

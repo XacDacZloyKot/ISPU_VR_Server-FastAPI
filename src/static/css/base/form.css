@@ -42,8 +42,8 @@
 }
 
 .form-container-height{
-    max-height: 600px;
-    height: calc(100% - 30px);
+    max-height: 540px;
+    height: 100%;
 }
 
 .screen-container-height{
@@ -51,6 +51,6 @@
 }
 
 .form-container-height-full{
-    max-height: 630px;
-    height: calc(100% - 30px);
+    max-height: 580px;
+    height: 100%;
 }

@@ -1,8 +1,8 @@
-"""Update DB
+"""Change name ModelValue, ModelType
 
-Revision ID: 4570df9ae491
+Revision ID: 6a2f3fd82b02
 Revises: 
-Create Date: 2024-08-01 19:27:53.820537
+Create Date: 2024-08-22 15:17:17.307481
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '4570df9ae491'
+revision: str = '6a2f3fd82b02'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -28,23 +28,24 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_accident'))
     )
     op.create_table('location',
+    sa.Column('status', sa.Enum('DEVELOPING', 'INACTIVE', 'COMPLETED', name='locationstatus'), nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('prefab', sa.String(length=300), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_location'))
     )
-    op.create_table('sensor_value',
+    op.create_table('model_type',
+    sa.Column('name', sa.String(length=255), nullable=True),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_model_type'))
+    )
+    op.create_table('model_value',
     sa.Column('sensor_type', sa.String(length=255), nullable=True),
     sa.Column('field', sa.String(length=128), nullable=True),
     sa.Column('value', sa.String(length=64), nullable=True),
     sa.Column('measurement', sa.String(length=64), nullable=True),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_sensor_value'))
-    )
-    op.create_table('sensortype',
-    sa.Column('name', sa.String(length=255), nullable=True),
-    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.PrimaryKeyConstraint('id', name=op.f('pk_sensortype'))
+    sa.PrimaryKeyConstraint('id', name=op.f('pk_model_value'))
     )
     op.create_table('user',
     sa.Column('email', sa.String(length=255), nullable=True),
@@ -66,9 +67,9 @@ def upgrade() -> None:
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
     op.create_table('model',
     sa.Column('specification', sa.JSON(), nullable=True),
-    sa.Column('sensor_type_id', sa.Integer(), nullable=False),
+    sa.Column('model_type_id', sa.Integer(), nullable=False),
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.ForeignKeyConstraint(['sensor_type_id'], ['sensortype.id'], name=op.f('fk_model_sensor_type_id_sensortype')),
+    sa.ForeignKeyConstraint(['model_type_id'], ['model_type.id'], name=op.f('fk_model_model_type_id_model_type')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_model'))
     )
     op.create_table('model_accident_association',
@@ -86,9 +87,10 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id', name=op.f('pk_sensor'))
     )
     op.create_table('scenario',
-    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('name', sa.String(length=255), nullable=False),
     sa.Column('sensor_id', sa.Integer(), nullable=False),
     sa.Column('location_id', sa.Integer(), nullable=False),
+    sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.ForeignKeyConstraint(['location_id'], ['location.id'], name=op.f('fk_scenario_location_id_location')),
     sa.ForeignKeyConstraint(['sensor_id'], ['sensor.id'], name=op.f('fk_scenario_sensor_id_sensor')),
     sa.PrimaryKeyConstraint('id', name=op.f('pk_scenario'))
@@ -130,8 +132,8 @@ def downgrade() -> None:
     op.drop_table('model')
     op.drop_index(op.f('ix_user_email'), table_name='user')
     op.drop_table('user')
-    op.drop_table('sensortype')
-    op.drop_table('sensor_value')
+    op.drop_table('model_value')
+    op.drop_table('model_type')
     op.drop_table('location')
     op.drop_table('accident')
     # ### end Alembic commands ###

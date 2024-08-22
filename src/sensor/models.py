@@ -42,12 +42,12 @@ class Model(Base):
     # Связь с Sensor (один ко многим)
     sensors = relationship("Sensor", back_populates="model")
 
-    # Связь с SensorType
-    sensor_type_id: Mapped[int] = mapped_column(ForeignKey('sensortype.id'))
-    sensor_type = relationship("SensorType",
-                               back_populates="models",
-                               foreign_keys='Model.sensor_type_id',
-                               lazy='selectin')
+    # Связь с SensorType (sensor_type_id, sensor_type)
+    model_type_id: Mapped[int] = mapped_column(ForeignKey('model_type.id'))
+    model_type = relationship("ModelType",
+                              back_populates="models",
+                              foreign_keys='Model.model_type_id',
+                              lazy='selectin')
 
     # Связь many-to-many через промежуточную таблицу
     accidents = relationship("Accident",
@@ -56,15 +56,15 @@ class Model(Base):
                              lazy="subquery")
 
     def __str__(self):
-        return f"ID: {self.id} | Имя: {self.sensor_type.name}"
+        return f"ID: {self.id} | Имя: {self.model_type.name}"
 
 
-class SensorType(Base):
-    __tablename__ = "sensortype"
+class ModelType(Base):
+    __tablename__ = "model_type"
 
     name = Column(String(255), doc="Тип датчика")
     #  Обратная совместимость
-    models = relationship("Model", back_populates="sensor_type", lazy="selectin")
+    models = relationship("Model", back_populates="model_type", lazy="selectin")
 
 
 class Accident(Base):
@@ -108,16 +108,16 @@ class Location(Base):
         return f"ID:{self.id} | {self.name}"
 
 
-class SensorValue(Base):
-    __tablename__ = "sensor_value"
+class ModelValue(Base):
+    __tablename__ = "model_value"
 
-    sensor_type = Column(String(255), doc="Тип датчика")
+    model_type = Column(String(255), doc="Тип датчика")
     field = Column(String(128), doc="Поле датчика")
     value = Column(String(64), doc="Значение")
     measurement = Column(String(64), doc="Величина измерения")
 
     def __str__(self):
-        return f"{self.sensor_type} | {self.field}: {self.value} {self.measurement}"
+        return f"{self.model_type} | {self.field}: {self.value} {self.measurement}"
 
 
 class Sensor(Base):

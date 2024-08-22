@@ -45,7 +45,7 @@
                     {% for option in sensors_options %}
                         <tr>
                             <td>{{ option.id }}</td>
-                            <td>{{ option.model.sensor_type.name }}</td>
+                            <td>{{ option.model.model_type.name }}</td>
                             <td>{{ option.name }}<br>ККС:{{ option.KKS }}</td>
                             <td class="column-error">
                                 {% for field, value in option.model.specification.items() %}

@@ -68,7 +68,7 @@
                         <td>{{ sensor.id }}</td>
                         <td>{{ sensor.KKS }}</td>
                         <td>{{ sensor.name }}</td>
-                        <td>{{ sensor.model.sensor_type.name }}</td>
+                        <td>{{ sensor.model.model_type.name }}</td>
                         <td>
                             {% for field, value in sensor.model.specification.items() %}
                                 {{ field }}: {{ value }}<br>

@@ -10,8 +10,8 @@ from src.sensor import (Location,
                         Model,
                         Accident,
                         model_accident_association,
-                        SensorValue,
-                        SensorType,
+                        ModelValue,
+                        ModelType,
                         Sensor,
                         sensor_location_association,
                         scenario_accident_association
@@ -128,38 +128,38 @@ async def get_sensor_for_id(session: AsyncSession, sensor_id: int) -> Sensor:
 
 
 async def get_name_sensor_value(session: AsyncSession):
-    query = select(SensorValue.sensor_type, func.count(SensorValue.id).label('count')).group_by(SensorValue.sensor_type)
+    query = select(ModelValue.model_type, func.count(ModelValue.id).label('count')).group_by(ModelValue.model_type)
     result = await session.execute(query)
     sensor_values = result.all()
     return sensor_values
 
 
-async def get_sensor_value_for_name(session: AsyncSession, sensor_name: str) -> Sequence[SensorValue]:
-    query = select(SensorValue).where(sensor_name == SensorValue.sensor_type)
+async def get_sensor_value_for_name(session: AsyncSession, sensor_name: str) -> Sequence[ModelValue]:
+    query = select(ModelValue).where(sensor_name == ModelValue.model_type)
     result = await session.execute(query)
     values = result.scalars().all()
     return values
 
 
-async def get_sensor_values_for_id(session: AsyncSession, fields_id: list[int]) -> Sequence[SensorValue]:
-    result = await session.execute(select(SensorValue).where(SensorValue.id.in_(fields_id)))
+async def get_sensor_values_for_id(session: AsyncSession, fields_id: list[int]) -> Sequence[ModelValue]:
+    result = await session.execute(select(ModelValue).where(ModelValue.id.in_(fields_id)))
     sensor_values = result.scalars().all()
     return sensor_values
 
 
 async def create_or_get_sensor_type(session: AsyncSession, sensor_type_name: str) -> int:
-    query = select(SensorType).where(SensorType.name == sensor_type_name)
+    query = select(ModelType).where(ModelType.name == sensor_type_name)
     result = await session.execute(query)
-    sensor_type = result.scalars().first()
+    model_type = result.scalars().first()
 
-    if sensor_type:
-        return sensor_type.id
+    if model_type:
+        return model_type.id
 
-    new_sensor_type = SensorType(name=sensor_type_name)
-    session.add(new_sensor_type)
+    new_model_type = ModelType(name=sensor_type_name)
+    session.add(new_model_type)
     await session.commit()
 
-    return new_sensor_type.id
+    return new_model_type.id
 
 
 async def get_all_models(session: AsyncSession) -> Sequence[Model]:
@@ -182,15 +182,15 @@ async def get_models_for_id(session: AsyncSession, models_id: list[int]) -> Sequ
     return models
 
 
-async def get_all_sensor_types(session: AsyncSession) -> Sequence[SensorType]:
-    query = select(SensorType).order_by(SensorType.name)
+async def get_all_sensor_types(session: AsyncSession) -> Sequence[ModelType]:
+    query = select(ModelType).order_by(ModelType.name)
     result = await session.execute(query)
     sensors_types = result.scalars().all()
     return sensors_types
 
 
-async def get_all_sensor_values(session: AsyncSession) -> Sequence[SensorValue]:
-    query = select(SensorValue).order_by(SensorValue.sensor_type)
+async def get_all_sensor_values(session: AsyncSession) -> Sequence[ModelValue]:
+    query = select(ModelValue).order_by(ModelValue.model_type)
     result = await session.execute(query)
     sensors_values = result.scalars().all()
     return sensors_values

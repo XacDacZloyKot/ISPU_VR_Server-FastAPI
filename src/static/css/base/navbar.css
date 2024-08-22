@@ -2,7 +2,7 @@
     display: grid;
     height: calc(100% - 30px);
     grid-template-rows: 80px 1fr;
-    grid-template-columns: 330px 1fr;
+    grid-template-columns: 280px 1fr;
 }
 
 .navbar {

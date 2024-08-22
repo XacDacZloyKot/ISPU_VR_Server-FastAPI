@@ -37,7 +37,7 @@
                 {% for model in models %}
                     <tr>
                         <td>{{ model.id }}</td>
-                        <td>{{ model.sensor_type.name }}</td>
+                        <td>{{ model.model_type.name }}</td>
                         <td>{% for field, value in model.specification.items() %}
                             {{ field }}: {{ value }}<br>
                         {% endfor %}
