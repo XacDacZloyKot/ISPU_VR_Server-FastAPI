@@ -799,7 +799,6 @@ async def get_create_model_page(request: Request, user: User = Depends(administr
 async def get_choice_fields(request: Request, model_selected: str = Form(...), user: User = Depends(administrator_user),
                             session: AsyncSession = Depends(get_async_session)):
     try:
-        print("Страница выбора полей")
         values = await get_sensor_value_for_name(session=session, sensor_name=model_selected)
         return templates.TemplateResponse(
             "/staff/create/model/choice_fields.html",
@@ -834,11 +833,18 @@ async def get_choice_fields(request: Request, model_selected: str = Form(...), u
 async def create_model(
         request: Request,
         models_name: str,
-        fields_selected: list[int] = Form(...),
+        fields_selected: list[int] = Form(None),
         user: User = Depends(administrator_user),
         session: AsyncSession = Depends(get_async_session)
 ):
     try:
+        if not fields_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали параметры модели!",
+                'user': user,
+                'menu': user_menu
+            })
         fields = await get_sensor_values_for_id(session=session, fields_id=fields_selected)
         fields_dict = dict()
         for field in fields:
@@ -907,12 +913,19 @@ async def get_create_sensor_page(request: Request, current_user: User = Depends(
 
 
 @router.post("/sensor/create/", response_class=HTMLResponse)
-async def post_update_model_page(request: Request, model_selected: int = Form(...),
+async def post_update_model_page(request: Request, model_selected: int = Form(None),
                                  name: str = Form(...),
                                  KKS: str = Form(...),
                                  current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
+        if not model_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали модель для сенсора!",
+                'user': current_user,
+                'menu': user_menu
+            })
         await create_sensor(session=session, model_id=model_selected, name=name, KKS=KKS)
         return RedirectResponse(url=request.url_for("get_sensor_page"),
                                 status_code=HTTPStatus.MOVED_PERMANENTLY)
@@ -1070,12 +1083,19 @@ async def get_create_location_page(request: Request,
 
 @router.post("/location/create/", response_class=HTMLResponse)
 async def post_create_location_page(request: Request,
-                                    sensor_selected: list[int] = Form(...),
+                                    sensor_selected: list[int] = Form(None),
                                     name: str = Form(...), prefab: str = Form(...),
                                     status: LocationStatus = Form(...),
                                     user: User = Depends(administrator_user),
                                     session: AsyncSession = Depends(get_async_session)):
     try:
+        if not sensor_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали приборы для локации.",
+                'user': user,
+                'menu': user_menu
+            })
         new_location = Location(name=name, status=status, prefab=prefab)
         session.add(new_location)
         await session.flush()
@@ -1466,11 +1486,18 @@ async def get_update_model_page_choice_field(request: Request, model_id: int,
 
 
 @router.post("/model/update/{model_id}", response_class=HTMLResponse)
-async def post_update_model_page(request: Request, model_id: int, fields_selected: list[int] = Form(...),
+async def post_update_model_page(request: Request, model_id: int, fields_selected: list[int] = Form(None),
                                  model_sensor_type: str = Form(...),
                                  current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
+        if not fields_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали параметры для модели.",
+                'user': current_user,
+                'menu': user_menu
+            })
         model = await get_model_for_id(model_id=model_id, session=session)
         fields = await get_sensor_values_for_id(session=session, fields_id=fields_selected)
         fields_dict = dict()
@@ -1541,12 +1568,19 @@ async def get_update_sensor_page(request: Request, sensor_id: int, current_user:
 
 
 @router.post("/sensor/update/{sensor_id}", response_class=HTMLResponse)
-async def post_update_model_page(request: Request, sensor_id: int, model_selected: int = Form(...),
+async def post_update_model_page(request: Request, sensor_id: int, model_selected: int = Form(None),
                                  name: str = Form(...),
                                  KKS: str = Form(...),
                                  current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
+        if not model_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали модель для сенсора.",
+                'user': current_user,
+                'menu': user_menu
+            })
         sensor = await get_sensor_for_id(session=session, sensor_id=sensor_id)
         sensor.KKS = KKS
         sensor.name = name
@@ -1620,12 +1654,19 @@ async def get_update_location_page(request: Request,
 @router.post("/location/create/{location_id}", response_class=HTMLResponse)
 async def post_update_location_page(request: Request,
                                     location_id: int,
-                                    sensor_selected: list[int] = Form(...),
+                                    sensor_selected: list[int] = Form(None),
                                     name: str = Form(...), prefab: str = Form(...),
                                     status: LocationStatus = Form(...),
                                     user: User = Depends(administrator_user),
                                     session: AsyncSession = Depends(get_async_session)):
     try:
+        if not sensor_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали сенсор для локации.",
+                'user': user,
+                'menu': user_menu
+            })
         location = await get_location_for_id(session=session, location_id=location_id)
         await delete_all_connection_location_model(session=session, location_id=location_id)
         location.status = status
@@ -1703,10 +1744,17 @@ async def get_update_scenario_page(request: Request, scenario_id: int,
 
 @router.post("/scenario/update/model/{scenario_id}", response_class=HTMLResponse)
 async def get_choice_sensor_for_update_scenario_page(request: Request, scenario_id: int,
-                                                     location_selected: int = Form(...),
+                                                     location_selected: int = Form(None),
                                                      user: User = Depends(administrator_user),
                                                      session: AsyncSession = Depends(get_async_session)):
     try:
+        if not location_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали локацию!",
+                'user': user,
+                'menu': user_menu
+            })
         scenario = await get_scenario_for_id(session=session, scenario_id=scenario_id)
         location = await get_location_for_id(session=session, location_id=location_selected)
         is_changed = False
@@ -1751,6 +1799,13 @@ async def get_choice_accident_for_update_scenario_page(request: Request,
                                                        user: User = Depends(administrator_user),
                                                        session: AsyncSession = Depends(get_async_session)):
     try:
+        if not sensor_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали сенсор для сценария.",
+                'user': user,
+                'menu': user_menu
+            })
         scenario = await get_scenario_for_id(session=session, scenario_id=scenario_id)
         sensor = await get_sensor_for_id(session=session, sensor_id=sensor_selected)
         is_changed = False
@@ -1792,11 +1847,18 @@ async def get_choice_accident_for_update_scenario_page(request: Request,
 async def post_update_scenario(request: Request,
                                scenario_id: int,
                                location_selected: int = Form(...), sensor_selected: int = Form(...),
-                               accident_selected: list[int] = Form(...),
+                               accident_selected: list[int] = Form(None),
                                name: str = Form(max_length=255),
                                user: User = Depends(administrator_user),
                                session: AsyncSession = Depends(get_async_session)):
     try:
+        if not accident_selected:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали аварии для сценария.",
+                'user': user,
+                'menu': user_menu
+            })
         scenario = await get_scenario_for_id(scenario_id=scenario_id, session=session)
         await delete_all_connection_scenario_accident(session=session, scenario_id=scenario_id)
         scenario.name = name
