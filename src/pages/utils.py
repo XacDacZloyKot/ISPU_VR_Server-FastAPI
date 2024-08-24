@@ -36,10 +36,10 @@ user_menu = [
         "name": "ТРЕНАЖЕР",
         "access": "staff",
         "urls": [
-            ("Сценарии", "get_scenario_page"),
+            ("Модели КИП", "get_model_page"),
+            ("Приборы КИП", "get_sensor_page"),
             ("Локации", "get_location_page"),
-            ("Модели", "get_model_page"),
-            ("Сенсоры", "get_sensor_page"),
+            ("Сценарии", "get_scenario_page"),
         ]
     },
     {
@@ -53,10 +53,10 @@ user_menu = [
         "name": "СУПЕР АДМИН",
         "access": "admin",
         "urls": [
-            ("Создание сценария", "get_create_scenario_page"),
-            ("Создание модели прибора", "get_create_model_page"),
-            ("Создание сенсора", "get_create_sensor_page"),
+            ("Создание модели КИП", "get_create_model_page"),
+            ("Создание прибора КИП", "get_create_sensor_page"),
             ("Создание локации", "get_create_location_page"),
+            ("Создание сценария", "get_create_scenario_page"),
         ]
     },
 ]

@@ -29,6 +29,8 @@
 }
 
 .location-data__param{
+    overflow-y: auto;
+    max-height: 100px;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
@@ -79,7 +81,7 @@
 }
 
 .sensor-table-full{
-    height: 600px;
+    height: 415px;
 }
 
 .accident-table{

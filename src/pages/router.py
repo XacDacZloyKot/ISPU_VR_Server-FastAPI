@@ -207,7 +207,7 @@ async def get_scenario_for_id_page(request: Request, scenario_id: int, user: Use
     try:
         scenarios = await get_scenario_for_id(scenario_id=scenario_id, session=session)
         return templates.TemplateResponse(
-            "/location/scenario_info.html",
+            "/staff/get/scenario/scenario_info.html",
             {
                 'request': request,
                 'user': user,
@@ -306,7 +306,7 @@ async def get_model_for_id_page(request: Request, model_id: int, current_user: U
     try:
         model = await get_model_for_id(model_id=model_id, session=session)
         return templates.TemplateResponse(
-            "/location/model_info.html",
+            "/staff/get/model/model_info.html",
             {
                 "request": request,
                 'user': current_user,
@@ -488,7 +488,7 @@ async def get_choice_accident_for_scenario_page(request: Request, location_selec
         if not sensor_selected:
             return templates.TemplateResponse("profile/index.html", {
                 "request": request,
-                "error": "Вы не выбрали сенсор!",
+                "error": "Вы не выбрали прибора КИП!",
                 'user': user,
                 'menu': user_menu
             })
@@ -922,7 +922,7 @@ async def post_update_model_page(request: Request, model_selected: int = Form(No
         if not model_selected:
             return templates.TemplateResponse("profile/index.html", {
                 "request": request,
-                "error": "Вы не выбрали модель для сенсора!",
+                "error": "Вы не выбрали модель для прибора КИП!",
                 'user': current_user,
                 'menu': user_menu
             })
@@ -1279,7 +1279,7 @@ async def get_scenario_page(request: Request, user: User = Depends(staff_user),
         result = await session.execute(query)
         scenarios = result.scalars().all()
         return templates.TemplateResponse(
-            "/location/scenario.html",
+            "/staff/get/scenario/scenario.html",
             {
                 'request': request,
                 'user': user,
@@ -1345,12 +1345,12 @@ async def get_model_page(request: Request, user: User = Depends(staff_user),
     try:
         models = await get_all_models(session=session)
         return templates.TemplateResponse(
-            "/location/model.html",
+            "/staff/get/model/model.html",
             {
                 'request': request,
                 'user': user,
                 "models": models,
-                'title': "ISPU - Scenario",
+                'title': "ISPU - Models",
                 'menu': user_menu,
             }
         )
@@ -1463,7 +1463,7 @@ async def get_update_model_page_choice_field(request: Request, model_id: int,
                 "sensor_values": sensor_values,
                 "model_sensor_type": model_sensor_type,
                 'selected_fields': selected_fields,
-                'title': "ISPU - User Profile!",
+                'title': "ISPU - Update fields model!",
                 'menu': user_menu,
             }
         )
@@ -1577,7 +1577,7 @@ async def post_update_model_page(request: Request, sensor_id: int, model_selecte
         if not model_selected:
             return templates.TemplateResponse("profile/index.html", {
                 "request": request,
-                "error": "Вы не выбрали модель для сенсора.",
+                "error": "Вы не выбрали модель для прибора КИП.",
                 'user': current_user,
                 'menu': user_menu
             })
@@ -1663,7 +1663,7 @@ async def post_update_location_page(request: Request,
         if not sensor_selected:
             return templates.TemplateResponse("profile/index.html", {
                 "request": request,
-                "error": "Вы не выбрали сенсор для локации.",
+                "error": "Вы не выбрали прибор КИП для локации.",
                 'user': user,
                 'menu': user_menu
             })
@@ -1802,7 +1802,7 @@ async def get_choice_accident_for_update_scenario_page(request: Request,
         if not sensor_selected:
             return templates.TemplateResponse("profile/index.html", {
                 "request": request,
-                "error": "Вы не выбрали сенсор для сценария.",
+                "error": "Вы не выбрали прибора КИП для сценария.",
                 'user': user,
                 'menu': user_menu
             })
@@ -2023,7 +2023,7 @@ async def post_add_accident_for_scenario_page(
 async def get_add_accident_model_page(
         request: Request,
         model_id: int,
-        user: User = Depends(staff_user),
+        user: User = Depends(administrator_user),
         session: AsyncSession = Depends(get_async_session)
 ):
     try:

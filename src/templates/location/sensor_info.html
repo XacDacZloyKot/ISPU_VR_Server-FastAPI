@@ -4,10 +4,11 @@
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/location/location_info.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/sensor/sensor_info.css') }}">
 {% endblock %}
 
 {% block navTitle %}
-    <p class="navbar__title">Сенсор #{{ sensor.id }} "{{ sensor.name }}"</p>
+    <p class="navbar__title">Прибора КИП #{{ sensor.id }} "{{ sensor.name }}"</p>
 {% endblock %}
 
 {% block content %}
@@ -17,7 +18,7 @@
                 <div class="location-data__name">
                     <p class="location-data__title">{{ sensor.name }} ID:{{ sensor.id }}</p>
                 </div>
-                <div class="location-data__param">
+                <div class="sensor-data__param">
                     <div class="location-data__param-insert">
                         <p class="location-data-param__name">Датчик:</p>
                         <p class="location-data-param__value">{{ sensor.model.model_type.name }}</p>
@@ -42,7 +43,7 @@
                     <div class="location-data__name">
                         <p class="location-data__title">Ошибки датчика:</p>
                     </div>
-                    <div class="location-data__param">
+                    <div class="sensor-data__param">
                         <div class="location-data-param__value">
                             {% for accident in sensor.model.accidents %}
                                 <div class="value-container">

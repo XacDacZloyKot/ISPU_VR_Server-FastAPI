@@ -1,9 +1,8 @@
 .title_add_accident{
     display: grid;
-    grid-template-columns: 8fr 1fr;
+    grid-template-columns: 10fr 1fr;
     grid-template-rows: 1fr;
     height: max-content;
-    /*gap: 10px;*/
     width: 100%;
     justify-items: end;
 }

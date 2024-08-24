@@ -1,0 +1,10 @@
+.sensor-data__param{
+    overflow-y: auto;
+    max-height: 180px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 5px;
+    padding-left: 15px;
+    padding-right: 15px;
+}

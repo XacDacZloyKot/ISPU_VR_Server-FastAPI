@@ -80,12 +80,16 @@
                 </tbody>
             </table>
         </div>
-        <div class="title_add_accident">
-            <h2 class="title-red slim-title">
-                Авария
-            </h2>
-            <a href="{{ url_for("get_add_accident_for_scenario_page", scenario_id=scenarios.id) }}" class="button red slim-title">Добавить</a>
-        </div>
+        {% if user.is_superuser %}
+            <div class="title_add_accident">
+                <h2 class="title-red slim-title">
+                    Авария
+                </h2>
+                <a href="{{ url_for("get_add_accident_for_scenario_page", scenario_id=scenarios.id) }}" class="button red slim-title">Добавить</a>
+            </div>
+        {% else %}
+            <h2 class="title-red slim-title">Авария</h2>
+        {% endif %}
         <div class="table-wrapper accident-table">
             <table>
                 <thead>
@@ -94,7 +98,9 @@
                         <th>Название</th>
                         <th>Параметры</th>
                         <th>Механическая ошибки</th>
-                        <th>Опции</th>
+                        {% if user.is_superuser %}
+                            <th>Опции</th>
+                        {% endif %}
                     </tr>
                 </thead>
                 <tbody>
@@ -106,11 +112,13 @@
                                 {{ field }}: {{ value }}<br>
                             {% endfor %}</td>
                         <td>{% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
-                        <td>
-                            <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_scenario_page', accident_id=accident.id, scenario_id=scenarios.id) }}')" class="button white">
-                                <img src="/static/img/delete.svg" alt="Удаление" class="location-icon">
-                            </button>
-                        </td>
+                        {% if user.is_superuser %}
+                            <td>
+                                <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_scenario_page', accident_id=accident.id, scenario_id=scenarios.id) }}')" class="button white">
+                                    <img src="/static/img/delete.svg" alt="Удаление" class="location-icon">
+                                </button>
+                            </td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
                 </tbody>
