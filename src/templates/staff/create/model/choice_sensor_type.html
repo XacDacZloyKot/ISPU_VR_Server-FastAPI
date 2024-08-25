@@ -3,6 +3,8 @@
 {% block css %}
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', path='css/base/select.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
 {% endblock %}
 
 {% block navTitle %}
@@ -10,21 +12,36 @@
 {% endblock %}
 
 {% block content %}
-    <h1 class="title-orange">Выбор типа датчика</h1>
-    <form action="{{ url_for('get_choice_fields') }}" method="post">
-        <div class="form-group">
-            <label for="model_selected">Датчик:</label>
-            <div class="select-wrapper">
-                <select name="model_selected" id="model_selected">
-                    {% for option in model_options %}
-                        <option value="{{ option.0 }}">{{ option.0 }}</option>
+    <form action="{{ url_for('get_choice_fields') }}" method="post" class="form-container-height">
+        <p class="title-table">Тип датчика</p>
+        <div class="table-wrapper form-container-height">
+            <table class="table-container">
+                <thead>
+                    <tr>
+                        <th>Название</th>
+                        <th>Параметры</th>
+                        <th>Назначение</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for option in model_value %}
+                        <tr>
+                            <td>{{ option.name }}</td>
+                            <td>
+                                {% for field, value in option.value.items() %}
+                                    {{ field }}: {{ value }}{% if not loop.last %},<br>{% endif %}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <input type="radio" id="html" class="checkbox-input" name="selected_model" value="{{ option.name }}" title="radio-box">
+                            </td>
+                        </tr>
                     {% endfor %}
-                </select>
-                <div class="select-arrow-1"></div>
-            </div>
+                </tbody>
+            </table>
         </div>
         <div class="submit-container">
-            <button type="submit" class="button orange submit">Выбрать аварии</button>
+            <button type="submit" class="button orange submit">Выбрать типа прибора</button>
         </div>
     </form>
 {% endblock %}

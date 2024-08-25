@@ -23,7 +23,8 @@ from src.pages.crud import (
     create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
     get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list, get_all_sensor_types,
     delete_all_connection_location_model, delete_all_connection_scenario_accident, delete_accident_for_scenario,
-    delete_accident_for_model, add_accidents_for_scenario, create_sensor,
+    delete_accident_for_model, add_accidents_for_scenario, create_sensor, get_all_sensor_values,
+    get_all_sensor_values_group_type,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -766,7 +767,7 @@ async def delete_admission(admission_id: int, session: AsyncSession = Depends(ge
 async def get_create_model_page(request: Request, user: User = Depends(administrator_user),
                                 session: AsyncSession = Depends(get_async_session)):
     try:
-        sensor_value_names = await get_name_sensor_value(session=session)
+        model_value = await get_all_sensor_values_group_type(session=session)
         return templates.TemplateResponse(
             "/staff/create/model/choice_sensor_type.html",
             {
@@ -774,7 +775,7 @@ async def get_create_model_page(request: Request, user: User = Depends(administr
                 'user': user,
                 'menu': user_menu,
                 'title': "ISPU - Create model!",
-                'model_options': sensor_value_names,
+                'model_value': model_value,
             }
         )
     except SQLAlchemyError as e:
@@ -796,10 +797,17 @@ async def get_create_model_page(request: Request, user: User = Depends(administr
 
 
 @router.post("/model/create/fields/", response_class=HTMLResponse)
-async def get_choice_fields(request: Request, model_selected: str = Form(...), user: User = Depends(administrator_user),
+async def get_choice_fields(request: Request, selected_model: str = Form(None), user: User = Depends(administrator_user),
                             session: AsyncSession = Depends(get_async_session)):
     try:
-        values = await get_sensor_value_for_name(session=session, sensor_name=model_selected)
+        if not selected_model:
+            return templates.TemplateResponse("profile/index.html", {
+                "request": request,
+                "error": "Вы не выбрали тип прибора КИП.",
+                'user': user,
+                'menu': user_menu
+            })
+        values = await get_sensor_value_for_name(session=session, sensor_name=selected_model)
         return templates.TemplateResponse(
             "/staff/create/model/choice_fields.html",
             {
@@ -808,7 +816,7 @@ async def get_choice_fields(request: Request, model_selected: str = Form(...), u
                 'menu': user_menu,
                 'title': "ISPU - Create scenario!",
                 'fields_options': values,
-                'model_selected': model_selected,
+                'model_selected': selected_model,
             }
         )
     except SQLAlchemyError as e:
@@ -1410,49 +1418,12 @@ async def get_sensor_page(request: Request, user: User = Depends(staff_user),
 
 #  region Update Model
 @router.get("/model/update/{model_id}", response_class=HTMLResponse)
-async def get_update_model_page(request: Request, model_id: int, current_user: User = Depends(administrator_user),
+async def get_update_model_page(request: Request, model_id: int,
+                                current_user: User = Depends(administrator_user),
                                 session: AsyncSession = Depends(get_async_session)):
     try:
         model = await get_model_for_id(model_id=model_id, session=session)
-        sensor_types = await get_all_sensor_types(session=session)
-
-        return templates.TemplateResponse(
-            "/staff/update/model/update_model.html",
-            {
-                "request": request,
-                'user': current_user,
-                "model": model,
-                "sensor_types": sensor_types,
-                'title': "ISPU - User Profile!",
-                'menu': user_menu,
-            }
-        )
-    except SQLAlchemyError as e:
-        print(f"SQLAlchemy error occurred: {e}")
-        return templates.TemplateResponse("profile/index.html", {
-            "request": request,
-            "error": "There is some problem with the model page.",
-            'user': current_user,
-            'menu': user_menu
-        })
-    except Exception as e:
-        print(e)
-        return templates.TemplateResponse("profile/index.html", {
-            "request": request,
-            "error": "There is some problem with the model page.",
-            'user': current_user,
-            'menu': user_menu
-        })
-
-
-@router.post("/model/update/fields/{model_id}", response_class=HTMLResponse)
-async def get_update_model_page_choice_field(request: Request, model_id: int,
-                                             current_user: User = Depends(administrator_user),
-                                             model_sensor_type: str = Form(...),
-                                             session: AsyncSession = Depends(get_async_session)):
-    try:
-        model = await get_model_for_id(model_id=model_id, session=session)
-        sensor_values = await get_sensor_value_for_name(sensor_name=model_sensor_type, session=session)
+        sensor_values = await get_sensor_value_for_name(sensor_name=model.model_type.name, session=session)
         selected_fields = model.specification
         return templates.TemplateResponse(
             "/staff/update/model/update_model_field.html",
@@ -1461,7 +1432,6 @@ async def get_update_model_page_choice_field(request: Request, model_id: int,
                 'user': current_user,
                 "model": model,
                 "sensor_values": sensor_values,
-                "model_sensor_type": model_sensor_type,
                 'selected_fields': selected_fields,
                 'title': "ISPU - Update fields model!",
                 'menu': user_menu,
@@ -1487,7 +1457,6 @@ async def get_update_model_page_choice_field(request: Request, model_id: int,
 
 @router.post("/model/update/{model_id}", response_class=HTMLResponse)
 async def post_update_model_page(request: Request, model_id: int, fields_selected: list[int] = Form(None),
-                                 model_sensor_type: str = Form(...),
                                  current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
@@ -1503,9 +1472,9 @@ async def post_update_model_page(request: Request, model_id: int, fields_selecte
         fields_dict = dict()
         for field in fields:
             fields_dict[field.field] = f"{field.value} {field.measurement}"
-        id: int = await create_or_get_sensor_type(session=session, sensor_type_name=model_sensor_type)
+        id: int = await create_or_get_sensor_type(session=session, sensor_type_name=model.model_type.name)
         model.specification = fields_dict
-        model.model_type = id
+        model.model_type_id = id
         session.add(model)
         await session.commit()
         return RedirectResponse(url=request.url_for("get_model_for_id_page", model_id=model.id),
@@ -1526,8 +1495,6 @@ async def post_update_model_page(request: Request, model_id: int, fields_selecte
             'user': current_user,
             'menu': user_menu
         })
-
-
 # endregion
 
 

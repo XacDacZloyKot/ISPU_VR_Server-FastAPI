@@ -196,6 +196,28 @@ async def get_all_sensor_values(session: AsyncSession) -> Sequence[ModelValue]:
     return sensors_values
 
 
+async def get_all_sensor_values_group_type(session: AsyncSession) -> list[dict]:
+    query = select(
+        ModelValue.model_type,
+        func.group_concat(func.concat(ModelValue.field, ': ', ModelValue.value, ' ', ModelValue.measurement)).label(
+            'combined_values')
+    ).group_by(ModelValue.model_type)
+    result = await session.execute(query)
+    result = result.all()
+    result_list = []
+    for model_type, combined_values in result:
+        values = combined_values.split(',')
+        value_dict = {}
+        for value in values:
+            parts = value.split(': ', 1)
+            if len(parts) == 2:
+                field = parts[0]
+                measurement_value = parts[1].strip()
+                value_dict[field] = measurement_value
+        result_list.append({'name': model_type, 'value': value_dict})
+    return result_list
+
+
 async def delete_all_connection_location_model(session: AsyncSession, location_id: int) -> None:
     try:
         query = delete(sensor_location_association).where(sensor_location_association.c.location_id == location_id)

@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block navTitle %}
-    <p class="navbar__title">Обновление модели #{{ model.id }}</p>
+    <p class="navbar__title">Обновление модели КИП #{{ model.id }} {{ model.model_type.name }}</p>
 {% endblock %}
 
 {% block content %}
@@ -26,7 +26,6 @@
                 </select>
             </div>
         </div>
-        <input type="hidden" name="model_sensor_type" value="{{ model_sensor_type }}">
         <div class="submit-container">
             <button type="submit" class="button orange submit">Обновить</button>
         </div>
