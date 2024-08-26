@@ -57,6 +57,7 @@ user_menu = [
             ("Создание прибора КИП", "get_create_sensor_page"),
             ("Создание локации", "get_create_location_page"),
             ("Создание сценария", "get_create_scenario_page"),
+            ("Добавление параметров в базу данных прибора", "post_create_model_value_page")
         ]
     },
 ]

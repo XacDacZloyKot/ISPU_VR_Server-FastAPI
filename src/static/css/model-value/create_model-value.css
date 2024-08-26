@@ -1,0 +1,60 @@
+.form-group{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    width: 700px;
+    gap: 10px;
+}
+
+.form-group-json{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: calc(100%);
+    gap: 10px;
+    justify-content: flex-start;
+
+}
+
+.key{
+    width: 200px;
+}
+
+.value{
+    width: 100px
+}
+
+.measurement{
+    width: 150px;
+}
+
+.json-fields{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    height: 100%;
+}
+
+.json-container{
+    min-height: 150px;
+    max-height: 270px;
+    height: fit-content;
+    min-width: 80%;
+    width: fit-content;
+}
+
+.del-icon{
+    width: 30px;
+}
+
+.button-delete{
+    background: none;
+	color: inherit;
+	border: none;
+	padding: 0;
+	font: inherit;
+	cursor: pointer;
+	outline: inherit;
+}

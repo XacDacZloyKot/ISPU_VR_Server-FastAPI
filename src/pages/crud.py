@@ -286,3 +286,20 @@ async def create_sensor(session: AsyncSession, KKS: str, name: str, model_id: in
     new_sensor_type = Sensor(name=name, KKS=KKS, model_id=model_id)
     session.add(new_sensor_type)
     await session.commit()
+
+
+async def create_model_value_or_none(session: AsyncSession, key: str, value: str, name: str, measurement: str):
+    query = select(ModelValue).where(key == ModelValue.field,
+                                     measurement == ModelValue.measurement, name == ModelValue.model_type)
+    result = await session.execute(query)
+    model_value = result.scalars().first()
+
+    if model_value:
+        model_value.value = value
+        session.add(model_value)
+        await session.commit()
+    else:
+        new_model_value = ModelValue(value=value, field=key, measurement=measurement, model_type=name)
+        session.add(new_model_value)
+        await session.commit()
+        return new_model_value

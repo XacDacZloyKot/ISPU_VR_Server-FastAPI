@@ -1,6 +1,6 @@
 import os
 from http import HTTPStatus
-from typing import Optional
+from typing import Optional, Union
 
 from fastapi import APIRouter, HTTPException
 from fastapi import Request, Form, Depends
@@ -24,7 +24,7 @@ from src.pages.crud import (
     get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list, get_all_sensor_types,
     delete_all_connection_location_model, delete_all_connection_scenario_accident, delete_accident_for_scenario,
     delete_accident_for_model, add_accidents_for_scenario, create_sensor, get_all_sensor_values,
-    get_all_sensor_values_group_type,
+    get_all_sensor_values_group_type, create_model_value_or_none,
 )
 from src.pages.utils import (authenticate,
                              authenticate_for_username,
@@ -2025,6 +2025,7 @@ async def get_add_accident_model_page(
 
 # endregion
 
+
 # region StartApp
 
 
@@ -2062,6 +2063,73 @@ async def start_admission_app(
         return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with start app.",
+            'user': user,
+            'menu': user_menu
+        })
+# endregion
+
+
+# region CreateModelValue
+@router.get("/model-value/create/", response_class=HTMLResponse)
+async def get_create_model_value_page(request: Request, user: User = Depends(administrator_user)):
+    try:
+        return templates.TemplateResponse(
+            "/staff/create/model-value/create_model-value.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'title': "ISPU - Create model value!",
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("profile/index.html", {
+            "request": request,
+            "error": "There is some problem with the create model value page.",
+            'user': user,
+            'menu': user_menu
+        })
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("profile/index.html", {
+            "request": request,
+            "error": "There is some problem with the create model value page.",
+            'user': user,
+            'menu': user_menu
+        })
+
+
+@router.post("/model-value/create/", response_class=HTMLResponse)
+async def post_create_model_value_page(
+        request: Request,
+        name: str = Form(...),
+        keys: list[str] = Form(None),
+        values: list[str] = Form(None),
+        measurement: list[str] = Form(None),
+        user: User = Depends(administrator_user),
+        session: AsyncSession = Depends(get_async_session)
+):
+    try:
+        for i in range(len(keys)):
+            await create_model_value_or_none(session=session, name=name, key=keys[i],
+                                             value=values[i], measurement=measurement[i])
+        return RedirectResponse(url=request.url_for("index_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        await session.rollback()
+        return templates.TemplateResponse("profile/index.html", {
+            "request": request,
+            "error": "There is some problem with the create model value page.",
+            'user': user,
+            'menu': user_menu
+        })
+    except Exception as e:
+        print(e)
+        await session.rollback()
+        return templates.TemplateResponse("profile/index.html", {
+            "request": request,
+            "error": "There is some problem with the create model value page.",
             'user': user,
             'menu': user_menu
         })

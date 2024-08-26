@@ -1,0 +1,73 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/select.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/model-value/create_model-value.css') }}">
+    <script>
+        let fieldCount = 1;
+
+        function addField() {
+            fieldCount++;
+            const container = document.getElementById('json-fields');
+            const newFieldPair = document.createElement('div');
+            newFieldPair.className = 'form-group-json';
+
+            newFieldPair.innerHTML = `
+                <label for="key${fieldCount}">Параметр:</label>
+                <input type="text" name="keys" id="key${fieldCount}" class="key" required>
+                <label for="value${fieldCount}">Значение:</label>
+                <input type="text" name="values" id="value${fieldCount}" class="value" required>
+
+                <label for="measurement${fieldCount}">Измеряемая величина: </label>
+                <input type="text" id="measurement${fieldCount}"
+                       name="measurement" required
+                       class="measurement" placeholder="Величина в СИ">
+
+                <button type="button" onclick="removeField(this)" class="button-delete" title="Кнопка удаления">
+                    <img src="{{ url_for('static', path='/img/delete.svg') }}" alt="" class="del-icon">
+                </button>
+            `;
+
+            container.appendChild(newFieldPair);
+        }
+
+        function removeField(button) {
+            const fieldPair = button.parentElement;
+            fieldPair.remove();
+        }
+    </script>
+{% endblock %}
+
+{% block navTitle %}
+    <p class="navbar__title">Создание параметров моделей</p>
+{% endblock %}
+
+{% block content %}
+    <form action="{{ url_for('post_create_model_value_page') }}" method="post" class="form-container">
+        <div class="form-group">
+            <label for="name">Название прибора: </label>
+            <input type="text" id="name" name="name" required class="input" placeholder="Метран-500">
+        </div>
+        <div class="json-container">
+            <div id="json-fields" class="json-fields">
+                <div class="form-group-json">
+                    <label for="key1">Параметр:</label>
+                    <input type="text" name="keys" id="key1" class="key" placeholder="Давление">
+                    <label for="value1">Значение:</label>
+                    <input type="text" name="values" id="value1" class="value" placeholder="45.2">
+                    <label for="measurement1">Измеряемая величина: </label>
+                    <input type="text" id="measurement1"
+                           name="measurement" required
+                           class="measurement" placeholder="Величина в СИ">
+                </div>
+            </div>
+        </div>
+        <button type="button" onclick="addField()" class="button orange submit">Добавить параметры</button>
+        <div class="submit-container">
+            <button type="submit" class="button orange submit">Создать</button>
+        </div>
+    </form>
+{% endblock %}
