@@ -68,7 +68,8 @@ a = Analysis(
         'ujson',
         'uvicorn',
         'watchfiles',
-        'websockets'
+        'websockets',
+        'python-slugify'
     ],
     hookspath=[],
     runtime_hooks=[],

@@ -7,6 +7,7 @@ from sqlalchemy import Integer, String, Boolean, ForeignKey, Column, TIMESTAMP, 
     Float, DateTime
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from slugify import slugify
 
 from src.database import Base
 
@@ -95,7 +96,10 @@ class Admission(Base):
                         'model': {
                             'id': self.scenario.sensor.model.id,
                             'name': self.scenario.sensor.model.model_type.name,
-                            'specification': self.scenario.sensor.model.specification,
+                            'specification': {
+                                slugify(key, separator="_"): value
+                                for key, value in self.scenario.sensor.model.specification.items()
+                            },
                         }
                     },
                     'accidents': [
