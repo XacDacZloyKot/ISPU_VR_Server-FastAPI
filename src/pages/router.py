@@ -2114,7 +2114,7 @@ async def post_create_model_value_page(
         for i in range(len(keys)):
             await create_model_value_or_none(session=session, name=name, key=keys[i],
                                              value=values[i], measurement=measurement[i])
-        return RedirectResponse(url=request.url_for("index_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
+        return RedirectResponse(url=request.url_for("get_model_value_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")
         await session.rollback()
@@ -2130,6 +2130,41 @@ async def post_create_model_value_page(
         return templates.TemplateResponse("profile/index.html", {
             "request": request,
             "error": "There is some problem with the create model value page.",
+            'user': user,
+            'menu': user_menu
+        })
+# endregion
+
+
+# region GetModelValue
+@router.get("/model-value/", response_class=HTMLResponse)
+async def get_model_value_page(request: Request, user: User = Depends(administrator_user),
+                               session: AsyncSession = Depends(get_async_session)):
+    try:
+        model_value = await get_all_sensor_values_group_type(session=session)
+        return templates.TemplateResponse(
+            "/staff/get/model-value/model-value.html",
+            {
+                'request': request,
+                'user': user,
+                'menu': user_menu,
+                'title': "ISPU - Create model!",
+                'model_value': model_value,
+            }
+        )
+    except SQLAlchemyError as e:
+        print(f"SQLAlchemy error occurred: {e}")
+        return templates.TemplateResponse("profile/index.html", {
+            "request": request,
+            "error": "There is some problem with the create model page.",
+            'user': user,
+            'menu': user_menu
+        })
+    except Exception as e:
+        print(e)
+        return templates.TemplateResponse("profile/index.html", {
+            "request": request,
+            "error": "There is some problem with the create model page.",
             'user': user,
             'menu': user_menu
         })

@@ -1,0 +1,37 @@
+{% extends '/location/base.html' %}
+
+{% block css %}
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/select.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
+{% endblock %}
+
+{% block navTitle %}
+	<p class="navbar__title">Параметры базы приборов</p>
+{% endblock %}
+
+{% block content %}
+    <div class="table-wrapper form-container-height">
+        <table class="table-container">
+            <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Параметры</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for option in model_value %}
+                    <tr>
+                        <td>{{ option.name }}</td>
+                        <td>
+                            {% for field, value in option.value.items() %}
+                                {{ field }}: {{ value }}{% if not loop.last %},<br>{% endif %}
+                            {% endfor %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}
