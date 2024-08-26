@@ -65,7 +65,7 @@ async def get_login_admin(request: Request):
 @router.post("/loginAdmin", response_class=HTMLResponse)
 async def post_login_admin(request: Request, email: str = Form(...), password: str = Form(...)):
     user = await authenticate(email=email, password=password)
-    if not user:
+    if not user or (user.is_superuser == False and user.is_staff == False):
         return templates.TemplateResponse("/auth/loginAdmin.html", {"request": request, "error": "Failed to login"})
 
     token = await get_jwt_strategy().write_token(user)
@@ -88,15 +88,22 @@ async def get_login_user(request: Request):
 
 @router.post("/loginUser", response_class=HTMLResponse)
 async def post_login_user(request: Request, username: str = Form(...), password: str = Form(...)):
-    user = await authenticate_for_username(username=username, password=password)
-    if not user:
-        return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Failed to login"})
+    try:
+        user = await authenticate_for_username(username=username, password=password)
+        if not user:
+            return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Failed to login"})
 
-    token = await get_jwt_strategy().write_token(user)
-    response = RedirectResponse(url=request.url_for("get_home_page"), status_code=302)
-    response.set_cookie(key="user-cookie", value=token, httponly=True, path="/")
-    return response
-
+        token = await get_jwt_strategy().write_token(user)
+        if user.is_superuser or user.is_staff:
+            response = RedirectResponse(url=request.url_for("index_page"), status_code=302)
+        else:
+            response = RedirectResponse(url=request.url_for("get_home_page"), status_code=302)
+        response.set_cookie(key="user-cookie", value=token, httponly=True, path="/")
+        return response
+    except HTTPException as e:
+        if e.status_code == 400:
+            return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Failed to login"})
+        return templates.TemplateResponse("/auth/loginUser.html", {"request": request, "error": "Такого пользователя не существует!"})
 
 @router.get("/registration", response_class=HTMLResponse)
 async def get_registration(request: Request):

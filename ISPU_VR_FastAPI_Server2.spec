@@ -43,7 +43,7 @@ a = Analysis(
         'watchfiles',
         'websockets',
         'aiomysql',
-        'python-slugify',
+        'python_slugify',
     ],
     hookspath=[],
     runtime_hooks=[],

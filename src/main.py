@@ -8,7 +8,7 @@ from fastapi.exceptions import ValidationException, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import RedirectResponse
+
 
 from src.auth.base_config import fastapi_users, auth_backend
 from src.auth.schemas import UserRead, UserCreate

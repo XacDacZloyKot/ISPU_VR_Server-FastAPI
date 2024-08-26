@@ -2,7 +2,7 @@ from fastapi import APIRouter, Body, Depends, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.pages.crud import get_admission_for_id
-from api.v1.admission.crud import update_admission_result as update_admission_result_crud
+from src.api.v1.admission.crud import update_admission_result as update_admission_result_crud
 from src.database import get_async_session
 
 router = APIRouter(
