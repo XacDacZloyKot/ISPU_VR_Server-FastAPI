@@ -921,20 +921,20 @@ async def get_create_sensor_page(request: Request, current_user: User = Depends(
 
 
 @router.post("/sensor/create/", response_class=HTMLResponse)
-async def post_update_model_page(request: Request, model_selected: int = Form(None),
+async def post_update_model_page(request: Request, selected_model: int = Form(None),
                                  name: str = Form(...),
                                  KKS: str = Form(...),
                                  current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
-        if not model_selected:
+        if not selected_model:
             return templates.TemplateResponse("profile/index.html", {
                 "request": request,
                 "error": "Вы не выбрали модель для прибора КИП!",
                 'user': current_user,
                 'menu': user_menu
             })
-        await create_sensor(session=session, model_id=model_selected, name=name, KKS=KKS)
+        await create_sensor(session=session, model_id=selected_model, name=name, KKS=KKS)
         return RedirectResponse(url=request.url_for("get_sensor_page"),
                                 status_code=HTTPStatus.MOVED_PERMANENTLY)
     except SQLAlchemyError as e:
@@ -1535,13 +1535,13 @@ async def get_update_sensor_page(request: Request, sensor_id: int, current_user:
 
 
 @router.post("/sensor/update/{sensor_id}", response_class=HTMLResponse)
-async def post_update_model_page(request: Request, sensor_id: int, model_selected: int = Form(None),
+async def post_update_model_page(request: Request, sensor_id: int, selected_model: int = Form(None),
                                  name: str = Form(...),
                                  KKS: str = Form(...),
                                  current_user: User = Depends(administrator_user),
                                  session: AsyncSession = Depends(get_async_session)):
     try:
-        if not model_selected:
+        if not selected_model:
             return templates.TemplateResponse("profile/index.html", {
                 "request": request,
                 "error": "Вы не выбрали модель для прибора КИП.",
@@ -1551,7 +1551,7 @@ async def post_update_model_page(request: Request, sensor_id: int, model_selecte
         sensor = await get_sensor_for_id(session=session, sensor_id=sensor_id)
         sensor.KKS = KKS
         sensor.name = name
-        sensor.model_id = model_selected
+        sensor.model_id = selected_model
         session.add(sensor)
         await session.commit()
         return RedirectResponse(url=request.url_for("get_sensor_page"),

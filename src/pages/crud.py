@@ -150,10 +150,10 @@ async def get_sensor_values_for_id(session: AsyncSession, fields_id: list[int]) 
 async def create_or_get_sensor_type(session: AsyncSession, sensor_type_name: str) -> int:
     query = select(ModelType).where(ModelType.name == sensor_type_name)
     result = await session.execute(query)
-    model_type = result.scalars().first()
+    type_model = result.scalars().first()
 
-    if model_type:
-        return model_type.id
+    if type_model:
+        return type_model.id
 
     new_model_type = ModelType(name=sensor_type_name)
     session.add(new_model_type)

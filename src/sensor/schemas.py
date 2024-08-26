@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 class ModelResponse(BaseModel):
     id: int
-    model_type: str
+    type_model: str
     specification: Dict[str, Any]
     parameters: str
 
