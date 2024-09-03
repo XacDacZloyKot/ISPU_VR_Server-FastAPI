@@ -80,7 +80,7 @@
                     </td>
                     <td>
                         <a href="{{ url_for("get_update_admission_page", admission_id=admission.id) }}" class="location-link">
-                            <img src="/static/img/Redact.svg" alt="Редактирование" class="location-icon">
+                            <img src="{{ url_for('static', path='/img/Redact.svg') }}" alt="Редактирование" class="location-icon">
                         </a>
                     </td>
                 </tr>

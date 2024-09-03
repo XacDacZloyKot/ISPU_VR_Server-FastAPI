@@ -57,7 +57,7 @@
                     <td class="option-button">
                         <div class="home-option-column">
                             <a href="{{ url_for("start_admission_app", admission_id=admission.id) }}" class="home-link">
-                                <img src="/static/img/Play.svg" alt="Начать" class="home-icon">
+                                <img src="{{ url_for('static', path='/img/Play.svg') }}" alt="Начать" class="home-icon">
                             </a>
                         </div>
                     </td>

@@ -33,10 +33,10 @@
                     <td>
                         <div class="location-option-column">
                             <a href="{{ url_for("get_update_user_page", user_id=curr_user.id) }}" class="location-link">
-                                <img src="/static/img/Redact.svg" alt="Редактирование" class="location-icon">
+                                <img src="{{ url_for('static', path='/img/Redact.svg') }}" alt="Редактирование" class="location-icon">
                             </a>
                             <a href="{{ url_for("get_profile_for_id_page", user_id=curr_user.id) }}" class="location-link">
-                                <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
+                                <img src="{{ url_for('static', path='/img/Vector.svg') }}" alt="Детально" class="location-icon">
                             </a>
                         </div>
                     </td>

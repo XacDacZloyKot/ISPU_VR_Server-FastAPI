@@ -39,6 +39,8 @@ class Model(Base):
 
     specification: Mapped[dict] = mapped_column(JSON, nullable=True)
 
+    param_mapping_names: Mapped[dict] = mapped_column(JSON, nullable=True)
+
     # Связь с Sensor (один ко многим)
     sensors = relationship("Sensor", back_populates="model")
 
@@ -73,6 +75,7 @@ class Accident(Base):
     name = Column(String(255), doc="Ошибка")
     mechanical_accident = Column(Boolean, doc="Механическое повреждение")
     change_value = Column(JSON, doc="Изменяемое значение")
+    param_mapping_names: Mapped[dict] = mapped_column(JSON, nullable=True)
 
     # Связь many-to-many(промежуточная таблица)
     models = relationship("Model", secondary=model_accident_association, back_populates="accidents",
@@ -113,6 +116,7 @@ class ModelValue(Base):
 
     model_type = Column(String(255), doc="Тип датчика")
     field = Column(String(128), doc="Поле датчика")
+    name_eng_param = Column(String(128), doc="Имя переменной в Unity")
     value = Column(String(64), doc="Значение")
     measurement = Column(String(64), doc="Величина измерения")
 

@@ -20,7 +20,7 @@ from src.pages.crud import (
     get_scenario_for_id,
     get_users_without_scenario,
     get_admission_for_id, get_name_sensor_value, get_sensor_value_for_name, get_sensor_values_for_id,
-    create_or_get_sensor_type, get_all_models, get_location_list, get_location_for_id,
+    create_or_get_model_type, get_all_models, get_location_list, get_location_for_id,
     get_sensor_for_id, get_model_for_id, get_all_sensors, get_scenarios_active_list, get_all_sensor_types,
     delete_all_connection_location_model, delete_all_connection_scenario_accident, delete_accident_for_scenario,
     delete_accident_for_model, add_accidents_for_scenario, create_sensor, get_all_sensor_values,
@@ -862,10 +862,12 @@ async def create_model(
             })
         fields = await get_sensor_values_for_id(session=session, fields_id=fields_selected)
         fields_dict = dict()
+        name_eng_params = dict()
         for field in fields:
             fields_dict[field.field] = f"{field.value} {field.measurement}"
-        id: int = await create_or_get_sensor_type(session=session, sensor_type_name=models_name)
-        new_model = Model(specification=fields_dict, model_type_id=id)
+            name_eng_params[field.field] = field.name_eng_param
+        id: int = await create_or_get_model_type(session=session, sensor_type_name=models_name)
+        new_model = Model(specification=fields_dict, param_mapping_names=name_eng_params, model_type_id=id)
         session.add(new_model)
         await session.commit()
         return RedirectResponse(url=request.url_for("get_add_accident_page", model_id=new_model.id),
@@ -1479,7 +1481,7 @@ async def post_update_model_page(request: Request, model_id: int, fields_selecte
         fields_dict = dict()
         for field in fields:
             fields_dict[field.field] = f"{field.value} {field.measurement}"
-        id: int = await create_or_get_sensor_type(session=session, sensor_type_name=model.model_type.name)
+        id: int = await create_or_get_model_type(session=session, sensor_type_name=model.model_type.name)
         model.specification = fields_dict
         model.model_type_id = id
         session.add(model)
@@ -2113,6 +2115,7 @@ async def post_create_model_value_page(
         name: str = Form(...),
         keys: list[str] = Form(None),
         values: list[str] = Form(None),
+        slug_name: list[str] = Form(None),
         measurement: list[str] = Form(None),
         user: User = Depends(administrator_user),
         session: AsyncSession = Depends(get_async_session)
@@ -2120,7 +2123,7 @@ async def post_create_model_value_page(
     try:
         for i in range(len(keys)):
             await create_model_value_or_none(session=session, name=name, key=keys[i],
-                                             value=values[i], measurement=measurement[i])
+                                             value=values[i], measurement=measurement[i], name_eng_param=slug_name[i])
         return RedirectResponse(url=request.url_for("get_model_value_page"), status_code=HTTPStatus.MOVED_PERMANENTLY)
     except SQLAlchemyError as e:
         print(f"SQLAlchemy error occurred: {e}")

@@ -39,7 +39,7 @@
                 <div class="location-data__param">
                     <div class="location-data-param__value">
                         {% for field, value in model.specification.items() %}
-                            {{ field }}: {{ value }},<br>
+                            {{ field }}: {{ value }} {% if user.is_superuser %}({{ model.param_mapping_names[field] }}){% endif %},<br>
                         {% endfor %}
                     </div>
                 </div>
@@ -81,7 +81,7 @@
                     {% if user.is_superuser %}
                         <td>
                             <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_model_page', accident_id=accident.id, model_id=model.id) }}')" class="button white">
-                                <img src="/static/img/delete.svg" alt="Редактирование" class="location-icon">
+                                <img src="{{ url_for('static', path='/img/delete.svg') }}" alt="Удаление" class="location-icon">
                             </button>
                         </td>
                     {% endif %}

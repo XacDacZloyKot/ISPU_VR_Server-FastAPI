@@ -26,6 +26,10 @@
                        name="measurement" required
                        class="measurement" placeholder="Величина в СИ">
 
+                <label for="slug_name${fieldCount}">Название eng: </label>
+                <input type="text" id="slug_name${fieldCount}" name="slug_name" required
+                       class="slug_name" placeholder="temp">
+
                 <button type="button" onclick="removeField(this)" class="button-delete" title="Кнопка удаления">
                     <img src="{{ url_for('static', path='/img/delete.svg') }}" alt="" class="del-icon">
                 </button>
@@ -62,6 +66,10 @@
                     <input type="text" id="measurement1"
                            name="measurement" required
                            class="measurement" placeholder="Величина в СИ">
+                    <label for="slug_name1">Название eng: </label>
+                    <input type="text" id="slug_name1"
+                           name="slug_name" required
+                           class="slug_name" placeholder="temp">
                 </div>
             </div>
         </div>

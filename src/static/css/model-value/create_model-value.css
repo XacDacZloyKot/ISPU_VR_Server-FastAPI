@@ -29,6 +29,10 @@
     width: 150px;
 }
 
+.slug_name{
+    width: 100px;
+}
+
 .json-fields{
     display: flex;
     flex-direction: column;

@@ -29,7 +29,7 @@
                     <td>{{ model.id }}</td>
                     <td>{{ model.model_type.name }}</td>
                     <td>{% for field, value in model.specification.items() %}
-                        {{ field }}: {{ value }}<br>
+                        {{ field }}: {{ value }} {% if user.is_superuser %}({{ model.param_mapping_names[field] }}){% endif %}<br>
                     {% endfor %}
                     </td>
                     <td>
@@ -40,11 +40,11 @@
                     <td>
                         <div class="location-option-column">
                             <a href="{{ url_for("get_model_for_id_page", model_id=model.id) }}" class="location-link">
-                                <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
+                                <img src="{{ url_for('static', path='/img/Vector.svg') }}" alt="Детально" class="location-icon">
                             </a>
                             {% if user.is_superuser %}
                                 <a href="{{ url_for("get_update_model_page", model_id=model.id) }}" class="location-link">
-                                    <img src="/static/img/Redact.svg" alt="Назначение" class="location-icon">
+                                    <img src="{{ url_for('static', path='/img/Redact.svg') }}" alt="Назначение" class="location-icon">
                                 </a>
                             {% endif %}
                         </div>

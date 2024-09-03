@@ -1,5 +1,5 @@
-from fastapi import HTTPException
-from sqlalchemy import select, func, delete, insert
+from slugify import slugify
+from sqlalchemy import select, func, insert
 from typing import List, Sequence
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import delete
@@ -147,7 +147,7 @@ async def get_sensor_values_for_id(session: AsyncSession, fields_id: list[int]) 
     return sensor_values
 
 
-async def create_or_get_sensor_type(session: AsyncSession, sensor_type_name: str) -> int:
+async def create_or_get_model_type(session: AsyncSession, sensor_type_name: str) -> int:
     query = select(ModelType).where(ModelType.name == sensor_type_name)
     result = await session.execute(query)
     type_model = result.scalars().first()
@@ -288,7 +288,9 @@ async def create_sensor(session: AsyncSession, KKS: str, name: str, model_id: in
     await session.commit()
 
 
-async def create_model_value_or_none(session: AsyncSession, key: str, value: str, name: str, measurement: str):
+async def create_model_value_or_none(session: AsyncSession, key: str, value: str, name: str, measurement: str,
+                                     name_eng_param: str):
+    name_eng_param = slugify(name_eng_param, separator='_')
     query = select(ModelValue).where(key == ModelValue.field,
                                      measurement == ModelValue.measurement, name == ModelValue.model_type)
     result = await session.execute(query)
@@ -296,10 +298,12 @@ async def create_model_value_or_none(session: AsyncSession, key: str, value: str
 
     if model_value:
         model_value.value = value
+        model_value.name_eng_param = name_eng_param
         session.add(model_value)
         await session.commit()
     else:
-        new_model_value = ModelValue(value=value, field=key, measurement=measurement, model_type=name)
+        new_model_value = ModelValue(value=value, field=key, measurement=measurement, model_type=name,
+                                     name_eng_param=name_eng_param)
         session.add(new_model_value)
         await session.commit()
         return new_model_value

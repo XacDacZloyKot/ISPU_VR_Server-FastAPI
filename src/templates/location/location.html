@@ -45,11 +45,11 @@
                     <td>
                         <div class="location-option-column">
                             <a href="{{ url_for("get_location_for_id_page", location_id=location.id) }}" class="location-link">
-                                <img src="/static/img/Vector.svg" alt="Детально" class="location-icon">
+                                <img src="{{ url_for('static', path='/img/Vector.svg') }}" alt="Детально" class="location-icon">
                             </a>
                             {% if user.is_superuser %}
                                 <a href="{{ url_for("get_update_location_page", location_id=location.id) }}" class="location-link">
-                                    <img src="/static/img/Redact.svg" alt="Назначение" class="location-icon">
+                                    <img src="{{ url_for('static', path='/img/Redact.svg') }}" alt="Назначение" class="location-icon">
                                 </a>
                             {% endif %}
                         </div>
