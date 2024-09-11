@@ -1,10 +1,48 @@
 {% extends '/location/base.html' %}
 
 {% block css %}
-	<link rel="stylesheet" href="{{ url_for('static', path='css/sensor/add_accident.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/base/form.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/base/table.css') }}">
 	<link rel="stylesheet" href="{{ url_for('static', path='css/base/checkbox.css') }}">
+	<link rel="stylesheet" href="{{ url_for('static', path='css/model/add_accident.css') }}">
+
+    <script>
+        let fieldCount = 1;
+
+        function addField() {
+            fieldCount++;
+            const container = document.getElementById('json-fields');
+            const newFieldPair = document.createElement('div');
+            newFieldPair.className = 'form-group-json';
+
+            newFieldPair.innerHTML = `
+                <label for="key${fieldCount}">Параметр:</label>
+                <input type="text" name="keys" id="key${fieldCount}" class="key" required>
+                <label for="value${fieldCount}">Значение:</label>
+                <input type="text" name="values" id="value${fieldCount}" class="value" required>
+
+                <label for="measurement${fieldCount}">Измеряемая величина: </label>
+                <input type="text" id="measurement${fieldCount}"
+                       name="measurement" required
+                       class="measurement" placeholder="Величина в СИ">
+
+                <label for="slug_name${fieldCount}">Название eng: </label>
+                <input type="text" id="slug_name${fieldCount}" name="slug_name" required
+                       class="slug_name" placeholder="temp">
+
+                <button type="button" onclick="removeField(this)" class="button-delete" title="Кнопка удаления">
+                    <img src="{{ url_for('static', path='/img/delete.svg') }}" alt="" class="del-icon">
+                </button>
+            `;
+
+            container.appendChild(newFieldPair);
+        }
+
+        function removeField(button) {
+            const fieldPair = button.parentElement;
+            fieldPair.remove();
+        }
+    </script>
 {% endblock %}
 
 {% block navTitle %}
@@ -13,7 +51,6 @@
 
 
 {% block content %}
-    <h1 class="title-orange">Введите параметры аварии</h1>
     <form action="{{ url_for('post_add_accident_page', model_id=model.id) }}" method="POST" class="form-container">
         <div class="form-group">
             <label for="name">Введите название аварии</label>
@@ -23,16 +60,30 @@
             <label for="mechanical_accident">Механическая авария</label>
             <input class="checkbox-input" type="checkbox" id="mechanical_accident" name="mechanical_accident" value="True">
         </div>
-        <div class="form-group">
-            <label for="change_value">Введите изменяемые величины</label>
-            <input type="text" id="change_value" name="change_value" required class="input input-json"
-                   placeholder="параметр:значение,сопротивление:50,диапазон температур:150-250">
+        <div class="json-container">
+            <div id="json-fields" class="json-fields">
+                <div class="form-group-json">
+                    <label for="key1">Параметр:</label>
+                    <input type="text" name="keys" id="key1" class="key" placeholder="Давление">
+                    <label for="value1">Значение:</label>
+                    <input type="text" name="values" id="value1" class="value" placeholder="45.2">
+                    <label for="measurement1">Измеряемая величина: </label>
+                    <input type="text" id="measurement1"
+                           name="measurement" required
+                           class="measurement" placeholder="Величина в СИ">
+                    <label for="slug_name1">Название eng: </label>
+                    <input type="text" id="slug_name1"
+                           name="slug_name" required
+                           class="slug_name" placeholder="temp">
+                </div>
+            </div>
         </div>
         <div class="submit-container">
-            <button type="submit" class="button orange submit">Добавить ещё</button>
+            <button type="button" onclick="addField()" class="button orange submit">Добавить параметры</button>
+            <button type="submit" class="button orange submit">Добавить аварии</button>
         </div>
     </form>
-    <div class="table-wrapper table-container-50">
+    <div class="table-wrapper table-container-small">
         <table>
             <thead>
                 <tr>

@@ -1011,23 +1011,23 @@ async def post_add_accident_page(
         model_id: int,
         name: str = Form(...),
         mechanical_accident: bool = Form(default=False),
-        change_value: str = Form(...),
+        keys: list[str] = Form(None),
+        values: list[str] = Form(None),
+        slug_name: list[str] = Form(None),
+        measurement: list[str] = Form(None),
         user: User = Depends(staff_user),
         session: AsyncSession = Depends(get_async_session)
 ):
     try:
-        print("post_add_accident_page")
         change_value_dict = {}
-        change_value_entries = change_value.split(',')
-        for entry in change_value_entries:
-            if ':' in entry:
-                key, value = entry.split(':', 1)
-                change_value_dict[key] = value
-
+        value_list = [f"{val} {mes}" for val, mes in zip(values, measurement)]
+        change_value_dict = dict(zip(keys, value_list))
+        param_name_slug = dict(zip(keys, slug_name))
         new_accident = Accident(
             name=name,
             mechanical_accident=mechanical_accident,
-            change_value=change_value_dict
+            change_value=change_value_dict,
+            param_mapping_names=param_name_slug
         )
         session.add(new_accident)
         await session.commit()
@@ -1036,7 +1036,7 @@ async def post_add_accident_page(
         await session.execute(link_model)
         await session.commit()
 
-        return RedirectResponse(request.url_for("get_add_accident_page", model_id=model_id),
+        return RedirectResponse(request.headers.get("REFERER"),
                                 status_code=HTTPStatus.MOVED_PERMANENTLY)
 
     except SQLAlchemyError as e:

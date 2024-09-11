@@ -304,6 +304,8 @@ async def create_model_value_or_none(session: AsyncSession, key: str, value: str
     else:
         new_model_value = ModelValue(value=value, field=key, measurement=measurement, model_type=name,
                                      name_eng_param=name_eng_param)
+        type_model = ModelType(name=name)
         session.add(new_model_value)
+        session.add(type_model)
         await session.commit()
         return new_model_value
