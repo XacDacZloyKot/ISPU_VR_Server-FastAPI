@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('get_choice_model_for_scenario_page') }}" method="post" class="form-container-height">
+    <form action="{{ url_for('get_choice_model_for_scenario') }}" method="post" class="form-container-height">
         <p class="title-table">Локации</p>
         <div class="table-wrapper form-container-height">
             <table class="table-container">
@@ -26,19 +26,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for option in location_options %}
+                    {% for location in locations %}
                         <tr>
-                            <td>{{ option.id }}</td>
-                            <td>{{ option.name }}</td>
+                            <td>{{ location.id }}</td>
+                            <td>{{ location.name }}</td>
                             <td class="column-error">
-                                {% for sensor in option.sensors %}
+                                {% for sensor in location.sensors %}
                                     {{ sensor.name }}<br>
                                     ККС:{{ sensor.KKS }}<br>
                                     Прибор:{{ sensor.model.model_type.name }}<br><br>
                                 {% endfor %}
                             </td>
                             <td>
-                                <input type="radio" id="html" class="checkbox-input" name="location_selected" value="{{ option.id }}" title="radio-box">
+                                <input type="radio" id="html" class="checkbox-input" name="location_selected" value="{{ location.id }}" title="radio-box">
                             </td>
                         </tr>
                     {% endfor %}

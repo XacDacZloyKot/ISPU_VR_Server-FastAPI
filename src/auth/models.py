@@ -81,7 +81,7 @@ class Admission(Base):
         else:
             instance.is_ready = None
 
-    def json_dump(self) -> str:
+    def json_obj(self, dump=False):
         json_object = {
             'response': {
                 'id': self.id,
@@ -89,6 +89,26 @@ class Admission(Base):
                 'scenario': {
                     'id': self.scenario.id,
                     'name': self.scenario.name,
+                    'location': {
+                        'name': self.scenario.location.name,
+                        'prefab': self.scenario.location.prefab,
+                        'sensors': [
+                            {
+                                'id': sensor.id,
+                                'name': sensor.model.model_type.name,
+                                'KKS': sensor.KKS,
+                                'model': {
+                                    'id': sensor.model.id,
+                                    'name': sensor.model.model_type.name,
+                                    'specification': {
+                                        self.scenario.sensor.model.param_mapping_names[key]: value
+                                        for key, value in self.scenario.sensor.model.specification.items()
+                                    },
+                                }
+                            }
+                            for sensor in self.scenario.location.sensors
+                        ],
+                    },
                     'sensor': {
                         'id': self.scenario.sensor.id,
                         'name': self.scenario.sensor.name,
@@ -97,7 +117,7 @@ class Admission(Base):
                             'id': self.scenario.sensor.model.id,
                             'name': self.scenario.sensor.model.model_type.name,
                             'specification': {
-                                slugify(key, separator="_"): value
+                                self.scenario.sensor.model.param_mapping_names[key]: value
                                 for key, value in self.scenario.sensor.model.specification.items()
                             },
                         }
@@ -106,14 +126,23 @@ class Admission(Base):
                         {
                             'name': accident.name,
                             'mechanical_accident': accident.mechanical_accident,
-                            'change_value': accident.change_value,
+                            'change_value': {
+                                accident.param_mapping_names[key]: value
+                                for key, value in accident.change_value.items()
+                            },
                         }
                         for accident in self.scenario.accidents
                     ]
                 }
             }
         }
-        return json.dumps(json_object, ensure_ascii=False)
+        if not dump:
+            return json_object
+        else:
+            return json.dumps(json_object, ensure_ascii=False)
+
+    def json_id(self):
+        return json.dumps({'id': self.id}, ensure_ascii=False)
 
     def __str__(self):
         return f"ID: {self.id} | name: {self.scenario.name} | Rating: {self.rating}"

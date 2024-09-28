@@ -10,6 +10,7 @@ from datetime import datetime
 
 from sqlalchemy import Sequence
 import json
+import psutil
 
 from src.auth.models import Admission, User, Scenario
 from src.auth.base_config import auth_backend, get_jwt_strategy
@@ -29,7 +30,7 @@ user_menu = [
         "access": "user",
         "urls": [
             ("Домашняя страница", "get_home_page"),
-            ("Активные задачи", "get_tasks_page"),
+            ("Активные задачи", "get_tasks"),
         ]
     },
     {
@@ -39,7 +40,7 @@ user_menu = [
             ("Модели КИП", "get_model_page"),
             ("Приборы КИП", "get_sensor_page"),
             ("Локации", "get_location_page"),
-            ("Сценарии", "get_scenario_page"),
+            ("Сценарии", "get_scenario"),
         ]
     },
     {
@@ -53,12 +54,12 @@ user_menu = [
         "name": "СУПЕР АДМИН",
         "access": "admin",
         "urls": [
-            ("Создание модели КИП", "get_create_model_page"),
-            ("Создание прибора КИП", "get_create_sensor_page"),
-            ("Создание локации", "get_create_location_page"),
-            ("Создание сценария", "get_create_scenario_page"),
-            ("Добавление параметров в базу данных прибора", "post_create_model_value_page"),
-            ("Просмотр параметров базы данных прибора", "get_model_value_page"),
+            ("Создание модели КИП", "get_create_model"),
+            ("Создание прибора КИП", "get_create_sensor"),
+            ("Создание локации", "get_create_location"),
+            ("Создание сценария", "get_create_scenario"),
+            ("Добавление параметров в базу данных прибора", "get_create_model_value"),
+            ("Просмотр параметров базы данных прибора", "get_model_value"),
         ]
     },
 ]
@@ -138,11 +139,30 @@ def create_json_scenario(admission_json, path="C:\\Users\\treen\\Desktop\\text.j
     with open(path, "w", encoding="utf-8") as file:
         file.write(admission_json)
 
+def kill_existing_process(process_name):
+    for proc in psutil.process_iter():
+        try:
+            if proc.name() == process_name:
+                proc.kill()
+                print(f"Процесс {process_name} завершен.")
+        except psutil.ZombieProcess:
+            pass
+        except psutil.NoSuchProcess:
+            pass
+        except psutil.AccessDenied:
+            pass
+
 
 def start_app(path="C:\\Users\\treen\\Desktop\\build\\Myproject.exe"):
+    process_name = path.split('\\')[-1]
+    print(process_name)
     try:
         if os.path.exists(path):
+            kill_existing_process(process_name)
+
+            print("Начал запуск приложения Unity")
             subprocess.Popen(path, shell=True)
+            print("Запуск завершен")
         else:
             raise IOError("Проект не найден")
     except Exception as e:

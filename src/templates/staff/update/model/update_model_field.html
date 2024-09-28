@@ -12,12 +12,12 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('post_update_model_page', model_id=model.id) }}" method="post" class="form-container">
+    <form action="{{ url_for('post_update_model', model_id=model.id) }}" method="post" class="form-container">
         <div class="form-group">
             <label for="fields-id">Параметры:</label>
             <div class="select select--multiple">
                 <select name="fields_selected" id="fields-id" class="multi-select" multiple size="10">
-                    {% for option in sensor_values %}
+                    {% for option in model_values %}
                         {% set option_value = option.value ~ ' ' ~ option.measurement %}
                         <option value="{{ option.id }}" {% if option_value in selected_fields.values() %}selected{% endif %}>
                             {{ option.model_type }} {{ option.field }}: {{ option.value }} {{ option.measurement }}

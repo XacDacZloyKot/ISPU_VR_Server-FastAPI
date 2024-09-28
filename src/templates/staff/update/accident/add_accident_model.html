@@ -51,7 +51,7 @@
 
 
 {% block content %}
-    <form action="{{ url_for('post_add_accident_page', model_id=model.id) }}" method="POST" class="form-container">
+    <form action="{{ url_for('post_add_accident', model_id=model.id) }}" method="POST" class="form-container">
         <div class="form-group">
             <label for="name">Введите название аварии</label>
             <input type="text" id="name" name="name" required class="input" placeholder="Текст">

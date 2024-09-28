@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('post_update_location_page', location_id=location.id) }}" method="post" class="form-container">
+    <form action="{{ url_for('post_update_location', location_id=location.id) }}" method="post" class="form-container">
         <div class="form-group">
             <label for="name">Название локации: </label>
             <input type="text" id="name" name="name" required class="input" placeholder="Название локации"
@@ -56,7 +56,7 @@
                                 <div>
                                     <input class="checkbox-input" title="Sensor" type="checkbox" id="{{ option.id }}"
                                            name="sensor_selected" value="{{ option.id }}"
-                                            {% if option in sensor_for_location %}checked{% endif %}>
+                                            {% if option in sensor_in_location %}checked{% endif %}>
                                 </div>
                             </td>
                         </tr>

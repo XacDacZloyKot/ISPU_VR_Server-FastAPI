@@ -51,7 +51,7 @@
 
 
 {% block content %}
-    <form action="{{ url_for('post_add_accident_page', model_id=model.id) }}" method="POST" class="form-container">
+    <form action="{{ url_for('post_add_accident', model_id=model.id) }}" method="POST" class="form-container">
         <div class="form-group">
             <label for="name">Введите название аварии</label>
             <input type="text" id="name" name="name" required class="input" placeholder="Текст">
@@ -99,7 +99,7 @@
                     <td>{{ model.model_type.name }}</td>
                     <td>
                         {% for field, value in model.specification.items() %}
-                            {{ field }}: {{ value }}
+                            {{ field }}: {{ value }}{% if not loop.last %},<br>{% endif %}
                         {% endfor %}
                     </td>
                     <td>
@@ -108,7 +108,7 @@
                                 Название: {{ accident.name }}<br>
                                 Мех. Повреждение: {% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}<br>
                                 Параметры:<br>{% for field, value in accident.change_value.items() %}
-                                    {{ field }}: {{ value }}
+                                    {{ field }}: {{ value }}{% if not loop.last %},<br>{% endif %}
                                 {% endfor %}
                             </div>
                         {% endfor %}

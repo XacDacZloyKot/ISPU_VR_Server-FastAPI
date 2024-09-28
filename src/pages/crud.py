@@ -98,6 +98,7 @@ async def get_location_list(session: AsyncSession) -> Sequence[Location]:
     location_results = result.scalars().all()
     return location_results
 
+
 async def get_model_names(session: AsyncSession) -> List[dict]:
     models_query = select(Model)
     result = await session.execute(models_query)
@@ -287,12 +288,14 @@ async def create_sensor(session: AsyncSession, KKS: str, name: str, model_id: in
     session.add(new_sensor_type)
     await session.commit()
 
-
+# TODO: СТАРОЕ УДАЛИТЬ
 async def create_model_value_or_none(session: AsyncSession, key: str, value: str, name: str, measurement: str,
                                      name_eng_param: str):
     name_eng_param = slugify(name_eng_param, separator='_')
-    query = select(ModelValue).where(key == ModelValue.field,
-                                     measurement == ModelValue.measurement, name == ModelValue.model_type)
+    query = select(ModelValue).where(
+        key == ModelValue.field,
+        measurement == ModelValue.measurement, name == ModelValue.model_type
+    )
     result = await session.execute(query)
     model_value = result.scalars().first()
 
@@ -304,8 +307,42 @@ async def create_model_value_or_none(session: AsyncSession, key: str, value: str
     else:
         new_model_value = ModelValue(value=value, field=key, measurement=measurement, model_type=name,
                                      name_eng_param=name_eng_param)
+        # TODO: Убрать дублирование ModelType
+        # query = select(ModelType).where
         type_model = ModelType(name=name)
         session.add(new_model_value)
         session.add(type_model)
         await session.commit()
         return new_model_value
+
+
+async def create_model_values_or_update(session: AsyncSession, keys: list[str], values: list[str],
+                                        measurements: list[str], name_eng_params: list[str], name: str):
+    for i in range(len(keys)):
+        name_eng_param = slugify(name_eng_params[i], separator='_')
+
+        query = select(ModelValue).where(
+            keys[i] == ModelValue.field, name == ModelValue.model_type
+        )
+        result = await session.execute(query)
+        model_value = result.scalars().first()
+
+        if model_value:
+            model_value.value = values[i]
+            model_value.measurement = measurements[i]
+            model_value.name_eng_param = name_eng_param
+            session.add(model_value)
+            await session.commit()
+
+        else:
+            new_model_value = ModelValue(value=values[i], field=keys[i], measurement=measurements[i],
+                                         model_type=name, name_eng_param=name_eng_param)
+            session.add(new_model_value)
+
+    query = select(ModelType).where(name == ModelType.name)
+    result = await session.execute(query)
+    model_type = result.scalar_one_or_none()
+    if not model_type:
+        type_model = ModelType(name=name)
+        session.add(type_model)
+    await session.commit()

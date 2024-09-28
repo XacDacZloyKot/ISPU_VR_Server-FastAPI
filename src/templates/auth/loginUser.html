@@ -17,7 +17,7 @@
             {% if error %}
                 <p class="login-container-lable">{{ error }}</p>
             {% endif %}
-            <form action="{{ url_for('get_login_user') }}" method="POST" class="login-container-form">
+            <form action="{{ url_for('post_login_user') }}" method="POST" class="login-container-form">
                 <div class="form-group">
                     <label for="username">Логин</label>
                     <input type="text" id="username" name="username" required class="input" placeholder="Текст">

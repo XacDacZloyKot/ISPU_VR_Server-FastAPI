@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('post_update_model_page', sensor_id=sensor.id) }}" method="post" class="form-container">
+    <form action="{{ url_for('post_update_sensor', sensor_id=sensor.id) }}" method="post" class="form-container">
         <div class="form-group">
             <label for="KKS">ККС датчика: </label>
             <input type="text" id="KKS" name="KKS" required class="input" value="{{ sensor.KKS }}">

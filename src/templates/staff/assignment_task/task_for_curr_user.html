@@ -11,7 +11,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('post_task_assignment_for_curr_user', user_id=user_id) }}" method="post">
+    <form action="{{ url_for('post_task_assignment_for_user', user_id=user_id) }}" method="post">
         <div class="table-wrapper table-task-container">
             <table class="table-container">
             <thead>

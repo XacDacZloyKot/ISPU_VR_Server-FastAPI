@@ -10,7 +10,7 @@
                     method: 'DELETE'
                 }).then(response => {
                     if (response.ok) {
-                        window.location.href = "{{ url_for('get_profile_for_id_page', user_id=admission.user_id) }}";
+                        window.location.href = "{{ url_for('get_profile_for_id', user_id=admission.user_id) }}";
                     } else {
                         alert("Не удалось удалить запись.");
                     }

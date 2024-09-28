@@ -17,10 +17,19 @@ async def update_admission_result(rating=Body(embed=True),
                                   status=Body(embed=True),
                                   session: AsyncSession = Depends(get_async_session)):
     try:
-        print("Updating admission result")
         admission = await get_admission_for_id(admission_id=admission_id, session=session)
         await update_admission_result_crud(session=session, rating=rating, admission=admission, status=status)
         return Response(status_code=201, content=str(admission), media_type="text/plain")
+    except Exception as e:
+        print(e)
+        return Response(status_code=500, content=str(e))
+
+
+@router.get("/admission/")
+async def get_admission_data(id: int = Body(embed=True), session: AsyncSession = Depends(get_async_session)):
+    try:
+        admission = await get_admission_for_id(admission_id=id, session=session)
+        return admission.json_obj()
     except Exception as e:
         print(e)
         return Response(status_code=500, content=str(e))

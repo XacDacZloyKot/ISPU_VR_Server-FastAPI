@@ -26,11 +26,6 @@
     display: none;             /* remove arrow IE     */
 }
 
-/*
- * Style #1
- * todo: try to change arrow DIV to pseudo :after
-*/
-
 .select-arrow-1 {
   position: absolute;
   z-index: -9999;

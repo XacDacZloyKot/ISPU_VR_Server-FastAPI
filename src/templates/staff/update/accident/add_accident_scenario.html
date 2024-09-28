@@ -14,7 +14,7 @@
 
 {% block content %}
     <h1 class="title-orange">Добавьте аварии</h1>
-    <form action="{{ url_for('post_add_accident_for_scenario_page', scenario_id=scenario.id) }}" method="POST" class="form-container-height">
+    <form action="{{ url_for('post_add_accident_scenario', scenario_id=scenario.id) }}" method="POST" class="form-container-height">
         <div class="table-wrapper table-container-75">
             <table>
                 <thead>

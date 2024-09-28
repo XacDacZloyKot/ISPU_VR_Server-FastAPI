@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('get_choice_accident_for_update_scenario_page', scenario_id=scenario.id) }}" method="post" class="form-container-height">
+    <form action="{{ url_for('get_choice_accident_for_update_scenario', scenario_id=scenario.id) }}" method="post" class="form-container-height">
         <p class="title-table">Приборы</p>
         <div class="table-wrapper form-container-height">
             <table class="table-container">

@@ -39,11 +39,11 @@
                     </td>
                     <td>
                         <div class="location-option-column">
-                            <a href="{{ url_for("get_model_for_id_page", model_id=model.id) }}" class="location-link">
+                            <a href="{{ url_for("get_model_for_id", model_id=model.id) }}" class="location-link">
                                 <img src="{{ url_for('static', path='/img/Vector.svg') }}" alt="Детально" class="location-icon">
                             </a>
                             {% if user.is_superuser %}
-                                <a href="{{ url_for("get_update_model_page", model_id=model.id) }}" class="location-link">
+                                <a href="{{ url_for("get_update_model", model_id=model.id) }}" class="location-link">
                                     <img src="{{ url_for('static', path='/img/Redact.svg') }}" alt="Назначение" class="location-icon">
                                 </a>
                             {% endif %}

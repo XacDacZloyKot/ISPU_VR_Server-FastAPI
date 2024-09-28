@@ -41,11 +41,11 @@
                     <td>{{ scenario.location.status.value }}</td>
                     <td>
                         <div class="location-option-column">
-                            <a href="{{ url_for("get_scenario_for_id_page", scenario_id=scenario.id) }}" class="location-link">
+                            <a href="{{ url_for("get_scenario_for_id", scenario_id=scenario.id) }}" class="location-link">
                                 <img src="{{ url_for('static', path='/img/Vector.svg') }}" alt="Детально" class="location-icon">
                             </a>
                             {% if user.is_superuser %}
-                                <a href="{{ url_for("get_update_scenario_page", scenario_id=scenario.id) }}" class="location-link">
+                                <a href="{{ url_for("get_update_scenario", scenario_id=scenario.id) }}" class="location-link">
                                     <img src="{{ url_for('static', path='/img/Redact.svg') }}" alt="Редактировать" class="location-icon">
                                 </a>
                             {% endif %}

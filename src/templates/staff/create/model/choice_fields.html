@@ -11,7 +11,7 @@
 
 {% block content %}
     <h1 class="title-orange">Выбор полей необходимых для {{ model_selected }} </h1>
-    <form action="{{ url_for('create_model', models_name=model_selected) }}" method="post">
+    <form action="{{ url_for('post_create_model', models_name=model_selected) }}" method="post">
         <div class="form-group">
             <label for="fields-id">Доступные аварии:</label>
             <div class="select select--multiple">

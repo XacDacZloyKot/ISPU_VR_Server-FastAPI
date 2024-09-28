@@ -45,12 +45,12 @@
                     </td>
                     <td>
                         <div class="location-option-column">
-                            <a href="{{ url_for("get_sensor_for_id_page", sensor_id=sensor.id) }}"
+                            <a href="{{ url_for("get_sensor_for_id", sensor_id=sensor.id) }}"
                                class="location-link">
                                 <img src="{{ url_for('static', path='/img/Vector.svg') }}" alt="Детально" class="location-icon">
                             </a>
                             {% if user.is_superuser %}
-                                <a href="{{ url_for("get_update_sensor_page", sensor_id=sensor.id) }}"
+                                <a href="{{ url_for("get_update_sensor", sensor_id=sensor.id) }}"
                                    class="location-link">
                                     <img src="{{ url_for('static', path='/img/Redact.svg') }}" alt="Редактирование" class="location-icon">
                                 </a>

@@ -13,7 +13,7 @@
 {% endblock %}
 
 {% block content %}
-    <form action="{{ url_for('post_create_location_page') }}" method="post" class="form-container">
+    <form action="{{ url_for('post_create_location') }}" method="post" class="form-container">
         <div class="form-group">
             <label for="name">Название локации: </label>
             <input type="text" id="name" name="name" required class="input" placeholder="Название локации">

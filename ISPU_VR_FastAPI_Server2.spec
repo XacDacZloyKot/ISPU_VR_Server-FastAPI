@@ -44,6 +44,7 @@ a = Analysis(
         'websockets',
         'aiomysql',
         'python_slugify',
+        'psutil',
     ],
     hookspath=[],
     runtime_hooks=[],

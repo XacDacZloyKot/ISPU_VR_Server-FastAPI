@@ -13,7 +13,7 @@
                     method: 'POST'
                 }).then(response => {
                     if (response.ok) {
-                        window.location.href = "{{ url_for('get_model_for_id_page', model_id=model.id) }}";
+                        window.location.href = "{{ url_for('get_model_for_id', model_id=model.id) }}";
                     } else {
                         alert("Не удалось удалить запись.");
                     }
@@ -51,7 +51,7 @@
             <h2 class="title-red slim-title">
                 Авария
             </h2>
-            <a href="{{ url_for("get_add_accident_model_page", model_id=model.id) }}" class="button red slim-title">Добавить</a>
+            <a href="{{ url_for("get_add_accident_model", model_id=model.id) }}" class="button red slim-title">Добавить</a>
         </div>
     {% elif user.is_staff %}
         <h2 class="title-red slim-title">Авария</h2>
@@ -80,7 +80,7 @@
                     <td>{% if accident.mechanical_accident %}Да{% else %}Нет{% endif %}</td>
                     {% if user.is_superuser %}
                         <td>
-                            <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_model_page', accident_id=accident.id, model_id=model.id) }}')" class="button white">
+                            <button type="button" onclick="confirmDelete('{{ url_for('delete_accident_for_model', accident_id=accident.id, model_id=model.id) }}')" class="button white">
                                 <img src="{{ url_for('static', path='/img/delete.svg') }}" alt="Удаление" class="location-icon">
                             </button>
                         </td>

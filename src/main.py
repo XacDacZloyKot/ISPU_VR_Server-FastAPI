@@ -9,17 +9,22 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
-
 from src.auth.base_config import fastapi_users, auth_backend
 from src.auth.schemas import UserRead, UserCreate
+
 from src.pages.router import router as router_pages, templates
 from src.sensor.router import router as router_sensor
-from src.api.v1.admission.router import router as router_admission
+from src.api.v1.admission.router import router as router_api_admission
+from src.users.router import router as router_users
+from src.location.router import router as router_location
+from src.model.router import router as router_model
+from src.scenario.router import router as router_scenario
+from src.admission.router import router as router_admission
 
 DEBUG = True
 
 app = FastAPI(
-    title="ISPU App"
+    title="ISPU App",
 )
 
 # Определяем базовый каталог
@@ -105,11 +110,21 @@ app.include_router(
 app.include_router(router_sensor)
 app.include_router(router_pages)
 app.include_router(router_admission)
+app.include_router(router_users)
+app.include_router(router_location)
+app.include_router(router_model)
+app.include_router(router_scenario)
+app.include_router(router_admission)
+app.include_router(router_api_admission)
 
 if __name__ == "__main__":
     try:
         log_level = "debug" if DEBUG else "critical"
-        uvicorn.run(app, port=8000, host="0.0.0.0", log_level=log_level)
+        uvicorn.run(
+            app,
+            port=8000, host="0.0.0.0",
+            log_level=log_level,
+        )
     except Exception as e:
         print("Error occurred:", e)
         sys.exit(1)
